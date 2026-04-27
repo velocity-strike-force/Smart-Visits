@@ -15,18 +15,12 @@ import { Signup, SignupData } from "./models/Signup";
 import { Feedback, FeedbackData } from "./models/Feedback";
 import { Customer, CustomerData } from "./models/Customer";
 import { AuditLog, AuditLogData } from "./models/AuditLog";
+import { smartVisitsTables } from "./schema";
 
 export class Dynamo {
     private readonly client: DynamoDBDocumentClient;
 
-    private readonly Tables = {
-        VISITS: `${process.env.STAGE || "dev"}-smart-visits-Visits`,
-        USERS: `${process.env.STAGE || "dev"}-smart-visits-Users`,
-        SIGNUPS: `${process.env.STAGE || "dev"}-smart-visits-Signups`,
-        FEEDBACK: `${process.env.STAGE || "dev"}-smart-visits-Feedback`,
-        CUSTOMERS: `${process.env.STAGE || "dev"}-smart-visits-Customers`,
-        AUDIT_LOG: `${process.env.STAGE || "dev"}-smart-visits-AuditLog`,
-    };
+    private readonly tables = smartVisitsTables(process.env.STAGE || "dev");
 
     constructor(ctorParams: { client?: DynamoDBDocumentClient }) {
         const { client } = ctorParams;
@@ -46,7 +40,7 @@ export class Dynamo {
 
     async getVisitById(visitId: string): Promise<Visit | undefined> {
         const command = new GetCommand({
-            TableName: this.Tables.VISITS,
+            TableName: this.tables.visits,
             Key: { visitId },
         });
         const result = await this.client.send(command);
@@ -58,7 +52,7 @@ export class Dynamo {
         let startKey: Record<string, any> | undefined;
         do {
             const command = new ScanCommand({
-                TableName: this.Tables.VISITS,
+                TableName: this.tables.visits,
                 ExclusiveStartKey: startKey,
             });
             const result = await this.client.send(command);
@@ -85,7 +79,7 @@ export class Dynamo {
 
     async createVisit(data: VisitData): Promise<void> {
         const command = new PutCommand({
-            TableName: this.Tables.VISITS,
+            TableName: this.tables.visits,
             Item: data,
         });
         await this.client.send(command);
@@ -111,7 +105,7 @@ export class Dynamo {
         if (expressionParts.length === 0) return;
 
         const command = new UpdateCommand({
-            TableName: this.Tables.VISITS,
+            TableName: this.tables.visits,
             Key: { visitId },
             UpdateExpression: `SET ${expressionParts.join(", ")}`,
             ExpressionAttributeNames: names,
@@ -122,7 +116,7 @@ export class Dynamo {
 
     async deleteVisit(visitId: string): Promise<void> {
         const command = new DeleteCommand({
-            TableName: this.Tables.VISITS,
+            TableName: this.tables.visits,
             Key: { visitId },
         });
         await this.client.send(command);
@@ -132,7 +126,7 @@ export class Dynamo {
 
     async getUserById(userId: string): Promise<User | undefined> {
         const command = new GetCommand({
-            TableName: this.Tables.USERS,
+            TableName: this.tables.users,
             Key: { userId },
         });
         const result = await this.client.send(command);
@@ -141,7 +135,7 @@ export class Dynamo {
 
     async createOrUpdateUser(data: UserData): Promise<void> {
         const command = new PutCommand({
-            TableName: this.Tables.USERS,
+            TableName: this.tables.users,
             Item: data,
         });
         await this.client.send(command);
@@ -151,7 +145,7 @@ export class Dynamo {
 
     async getSignupsForVisit(visitId: string): Promise<Signup[]> {
         const command = new QueryCommand({
-            TableName: this.Tables.SIGNUPS,
+            TableName: this.tables.signups,
             KeyConditionExpression: "visitId = :vid",
             ExpressionAttributeValues: { ":vid": visitId },
         });
@@ -161,7 +155,7 @@ export class Dynamo {
 
     async putSignup(data: SignupData): Promise<void> {
         const command = new PutCommand({
-            TableName: this.Tables.SIGNUPS,
+            TableName: this.tables.signups,
             Item: data,
         });
         await this.client.send(command);
@@ -169,7 +163,7 @@ export class Dynamo {
 
     async deleteSignup(visitId: string, userId: string): Promise<void> {
         const command = new DeleteCommand({
-            TableName: this.Tables.SIGNUPS,
+            TableName: this.tables.signups,
             Key: { visitId, userId },
         });
         await this.client.send(command);
@@ -179,7 +173,7 @@ export class Dynamo {
 
     async getFeedbackForVisit(visitId: string): Promise<Feedback[]> {
         const command = new QueryCommand({
-            TableName: this.Tables.FEEDBACK,
+            TableName: this.tables.feedback,
             KeyConditionExpression: "visitId = :vid",
             ExpressionAttributeValues: { ":vid": visitId },
         });
@@ -191,7 +185,7 @@ export class Dynamo {
 
     async putFeedback(data: FeedbackData): Promise<void> {
         const command = new PutCommand({
-            TableName: this.Tables.FEEDBACK,
+            TableName: this.tables.feedback,
             Item: data,
         });
         await this.client.send(command);
@@ -201,7 +195,7 @@ export class Dynamo {
 
     async searchCustomers(query: string): Promise<Customer[]> {
         const command = new ScanCommand({
-            TableName: this.Tables.CUSTOMERS,
+            TableName: this.tables.customers,
             FilterExpression: "contains(customerName, :q)",
             ExpressionAttributeValues: { ":q": query },
         });
@@ -215,7 +209,7 @@ export class Dynamo {
         customerId: string
     ): Promise<Customer | undefined> {
         const command = new GetCommand({
-            TableName: this.Tables.CUSTOMERS,
+            TableName: this.tables.customers,
             Key: { customerId },
         });
         const result = await this.client.send(command);
@@ -228,7 +222,7 @@ export class Dynamo {
 
     async putAuditLog(data: AuditLogData): Promise<void> {
         const command = new PutCommand({
-            TableName: this.Tables.AUDIT_LOG,
+            TableName: this.tables.auditLog,
             Item: data,
         });
         await this.client.send(command);
@@ -236,7 +230,7 @@ export class Dynamo {
 
     async getAuditLogsForEntity(entityId: string): Promise<AuditLog[]> {
         const command = new QueryCommand({
-            TableName: this.Tables.AUDIT_LOG,
+            TableName: this.tables.auditLog,
             KeyConditionExpression: "entityId = :eid",
             ExpressionAttributeValues: { ":eid": entityId },
         });

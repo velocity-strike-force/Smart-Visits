@@ -3,7 +3,7 @@
  * Store as DynamoDB attributes (camelCase keys below).
  */
 
-export type UserRole = 'visitor' | 'sales_rep';
+export type UserRole = "visitor" | "sales_rep";
 
 /** `{env}-smart-visits-Visits` — PK: visitId */
 export interface VisitRecord {
@@ -56,7 +56,7 @@ export interface VisitSignupRecord {
   userId: string;
   signedUpAt: string;
   /** e.g. active | cancelled */
-  status?: 'active' | 'cancelled';
+  status?: "active" | "cancelled";
 }
 
 /** `{env}-smart-visits-Feedback` — PK: visitId, SK: userId */

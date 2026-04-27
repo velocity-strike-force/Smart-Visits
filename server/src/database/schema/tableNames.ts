@@ -4,15 +4,15 @@
  */
 export type DeploymentEnv = string;
 
-const PREFIX = 'smart-visits';
+const PREFIX = "smart-visits";
 
 export type SmartVisitsLogicalTable =
-  | 'Visits'
-  | 'Users'
-  | 'Signups'
-  | 'Feedback'
-  | 'Customers'
-  | 'AuditLog';
+  | "Visits"
+  | "Users"
+  | "Signups"
+  | "Feedback"
+  | "Customers"
+  | "AuditLog";
 
 export function smartVisitsTableName(
   env: DeploymentEnv,
@@ -24,11 +24,11 @@ export function smartVisitsTableName(
 /** Resolved table names for a single environment. */
 export function smartVisitsTables(env: DeploymentEnv) {
   return {
-    visits: smartVisitsTableName(env, 'Visits'),
-    users: smartVisitsTableName(env, 'Users'),
-    signups: smartVisitsTableName(env, 'Signups'),
-    feedback: smartVisitsTableName(env, 'Feedback'),
-    customers: smartVisitsTableName(env, 'Customers'),
-    auditLog: smartVisitsTableName(env, 'AuditLog'),
+    visits: smartVisitsTableName(env, "Visits"),
+    users: smartVisitsTableName(env, "Users"),
+    signups: smartVisitsTableName(env, "Signups"),
+    feedback: smartVisitsTableName(env, "Feedback"),
+    customers: smartVisitsTableName(env, "Customers"),
+    auditLog: smartVisitsTableName(env, "AuditLog"),
   } as const;
 }
