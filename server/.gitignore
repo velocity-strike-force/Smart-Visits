@@ -1,0 +1,8 @@
+node_modules/
+.aws-sam/
+dist/
+*.js.map
+*.d.ts
+!src/**/*.d.ts
+.env
+.env.*

@@ -1,0 +1,29 @@
+{
+  "name": "smart-visits-server",
+  "version": "1.0.0",
+  "description": "Smart-Visits Lambda backend — Customer Visit Sign-Up App",
+  "private": true,
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.x",
+    "@aws-sdk/client-ssm": "^3.x",
+    "@aws-sdk/lib-dynamodb": "^3.x",
+    "@types/aws-lambda": "^8.x",
+    "@types/node": "^22.x",
+    "lodash": "^4.x",
+    "ts-node": "^10.x",
+    "typescript": "^5.x",
+    "uuid": "^11.x"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.x",
+    "@types/uuid": "^10.x",
+    "aws-sdk-client-mock": "^4.x",
+    "jest": "^29.x",
+    "@types/jest": "^29.x",
+    "ts-jest": "^29.x"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+    "start:local": "sam local start-api --warm-containers EAGER"
+  }
+}

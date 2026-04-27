@@ -1,0 +1,20 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      nodejs: 24
+    commands:
+      - npm install
+  build:
+    commands:
+      - npm run test
+      - rm -rf __tests__
+      - npm prune --production
+      - aws cloudformation package
+          --template-file template.yaml
+          --s3-bucket $S3_BUCKET
+          --output-template-file template-export.yml
+artifacts:
+  type: zip
+  files:
+    - template-export.yml

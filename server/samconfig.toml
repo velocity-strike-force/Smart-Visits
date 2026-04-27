@@ -1,0 +1,15 @@
+version = 0.1
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[smart_visits_dev.deploy.parameters]
+stack_name = "smart-visits"
+parameter_overrides = "STAGE=\"dev\""
+
+[smart_visits_test.deploy.parameters]
+stack_name = "smart-visits-test"
+parameter_overrides = "STAGE=\"test\""
+
+[smart_visits_prod.deploy.parameters]
+stack_name = "smart-visits-prod"
+parameter_overrides = "STAGE=\"prod\""

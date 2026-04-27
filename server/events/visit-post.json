@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /api/visit",
+  "rawPath": "/api/visit",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "queryStringParameters": null,
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/api/visit",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "curl/7.68.0"
+    },
+    "requestId": "test-request-id",
+    "routeKey": "POST /api/visit",
+    "stage": "$default",
+    "time": "27/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777492800000
+  },
+  "body": "{\"productLine\":\"NetSuite\",\"location\":\"Jacksonville, FL\",\"city\":\"Jacksonville\",\"state\":\"FL\",\"salesRepId\":\"rep-001\",\"salesRepName\":\"Jane Smith\",\"domain\":\"ERP\",\"customerId\":\"cust-001\",\"customerName\":\"Acme Corp\",\"customerARR\":250000,\"customerImplementationStatus\":\"Live\",\"isKeyAccount\":true,\"startDate\":\"2026-06-10\",\"endDate\":\"2026-06-11\",\"capacity\":5,\"invitees\":[],\"customerContactRep\":\"John Doe\",\"purposeForVisit\":\"Quarterly Business Review\",\"visitDetails\":\"Closed-toed shoes required.\",\"isDraft\":false,\"isPrivate\":false}",
+  "isBase64Encoded": false
+}

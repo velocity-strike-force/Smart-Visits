@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  dynamodb-local:
+    image: amazon/dynamodb-local:latest
+    container_name: smart-visits-dynamodb
+    ports:
+      - "8000:8000"
+    command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+    networks:
+      - smart-visits-net
+
+networks:
+  smart-visits-net:
+    name: smart-visits-net
+    driver: bridge

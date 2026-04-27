@@ -1,0 +1,28 @@
+{
+  "colors": {
+    "brand": {
+      "orange":      { "value": "#F15A24", "description": "Primary CTA / logo accent" },
+      "navy":        { "value": "#1B2A4A", "description": "Dark navy — headers, hero backgrounds" },
+      "blue":        { "value": "#0072CE", "description": "Interactive blue — links, CTAs" }
+    },
+    "secondary": {
+      "lightBlue":   { "value": "#E8F4FC", "description": "Light blue tint for section backgrounds" },
+      "darkNavy":    { "value": "#0F1E36", "description": "Deeper navy — footer background" },
+      "midBlue":     { "value": "#1A4480", "description": "Mid blue — alternate section backgrounds" }
+    },
+    "neutral": {
+      "white":       { "value": "#FFFFFF" },
+      "offWhite":    { "value": "#F5F7FA", "description": "Page/card backgrounds" },
+      "lightGray":   { "value": "#E8ECF0", "description": "Borders, dividers" },
+      "midGray":     { "value": "#8C96A0", "description": "Placeholder / secondary text" },
+      "darkGray":    { "value": "#4A5568", "description": "Body text" },
+      "charcoal":    { "value": "#1A202C", "description": "Headings, strong text" }
+    },
+    "semantic": {
+      "success":     { "value": "#28A745" },
+      "warning":     { "value": "#FFC107" },
+      "danger":      { "value": "#DC3545" },
+      "info":        { "value": "#17A2B8" }
+    }
+  }
+}

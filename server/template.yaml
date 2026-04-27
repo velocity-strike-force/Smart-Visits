@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: 2010-09-09
+Transform:
+- AWS::Serverless-2016-10-31
+
+Parameters:
+  STAGE:
+    Type: String
+    Default: dev
+
+Globals:
+  Function:
+    Architectures:
+      - x86_64
+    LoggingConfig:
+      LogFormat: JSON
+      SystemLogLevel: DEBUG
+    MemorySize: 128
+    Runtime: nodejs24.x
+    Timeout: 100
+    Tracing: Active
+    Environment:
+      Variables:
+        STAGE: !Ref STAGE
+        DYNAMODB_ENDPOINT: ""
+  Api:
+    Cors:
+      AllowHeaders: "'*'"
+      AllowMethods: "'GET, POST, PUT, DELETE, OPTIONS'"
+      AllowOrigin: "'*'"
+    TracingEnabled: true
+
+Resources:
+  # ── Visit ────────────────────────────────────────────────
+  HandleVisitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-visit
+      CodeUri: ./
+      Handler: src/handlers/visit.handleVisitEndpoint
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/visit
+            Method: GET
+        PostApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/visit
+            Method: POST
+        PutApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/visit
+            Method: PUT
+        DeleteApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/visit
+            Method: DELETE
+
+  # ── Signup ───────────────────────────────────────────────
+  HandleSignupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-signup
+      CodeUri: ./
+      Handler: src/handlers/signup.handleSignupEndpoint
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/signup
+            Method: GET
+        PostApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/signup
+            Method: POST
+        DeleteApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/signup
+            Method: DELETE
+
+  # ── Feedback ─────────────────────────────────────────────
+  HandleFeedbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-feedback
+      CodeUri: ./
+      Handler: src/handlers/feedback.handleFeedbackEndpoint
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/feedback
+            Method: GET
+        PostApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/feedback
+            Method: POST
+
+  # ── Profile ──────────────────────────────────────────────
+  HandleProfileFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-profile
+      CodeUri: ./
+      Handler: src/handlers/profile.handleProfileEndpoint
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/profile
+            Method: GET
+        PostApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/profile
+            Method: POST
+
+  # ── Analytics ────────────────────────────────────────────
+  HandleAnalyticsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-analytics
+      CodeUri: ./
+      Handler: src/handlers/analytics.handleAnalyticsEndpoint
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/analytics
+            Method: GET
+
+  # ── Customer ─────────────────────────────────────────────
+  HandleCustomerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-customer
+      CodeUri: ./
+      Handler: src/handlers/customer.handleCustomerEndpoint
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/customer
+            Method: GET
