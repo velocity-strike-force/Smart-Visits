@@ -24,12 +24,20 @@ export default function Layout() {
         <header className="bg-white border-b px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-8">
-              <h1
-                className="text-xl cursor-pointer hover:text-blue-600"
+              <button
+                type="button"
                 onClick={() => navigate('/')}
+                className="flex items-center gap-3"
               >
-                Smart Visits
-              </h1>
+                <img
+                  src="/rfsmart_logo.png"
+                  alt="RF-SMART"
+                  className="h-8 w-auto"
+                />
+                <span className="text-xl hover:text-blue-600">
+                  Customer Visits
+                </span>
+            </button>
               <nav className="flex gap-1">
                 <button
                   onClick={() => navigate('/')}
