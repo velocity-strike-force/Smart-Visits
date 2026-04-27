@@ -141,3 +141,16 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Terraform (repo root)
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+*.tfvars
+!terraform/terraform.tfvars.example
+
+# CDK leftovers (legacy)
+infra/cdk.out/
+infra/node_modules/
