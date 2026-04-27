@@ -9,10 +9,10 @@ export type UserRole = "visitor" | "sales_rep";
 export interface VisitRecord {
   visitId: string;
   /** Display title (e.g. purpose or internal label). */
-  title?: string;
+  //title?: string;
   customerId?: string;
   /** Denormalized customer name for search/list UIs. */
-  customerName?: string;
+  //customerName?: string;
   startDate: string;
   endDate: string;
   productLine: string;
@@ -34,12 +34,41 @@ export interface VisitRecord {
   updatedAt: string;
 }
 
+/** `{env}-smart-visits-Roles` — PK: roleId */
+export interface RoleRecord {
+  roleId: string;
+  name: string;
+  description?: string;
+  sortOrder?: number;
+  createdAt?: string;
+}
+
+/** `{env}-smart-visits-ProductLines` — PK: productLineId */
+export interface ProductLineRecord {
+  productLineId: string;
+  name: string;
+  description?: string;
+  sortOrder?: number;
+  isActive?: boolean;
+  createdAt?: string;
+}
+
+/** `{env}-smart-visits-UserProductLines` — PK: userId, SK: productLineId (user ↔ product line). */
+export interface UserProductLineRecord {
+  userId: string;
+  productLineId: string;
+  assignedAt: string;
+}
+
 /** `{env}-smart-visits-Users` — PK: userId */
 export interface UserProfileRecord {
   userId: string;
+  /** FK → Roles table. */
+  roleId?: string;
   email: string;
   name: string;
   role: UserRole;
+  /** Denormalized; canonical assignments live in UserProductLines. */
   productLines: string[];
   city?: string;
   state?: string;

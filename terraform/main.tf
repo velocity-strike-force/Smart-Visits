@@ -128,3 +128,63 @@ resource "aws_dynamodb_table" "audit_log" {
 
   tags = var.tags
 }
+
+resource "aws_dynamodb_table" "roles" {
+  name                        = "${local.name_prefix}-Roles"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "roleId"
+  deletion_protection_enabled = local.is_prod
+
+  attribute {
+    name = "roleId"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = local.is_prod
+  }
+
+  tags = var.tags
+}
+
+resource "aws_dynamodb_table" "product_lines" {
+  name                        = "${local.name_prefix}-ProductLines"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "productLineId"
+  deletion_protection_enabled = local.is_prod
+
+  attribute {
+    name = "productLineId"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = local.is_prod
+  }
+
+  tags = var.tags
+}
+
+resource "aws_dynamodb_table" "user_product_lines" {
+  name                        = "${local.name_prefix}-UserProductLines"
+  billing_mode                = "PAY_PER_REQUEST"
+  hash_key                    = "userId"
+  range_key                   = "productLineId"
+  deletion_protection_enabled = local.is_prod
+
+  attribute {
+    name = "userId"
+    type = "S"
+  }
+
+  attribute {
+    name = "productLineId"
+    type = "S"
+  }
+
+  point_in_time_recovery {
+    enabled = local.is_prod
+  }
+
+  tags = var.tags
+}

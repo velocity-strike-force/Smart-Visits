@@ -57,6 +57,27 @@ $tables = @(
             @{ AttributeName = "entityId"; KeyType = "HASH" },
             @{ AttributeName = "timestamp"; KeyType = "RANGE" }
         )
+    },
+    @{
+        Name       = "$Stage-smart-visits-Roles"
+        Attributes = @( @{ AttributeName = "roleId"; AttributeType = "S" } )
+        KeySchema  = @( @{ AttributeName = "roleId"; KeyType = "HASH" } )
+    },
+    @{
+        Name       = "$Stage-smart-visits-ProductLines"
+        Attributes = @( @{ AttributeName = "productLineId"; AttributeType = "S" } )
+        KeySchema  = @( @{ AttributeName = "productLineId"; KeyType = "HASH" } )
+    },
+    @{
+        Name       = "$Stage-smart-visits-UserProductLines"
+        Attributes = @(
+            @{ AttributeName = "userId"; AttributeType = "S" },
+            @{ AttributeName = "productLineId"; AttributeType = "S" }
+        )
+        KeySchema  = @(
+            @{ AttributeName = "userId"; KeyType = "HASH" },
+            @{ AttributeName = "productLineId"; KeyType = "RANGE" }
+        )
     }
 )
 
