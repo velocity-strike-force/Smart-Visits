@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { Slider } from './ui/slider';
 
 interface Visit {
   id: string;
@@ -29,6 +30,13 @@ export default function FilterPanel({ visits }: FilterPanelProps) {
     keyAccounts: false,
   });
 
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumFractionDigits: 0,
+    }).format(value);
+
   // Extract unique values from existing visits
   const productLineOptions = useMemo(() =>
     [...new Set(visits.map(v => v.productLine))].sort(),
@@ -49,6 +57,26 @@ export default function FilterPanel({ visits }: FilterPanelProps) {
     [...new Set(visits.map(v => v.salesRep).filter(Boolean))].sort(),
     [visits]
   );
+
+  const arrBounds = useMemo(() => {
+    if (visits.length === 0) {
+      return { min: 0, max: 10000 };
+    }
+
+    const values = visits.map(v => v.arr);
+    const min = Math.floor(Math.min(...values) / 10000) * 10000;
+    const max = Math.ceil(Math.max(...values) / 10000) * 10000;
+
+    return {
+      min,
+      max: max > min ? max : min + 10000,
+    };
+  }, [visits]);
+
+  const arrRange = [
+    filters.arrMin === '' ? arrBounds.min : Number(filters.arrMin),
+    filters.arrMax === '' ? arrBounds.max : Number(filters.arrMax),
+  ];
 
   const handleProductLineToggle = (line: string) => {
     setFilters(prev => ({
@@ -111,21 +139,24 @@ export default function FilterPanel({ visits }: FilterPanelProps) {
 
         <div>
           <label className="block mb-2">ARR Range</label>
-          <div className="space-y-2">
-            <input
-              type="number"
-              placeholder="Min"
-              value={filters.arrMin}
-              onChange={(e) => setFilters({ ...filters, arrMin: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
+          <div className="space-y-3 rounded-lg border px-3 py-4">
+            <Slider
+              min={arrBounds.min}
+              max={arrBounds.max}
+              step={10000}
+              minStepsBetweenThumbs={1}
+              value={arrRange}
+              onValueChange={(value) => setFilters({
+                ...filters,
+                arrMin: String(value[0]),
+                arrMax: String(value[1]),
+              })}
+              disabled={visits.length === 0}
             />
-            <input
-              type="number"
-              placeholder="Max"
-              value={filters.arrMax}
-              onChange={(e) => setFilters({ ...filters, arrMax: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg"
-            />
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <span>{formatCurrency(arrRange[0])}</span>
+              <span>{formatCurrency(arrRange[1])}</span>
+            </div>
           </div>
         </div>
 
