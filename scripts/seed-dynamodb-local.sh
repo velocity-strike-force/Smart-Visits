@@ -82,6 +82,41 @@ aws dynamodb create-table \
   --billing-mode PAY_PER_REQUEST \
   --no-cli-pager 2>/dev/null && echo "  Created ${STAGE}-smart-visits-AuditLog" || echo "  ${STAGE}-smart-visits-AuditLog already exists"
 
+# ── Roles (PK: roleId) ─────────────────────────────────────
+aws dynamodb create-table \
+  --endpoint-url "$ENDPOINT" \
+  --table-name "${STAGE}-smart-visits-Roles" \
+  --attribute-definitions \
+    AttributeName=roleId,AttributeType=S \
+  --key-schema \
+    AttributeName=roleId,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --no-cli-pager 2>/dev/null && echo "  Created ${STAGE}-smart-visits-Roles" || echo "  ${STAGE}-smart-visits-Roles already exists"
+
+# ── ProductLines (PK: productLineId) ───────────────────────
+aws dynamodb create-table \
+  --endpoint-url "$ENDPOINT" \
+  --table-name "${STAGE}-smart-visits-ProductLines" \
+  --attribute-definitions \
+    AttributeName=productLineId,AttributeType=S \
+  --key-schema \
+    AttributeName=productLineId,KeyType=HASH \
+  --billing-mode PAY_PER_REQUEST \
+  --no-cli-pager 2>/dev/null && echo "  Created ${STAGE}-smart-visits-ProductLines" || echo "  ${STAGE}-smart-visits-ProductLines already exists"
+
+# ── UserProductLines (PK: userId, SK: productLineId) ────────
+aws dynamodb create-table \
+  --endpoint-url "$ENDPOINT" \
+  --table-name "${STAGE}-smart-visits-UserProductLines" \
+  --attribute-definitions \
+    AttributeName=userId,AttributeType=S \
+    AttributeName=productLineId,AttributeType=S \
+  --key-schema \
+    AttributeName=userId,KeyType=HASH \
+    AttributeName=productLineId,KeyType=RANGE \
+  --billing-mode PAY_PER_REQUEST \
+  --no-cli-pager 2>/dev/null && echo "  Created ${STAGE}-smart-visits-UserProductLines" || echo "  ${STAGE}-smart-visits-UserProductLines already exists"
+
 echo ""
 echo "All tables seeded. Listing tables:"
 aws dynamodb list-tables --endpoint-url "$ENDPOINT" --no-cli-pager

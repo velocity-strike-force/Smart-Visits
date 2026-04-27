@@ -38,5 +38,8 @@ export function buildSmartVisitsTableDefinitions(
     def(env, "Feedback"),
     def(env, "Customers"),
     def(env, "AuditLog"),
+    def(env, "Roles"),
+    def(env, "ProductLines"),
+    def(env, "UserProductLines"),
   ];
 }

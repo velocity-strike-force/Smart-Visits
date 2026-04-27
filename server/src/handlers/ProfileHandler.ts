@@ -36,6 +36,7 @@ export class ProfileHandler extends ApiGatewayLambdaHandler {
             success: true,
             profile: {
                 userId,
+                roleId: "role-seed-00",
                 name: "Jane Smith",
                 email: "jane.smith@rfsmart.com",
                 productLines: ["NetSuite", "Oracle Cloud"],

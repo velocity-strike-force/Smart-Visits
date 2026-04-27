@@ -16,6 +16,9 @@ export const SMART_VISITS_KEY_SCHEMAS: Record<
   Feedback: { partitionKey: "visitId", sortKey: "userId" },
   Customers: { partitionKey: "customerId" },
   AuditLog: { partitionKey: "entityId", sortKey: "timestamp" },
+  Roles: { partitionKey: "roleId" },
+  ProductLines: { partitionKey: "productLineId" },
+  UserProductLines: { partitionKey: "userId", sortKey: "productLineId" },
 };
 
 export function getKeySchema(logical: SmartVisitsLogicalTable): TableKeySchema {

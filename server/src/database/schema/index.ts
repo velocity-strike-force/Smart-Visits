@@ -21,4 +21,7 @@ export type {
   CustomerRecord,
   AuditLogRecord,
   UserRole,
+  RoleRecord,
+  ProductLineRecord,
+  UserProductLineRecord,
 } from "./entities";

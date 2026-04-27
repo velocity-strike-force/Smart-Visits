@@ -1,7 +1,10 @@
 export interface UserData {
     userId: string;
+    /** FK → `{env}-smart-visits-Roles`. */
+    roleId?: string;
     name: string;
     email: string;
+    /** Denormalized labels; prefer `UserProductLines` + `ProductLines` for source of truth. */
     productLines: string[];
     city: string;
     state: string;
@@ -15,6 +18,7 @@ export interface UserData {
 
 export class User {
     readonly userId: string;
+    readonly roleId?: string;
     readonly name: string;
     readonly email: string;
     readonly productLines: string[];
@@ -29,6 +33,7 @@ export class User {
 
     constructor(data: UserData) {
         this.userId = data.userId;
+        this.roleId = data.roleId;
         this.name = data.name;
         this.email = data.email;
         this.productLines = data.productLines;

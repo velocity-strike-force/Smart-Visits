@@ -1,5 +1,6 @@
 /**
- * Inserts 10 test rows into each Smart Visits DynamoDB table.
+ * Inserts test rows into Smart Visits DynamoDB tables (10 each for core tables;
+ * UserProductLines writes 20 rows so each user has two product-line assignments).
  *
  * Usage (from server/):
  *   STAGE=dev npx ts-node --transpile-only scripts/seed-test-records.ts
@@ -17,6 +18,9 @@ import type { SignupData } from "../src/database/models/Signup";
 import type { FeedbackData } from "../src/database/models/Feedback";
 import type { CustomerData } from "../src/database/models/Customer";
 import type { AuditLogData } from "../src/database/models/AuditLog";
+import type { RoleData } from "../src/database/models/Role";
+import type { ProductLineData } from "../src/database/models/ProductLine";
+import type { UserProductLineData } from "../src/database/models/UserProductLine";
 
 const STAGE = process.env.STAGE || "dev";
 const COUNT = 10;
@@ -43,12 +47,48 @@ async function main(): Promise<void> {
   const now = new Date();
   const base = iso(now);
 
+  const roles: RoleData[] = [];
+  const productLines: ProductLineData[] = [];
   const customers: CustomerData[] = [];
   const users: UserData[] = [];
+  const userProductLines: UserProductLineData[] = [];
   const visits: VisitData[] = [];
   const signups: SignupData[] = [];
   const feedback: FeedbackData[] = [];
   const audits: AuditLogData[] = [];
+
+  const productLineCatalog = [
+    "Oracle Cloud",
+    "NetSuite",
+    "Shipping",
+    "TMS",
+    "Demand Planning",
+    "AX",
+    "Healthcare",
+    "Retail",
+    "Logistics",
+    "Manufacturing",
+  ];
+
+  for (let i = 0; i < COUNT; i++) {
+    const p = pad(i);
+    roles.push({
+      roleId: `role-seed-${p}`,
+      name: i % 2 === 0 ? "Sales Rep" : "Visitor",
+      description: `Seed role ${i} for Smart Visits`,
+      sortOrder: i,
+      createdAt: base,
+    });
+
+    productLines.push({
+      productLineId: `pl-seed-${p}`,
+      name: productLineCatalog[i]!,
+      description: `${productLineCatalog[i]} practice area`,
+      sortOrder: i,
+      isActive: true,
+      createdAt: base,
+    });
+  }
 
   for (let i = 0; i < COUNT; i++) {
     const p = pad(i);
@@ -63,11 +103,14 @@ async function main(): Promise<void> {
       primaryContactEmail: `contact${i}@seed.example.com`,
     });
 
+    const plA = productLineCatalog[i]!;
+    const plB = productLineCatalog[(i + 1) % COUNT]!;
     users.push({
       userId: `user-seed-${p}`,
+      roleId: `role-seed-${pad(i % 5)}`,
       name: `Seed User ${i}`,
       email: `user${i}.seed@example.com`,
-      productLines: ["NetSuite", "Oracle Cloud"].slice(0, (i % 2) + 1),
+      productLines: [plA, plB],
       city: "Jacksonville",
       state: "FL",
       emailNotifications: true,
@@ -137,26 +180,42 @@ async function main(): Promise<void> {
       before: i % 3 === 1 ? { status: "draft" } : null,
       after: { visitId: `visit-seed-${p}`, note: `seed audit ${i}` },
     });
+
+    userProductLines.push(
+      {
+        userId: `user-seed-${p}`,
+        productLineId: `pl-seed-${p}`,
+        assignedAt: base,
+      },
+      {
+        userId: `user-seed-${p}`,
+        productLineId: `pl-seed-${pad((i + 1) % COUNT)}`,
+        assignedAt: base,
+      }
+    );
   }
 
-  async function putAll<T extends Record<string, unknown>>(
+  async function putAll(
     label: string,
     tableName: string,
-    items: T[]
+    items: unknown[]
   ): Promise<void> {
     for (const item of items) {
       await doc.send(
         new PutCommand({
           TableName: tableName,
-          Item: item,
+          Item: item as Record<string, unknown>,
         })
       );
     }
     console.log(`${label}: wrote ${items.length} items → ${tableName}`);
   }
 
+  await putAll("Roles", tables.roles, roles);
+  await putAll("ProductLines", tables.productLines, productLines);
   await putAll("Customers", tables.customers, customers);
   await putAll("Users", tables.users, users);
+  await putAll("UserProductLines", tables.userProductLines, userProductLines);
   await putAll("Visits", tables.visits, visits);
   await putAll("Signups", tables.signups, signups);
   await putAll("Feedback", tables.feedback, feedback);
