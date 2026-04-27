@@ -6,3 +6,5 @@ dist/
 !src/**/*.d.ts
 .env
 .env.*
+docs/
+scripts/
