@@ -9,10 +9,10 @@ export type UserRole = "visitor" | "sales_rep";
 export interface VisitRecord {
   visitId: string;
   /** Display title (e.g. purpose or internal label). */
-  title?: string;
+  //title?: string;
   customerId?: string;
   /** Denormalized customer name for search/list UIs. */
-  customerName?: string;
+  //customerName?: string;
   startDate: string;
   endDate: string;
   productLine: string;
