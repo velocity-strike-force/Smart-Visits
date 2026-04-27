@@ -1,0 +1,7 @@
+deployment_env = "dev"
+aws_region       = "us-east-1"
+# Use environment variable AWS_PROFILE if not using the default credential chain.
+
+tags = {
+  Project = "smart-visits"
+}
