@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Calendar, List, Filter, Plus, ChevronLeft, ChevronRight, X, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
 import FilterPanel from './FilterPanel';
 import { useUser } from './UserContext';
 
@@ -42,7 +42,9 @@ export default function Dashboard() {
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
-  const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
+  const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const daysInMonth = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
 
   const getVisitsForDay = (day: Date) => {
     return filteredVisits.filter(visit => isSameDay(visit.date, day));
