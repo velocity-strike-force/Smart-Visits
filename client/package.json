@@ -1,5 +1,5 @@
 {
-  "name": "@figma/my-make-file",
+  "name": "@velocity-strike-force/smart-visit",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -73,7 +73,7 @@
     "@vitejs/plugin-react": "4.7.0",
     "tailwindcss": "4.1.12",
     "typescript": "^6.0.3",
-    "vite": "6.3.5"
+    "vite": "^6.4.2"
   },
   "peerDependencies": {
     "react": "18.3.1",
