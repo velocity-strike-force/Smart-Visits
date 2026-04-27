@@ -3,16 +3,16 @@ export {
   smartVisitsTables,
   type DeploymentEnv,
   type SmartVisitsLogicalTable,
-} from './tableNames';
+} from "./tableNames";
 export {
   SMART_VISITS_KEY_SCHEMAS,
   getKeySchema,
   type TableKeySchema,
-} from './keySchemas';
+} from "./keySchemas";
 export {
   buildSmartVisitsTableDefinitions,
   type DynamoTableDefinition,
-} from './tableDefinitions';
+} from "./tableDefinitions";
 export type {
   VisitRecord,
   UserProfileRecord,
@@ -21,4 +21,4 @@ export type {
   CustomerRecord,
   AuditLogRecord,
   UserRole,
-} from './entities';
+} from "./entities";
