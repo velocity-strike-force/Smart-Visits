@@ -1,17 +1,5 @@
 import { useState, useMemo } from 'react';
-
-interface Visit {
-  id: string;
-  title: string;
-  customer: string;
-  date: Date;
-  productLine: string;
-  location: string;
-  arr: number;
-  salesRep: string;
-  domain: string;
-  isDraft?: boolean;
-}
+import { Visit } from './VisitsContext';
 
 interface FilterPanelProps {
   visits: Visit[];

@@ -1,53 +1,54 @@
-import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2, Users, MapPin, Calendar, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useUser } from './UserContext';
+import { useVisits } from './VisitsContext';
+import VisitorSignUpCard from './VisitorSignUpCard';
 
 export default function VisitDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
-  const [attendees, setAttendees] = useState(['Sarah Williams', 'Mike Johnson', 'Emily Davis']);
-  const [isSignedUp, setIsSignedUp] = useState(attendees.includes(user.name));
+  const { getVisit, addAttendee, removeAttendee } = useVisits();
 
-  const visit = {
-    id: '1',
-    title: 'Quarterly Review',
-    customer: 'Acme Corp',
-    date: new Date(2026, 3, 10),
-    endDate: new Date(2026, 3, 10),
-    productLine: 'NetSuite',
-    location: 'Jacksonville, FL',
-    arr: 250000,
-    salesRep: 'John Smith',
-    domain: 'Manufacturing',
-    capacity: 10,
-    customerContact: 'Bob Anderson',
-    purpose: 'Quarterly Review',
-    details: 'Closed-toed shoes required. Meet at main entrance.',
-    isPrivate: false,
-    isDraft: false,
-    creatorEmail: 'john.smith@rfsmart.com',
-  };
+  const visit = getVisit(id || '');
+
+  if (!visit) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl mb-4">Visit not found</h2>
+          <button
+            onClick={() => navigate('/')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const isCreator = user.email === visit.creatorEmail;
+  const isSignedUp = visit.attendees.includes(user.name);
 
   const handleSignUp = () => {
-    setIsSignedUp(true);
-    setAttendees([...attendees, user.name]);
+    if (visit.attendees.length >= visit.capacity) {
+      toast.error('This visit is full');
+      return;
+    }
+    addAttendee(visit.id, user.name);
     toast.success('Successfully signed up for visit!');
   };
 
   const handleCancelSignUp = () => {
-    setIsSignedUp(false);
-    setAttendees(attendees.filter(a => a !== user.name));
-    toast.success('Sign-up cancelled');
+    removeAttendee(visit.id, user.name);
+    toast.success('You have left the visit');
   };
 
   const handleRemoveAttendee = (attendee: string) => {
-    setAttendees(attendees.filter(a => a !== attendee));
+    removeAttendee(visit.id, attendee);
     toast.success(`Removed ${attendee} from visit`);
   };
 
@@ -76,7 +77,7 @@ export default function VisitDetail() {
           Back to Dashboard
         </button>
         <div className="flex items-start justify-between">
-          <div>
+          <div className="flex-1">
             <h1 className="text-2xl mb-2">{visit.customer} - {visit.title}</h1>
             <div className="flex items-center gap-2">
               <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded text-sm">
@@ -88,76 +89,68 @@ export default function VisitDetail() {
                 </span>
               )}
               {isSignedUp && !isCreator && (
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm">
-                  ✓ You're Attending
+                <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm flex items-center gap-1">
+                  <span className="text-green-600">✓</span> You're Attending
                 </span>
               )}
             </div>
           </div>
-          <div className="flex gap-2">
-            {isCreator ? (
-              <>
-                <button
-                  onClick={() => navigate(`/post-visit?id=${id}`)}
-                  className="px-4 py-2 bg-white border rounded-lg flex items-center gap-2 hover:bg-gray-50"
-                >
-                  <Edit className="w-4 h-4" />
-                  Edit Visit
-                </button>
-                <button
-                  onClick={handleCancel}
-                  className="px-4 py-2 bg-white border border-orange-300 text-orange-700 rounded-lg hover:bg-orange-50"
-                >
-                  Cancel Event
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-white border border-red-300 text-red-700 rounded-lg flex items-center gap-2 hover:bg-red-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Delete
-                </button>
-              </>
-            ) : (
-              <>
-                {isSignedUp ? (
-                  <button
-                    onClick={handleCancelSignUp}
-                    className="px-6 py-3 bg-white border-2 border-red-500 text-red-700 rounded-lg hover:bg-red-50 font-medium"
-                  >
-                    Leave Visit
-                  </button>
-                ) : (
-                  <>
-                    {attendees.length >= visit.capacity ? (
-                      <div className="flex items-center gap-3">
-                        <span className="text-red-600 font-medium">This visit is full</span>
-                        <button
-                          disabled
-                          className="px-6 py-3 bg-gray-200 text-gray-500 rounded-lg font-medium flex items-center gap-2 cursor-not-allowed"
-                        >
-                          <Users className="w-5 h-5" />
-                          Visit Full
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={handleSignUp}
-                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2"
-                      >
-                        <Users className="w-5 h-5" />
-                        Join Visit
-                      </button>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-          </div>
+          {isCreator && (
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate(`/post-visit?id=${id}`)}
+                className="px-4 py-2 bg-white border rounded-lg flex items-center gap-2 hover:bg-gray-50"
+              >
+                <Edit className="w-4 h-4" />
+                Edit Visit
+              </button>
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 bg-white border border-orange-300 text-orange-700 rounded-lg hover:bg-orange-50"
+              >
+                Cancel Event
+              </button>
+              <button
+                onClick={handleDelete}
+                className="px-4 py-2 bg-white border border-red-300 text-red-700 rounded-lg flex items-center gap-2 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-4xl mx-auto p-8">
+        {!isCreator && (
+          <>
+            <div className="mb-6">
+              <VisitorSignUpCard
+                visit={{
+                  customer: visit.customer,
+                  date: visit.date,
+                  location: visit.location,
+                  capacity: visit.capacity,
+                  currentAttendees: visit.attendees.length,
+                }}
+                onSignUp={handleSignUp}
+                isSignedUp={isSignedUp}
+              />
+            </div>
+            {isSignedUp && (
+              <div className="mb-6 flex justify-end">
+                <button
+                  onClick={handleCancelSignUp}
+                  className="px-8 py-3 bg-white border-2 border-red-500 text-red-700 rounded-lg hover:bg-red-50 font-medium"
+                >
+                  Leave Visit
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
         <div className="bg-white rounded-lg border p-6 space-y-6">
           <div className="grid grid-cols-2 gap-6">
             <div>
@@ -186,9 +179,9 @@ export default function VisitDetail() {
                 <Users className="w-4 h-4" />
                 <span className="text-sm">Capacity</span>
               </div>
-              <div className={attendees.length >= visit.capacity ? 'text-red-600' : ''}>
-                {attendees.length} / {visit.capacity} attendees
-                {attendees.length >= visit.capacity && (
+              <div className={visit.attendees.length >= visit.capacity ? 'text-red-600' : ''}>
+                {visit.attendees.length} / {visit.capacity} attendees
+                {visit.attendees.length >= visit.capacity && (
                   <span className="ml-2 text-xs">(Full)</span>
                 )}
               </div>
@@ -237,26 +230,27 @@ export default function VisitDetail() {
           )}
 
           <div className="border-t pt-6">
-            <div className="flex items-center justify-between mb-3">
-              <h3>Attendees ({attendees.length} / {visit.capacity})</h3>
-              {!isCreator && attendees.length < visit.capacity && !isSignedUp && (
+            <div className="flex items-center justify-between mb-4">
+              <h3>Attendees ({visit.attendees.length} / {visit.capacity})</h3>
+              {!isCreator && visit.attendees.length < visit.capacity && !isSignedUp && (
                 <button
                   onClick={handleSignUp}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm flex items-center gap-2"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2 shadow-sm"
                 >
                   <Users className="w-4 h-4" />
-                  Sign Up
+                  Sign Up for This Visit
                 </button>
               )}
             </div>
-            {attendees.length === 0 ? (
-              <div className="text-center py-8 bg-blue-50 rounded-lg">
-                <Users className="w-12 h-12 mx-auto mb-3 text-blue-300" />
-                <p className="text-gray-600 mb-3">No attendees yet. Be the first to join!</p>
+            {visit.attendees.length === 0 ? (
+              <div className="text-center py-12 bg-blue-50 rounded-lg border-2 border-blue-200 border-dashed">
+                <Users className="w-16 h-16 mx-auto mb-4 text-blue-400" />
+                <p className="text-lg text-gray-700 mb-2 font-medium">No attendees yet</p>
+                <p className="text-gray-500 mb-4">Be the first to join this visit!</p>
                 {!isCreator && !isSignedUp && (
                   <button
                     onClick={handleSignUp}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md hover:shadow-lg transition-shadow"
                   >
                     Sign Up Now
                   </button>
@@ -264,13 +258,13 @@ export default function VisitDetail() {
               </div>
             ) : (
               <>
-                {attendees.length >= visit.capacity && (
+                {visit.attendees.length >= visit.capacity && (
                   <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm flex items-center gap-2">
                     <span className="font-medium">⚠️ This visit is at full capacity</span>
                   </div>
                 )}
                 <div className="space-y-2">
-                  {attendees.map((attendee, idx) => (
+                  {visit.attendees.map((attendee, idx) => (
                     <div key={idx} className="flex items-center justify-between p-3 bg-gray-50 rounded">
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">
