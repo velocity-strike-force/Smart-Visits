@@ -193,7 +193,6 @@ export default function Dashboard() {
         }
 
         setDayModalFocusIndex(0);
-        dayModalVisitRefs.current = [];
     }, [selectedDay, selectedDayVisits.length]);
 
     useEffect(() => {
@@ -205,7 +204,7 @@ export default function Dashboard() {
         if (target) {
             target.focus();
         }
-    }, [selectedDay, dayModalFocusIndex]);
+    }, [selectedDay, dayModalFocusIndex, selectedDayVisits.length]);
 
     const previousMonth = () => {
         setCurrentDate(
