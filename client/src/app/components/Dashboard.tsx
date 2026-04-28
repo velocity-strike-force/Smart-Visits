@@ -859,6 +859,19 @@ export default function Dashboard() {
                                 return;
                             }
 
+                            const isVisitRowTarget =
+                                dayModalVisitRefs.current.some(
+                                    (node) => node === e.target,
+                                );
+                            const isModalContainerTarget =
+                                e.target === e.currentTarget;
+                            const shouldHandleListKeys =
+                                isVisitRowTarget || isModalContainerTarget;
+
+                            if (!shouldHandleListKeys) {
+                                return;
+                            }
+
                             if (e.key === "ArrowDown") {
                                 e.preventDefault();
                                 setDayModalFocusIndex((idx) =>
@@ -889,6 +902,10 @@ export default function Dashboard() {
                             }
 
                             if (e.key === "Enter" || e.key === " ") {
+                                if (!isVisitRowTarget) {
+                                    return;
+                                }
+
                                 const target =
                                     dayModalVisitRefs.current[
                                         dayModalFocusIndex
