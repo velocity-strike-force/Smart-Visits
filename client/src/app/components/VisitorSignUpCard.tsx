@@ -78,7 +78,7 @@ export default function VisitorSignUpCard({ visit, onSignUp, isSignedUp }: Visit
         </div>
         <button
           onClick={onSignUp}
-          className="px-8 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
+          className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
         >
           <Users className="w-6 h-6" />
           Sign Up Now

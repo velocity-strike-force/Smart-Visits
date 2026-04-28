@@ -475,7 +475,7 @@ export default function PostVisit() {
                         </button>
                         <button
                             onClick={() => handleSubmit(false)}
-                            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
                             Post Visit
                         </button>
