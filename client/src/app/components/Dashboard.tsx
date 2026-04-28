@@ -37,6 +37,7 @@ interface Visit {
     arr: number;
     salesRep: string;
     domain: string;
+    purpose?: string;
     isKeyAccount?: boolean;
     isDraft?: boolean;
     postVisitRecordCount?: number;
@@ -48,6 +49,7 @@ const mockVisits: Visit[] = [
     {
         id: "1",
         title: "Quarterly Review",
+        purpose: "Quarterly Review",
         customer: "Seal Shield",
         date: new Date(2026, 3, 10),
         productLine: "NetSuite",
@@ -63,6 +65,7 @@ const mockVisits: Visit[] = [
     {
         id: "2",
         title: "Product Demo",
+        purpose: "Product Demo",
         customer: "Centra Health",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
@@ -78,6 +81,7 @@ const mockVisits: Visit[] = [
     {
         id: "5",
         title: "Executive Briefing",
+        purpose: "Quarterly Review",
         customer: "Advantus Corp",
         date: new Date(2026, 3, 15),
         productLine: "NetSuite",
@@ -93,6 +97,7 @@ const mockVisits: Visit[] = [
     {
         id: "6",
         title: "Architecture Workshop",
+        purpose: "Training",
         customer: "AdaptHealth",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
@@ -108,6 +113,7 @@ const mockVisits: Visit[] = [
     {
         id: "3",
         title: "Implementation Review",
+        purpose: "Implementation Review",
         customer: "Global Logistics",
         date: new Date(2026, 3, 22),
         productLine: "TMS",
@@ -123,6 +129,7 @@ const mockVisits: Visit[] = [
     {
         id: "4",
         title: "Training Session",
+        purpose: "Training",
         customer: "RetailMax",
         date: new Date(2026, 3, 28),
         productLine: "Shipping",
@@ -137,6 +144,7 @@ const mockVisits: Visit[] = [
     {
         id: "7",
         title: "Post Go-Live Review",
+        purpose: "Implementation Review",
         customer: "Northstar Foods",
         date: new Date(2026, 3, 28),
         productLine: "TMS",
@@ -152,6 +160,7 @@ const mockVisits: Visit[] = [
     {
         id: "8",
         title: "Demand Planning Strategy Session",
+        purpose: "Other",
         customer: "Summit Brands",
         date: new Date(2026, 3, 17),
         productLine: "Demand Planning",
@@ -167,6 +176,7 @@ const mockVisits: Visit[] = [
     {
         id: "9",
         title: "Warehouse Mobility Deep Dive",
+        purpose: "Other",
         customer: "Vertex Distribution",
         date: new Date(2026, 3, 17),
         productLine: "AX",
@@ -182,6 +192,7 @@ const mockVisits: Visit[] = [
     {
         id: "10",
         title: "Outbound Throughput Workshop",
+        purpose: "Training",
         customer: "Globex Industries",
         date: new Date(2026, 3, 22),
         productLine: "TMS",
@@ -197,6 +208,7 @@ const mockVisits: Visit[] = [
     {
         id: "11",
         title: "Counting Process Calibration",
+        purpose: "Quarterly Review",
         customer: "Metro Retail Group",
         date: new Date(2026, 3, 28),
         productLine: "Shipping",
@@ -211,6 +223,7 @@ const mockVisits: Visit[] = [
     {
         id: "12",
         title: "May Launch Planning",
+        purpose: "Other",
         customer: "CHSPSC, LLC",
         date: new Date(2026, 4, 6),
         productLine: "Oracle Cloud",
@@ -226,6 +239,7 @@ const mockVisits: Visit[] = [
     {
         id: "13",
         title: "Factory Floor Alignment",
+        purpose: "Quarterly Review",
         customer: "HC Brand",
         date: new Date(2026, 4, 14),
         productLine: "NetSuite",
@@ -240,6 +254,7 @@ const mockVisits: Visit[] = [
     {
         id: "14",
         title: "Outbound Routing Roundtable",
+        purpose: "Quarterly Review",
         customer: "Globex Industries",
         date: new Date(2026, 4, 28),
         productLine: "TMS",
@@ -254,6 +269,7 @@ const mockVisits: Visit[] = [
     {
         id: "15",
         title: "June Forecast Workshop",
+        purpose: "Training",
         customer: "Summit Brands",
         date: new Date(2026, 5, 4),
         productLine: "Demand Planning",
@@ -268,6 +284,7 @@ const mockVisits: Visit[] = [
     {
         id: "16",
         title: "Warehouse Mobility Review",
+        purpose: "Quarterly Review",
         customer: "Vertex Distribution",
         date: new Date(2026, 5, 19),
         productLine: "AX",
@@ -282,6 +299,7 @@ const mockVisits: Visit[] = [
     {
         id: "17",
         title: "Late-April Customer Readout",
+        purpose: "Other",
         customer: "Pharmsource LLC",
         date: new Date(2026, 3, 29),
         productLine: "NetSuite",
@@ -296,6 +314,7 @@ const mockVisits: Visit[] = [
     {
         id: "18",
         title: "May Throughput Assessment",
+        purpose: "Quarterly Review",
         customer: "Metro Retail Group",
         date: new Date(2026, 4, 21),
         productLine: "Shipping",
@@ -311,6 +330,7 @@ const mockVisits: Visit[] = [
     {
         id: "19",
         title: "June Operations Roundtable",
+        purpose: "Quarterly Review",
         customer: "Globex Industries",
         date: new Date(2026, 5, 24),
         productLine: "TMS",
@@ -325,6 +345,7 @@ const mockVisits: Visit[] = [
     {
         id: "20",
         title: "May Integration Design Review",
+        purpose: "Implementation Review",
         customer: "Providence Health & Services",
         date: new Date(2026, 4, 5),
         productLine: "Oracle Cloud",
@@ -339,6 +360,7 @@ const mockVisits: Visit[] = [
     {
         id: "21",
         title: "May Site Expansion Debrief",
+        purpose: "Quarterly Review",
         customer: "T-H Marine Supplies",
         date: new Date(2026, 4, 12),
         productLine: "NetSuite",
@@ -353,6 +375,7 @@ const mockVisits: Visit[] = [
     {
         id: "22",
         title: "May Forecast Validation",
+        purpose: "Quarterly Review",
         customer: "Summit Brands",
         date: new Date(2026, 4, 20),
         productLine: "Demand Planning",
@@ -367,6 +390,7 @@ const mockVisits: Visit[] = [
     {
         id: "23",
         title: "May Distribution Workflow Audit",
+        purpose: "Other",
         customer: "Vertex Distribution",
         date: new Date(2026, 4, 26),
         productLine: "AX",
@@ -381,6 +405,7 @@ const mockVisits: Visit[] = [
     {
         id: "24",
         title: "June Kickoff Planning Session",
+        purpose: "Other",
         customer: "The Nemours Foundation",
         date: new Date(2026, 5, 2),
         productLine: "Oracle Cloud",
@@ -395,6 +420,7 @@ const mockVisits: Visit[] = [
     {
         id: "25",
         title: "June Factory Readiness Workshop",
+        purpose: "Training",
         customer: "Mann Lake Ltd",
         date: new Date(2026, 5, 9),
         productLine: "NetSuite",
@@ -409,6 +435,7 @@ const mockVisits: Visit[] = [
     {
         id: "26",
         title: "June Mid-Month Throughput Check",
+        purpose: "Other",
         customer: "Metro Retail Group",
         date: new Date(2026, 5, 18),
         productLine: "Shipping",
@@ -423,6 +450,7 @@ const mockVisits: Visit[] = [
     {
         id: "27",
         title: "June Route Optimization Review",
+        purpose: "Quarterly Review",
         customer: "Globex Industries",
         date: new Date(2026, 5, 25),
         productLine: "TMS",
@@ -437,6 +465,7 @@ const mockVisits: Visit[] = [
     {
         id: "28",
         title: "April Go-Live Readiness Check",
+        purpose: "Implementation Review",
         customer: "Seal Shield",
         date: new Date(2026, 3, 1),
         productLine: "NetSuite",
@@ -452,6 +481,7 @@ const mockVisits: Visit[] = [
     {
         id: "29",
         title: "April Inventory Alignment Session",
+        purpose: "Quarterly Review",
         customer: "LifePoint Health",
         date: new Date(2026, 3, 2),
         productLine: "Oracle Cloud",
@@ -467,6 +497,7 @@ const mockVisits: Visit[] = [
     {
         id: "30",
         title: "April Network Planning Kickoff",
+        purpose: "Other",
         customer: "Globex Industries",
         date: new Date(2026, 3, 6),
         productLine: "TMS",
