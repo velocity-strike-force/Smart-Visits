@@ -1,0 +1,29 @@
+{
+  "version": "2.0",
+  "routeKey": "GET /api/analytics",
+  "rawPath": "/api/analytics",
+  "rawQueryString": "report=summary",
+  "queryStringParameters": {
+    "report": "summary"
+  },
+  "headers": {
+    "content-type": "application/json"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "test",
+    "http": {
+      "method": "GET",
+      "path": "/api/analytics",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "test"
+    },
+    "requestId": "test-analytics-get",
+    "routeKey": "GET /api/analytics",
+    "stage": "$default",
+    "time": "28/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777521600000
+  },
+  "isBase64Encoded": false
+}

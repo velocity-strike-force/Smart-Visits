@@ -22,3 +22,9 @@ export type {
   AuditLogRecord,
   UserRole,
 } from "./entities";
+export { Visit, type VisitData } from "./Visit";
+export { User, type UserData } from "./User";
+export { Signup, type SignupData } from "./Signup";
+export { Feedback, type FeedbackData } from "./Feedback";
+export { Customer, type CustomerData } from "./Customer";
+export { AuditLog, type AuditLogData } from "./AuditLog";

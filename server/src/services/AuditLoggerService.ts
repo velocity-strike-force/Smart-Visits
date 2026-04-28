@@ -1,5 +1,5 @@
 import { Dynamo } from "../database/Dynamo";
-import { AuditLogData } from "../database/models/AuditLog";
+import { AuditLogData } from "../database/schema/AuditLog";
 
 class AuditLoggerService {
     private buffer: AuditLogData[] = [];

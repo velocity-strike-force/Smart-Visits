@@ -7,15 +7,14 @@ import {
     PutCommand,
     UpdateCommand,
     DeleteCommand,
-    BatchWriteCommand,
 } from "@aws-sdk/lib-dynamodb";
-import { Visit, VisitData } from "./models/Visit";
-import { User, UserData } from "./models/User";
-import { Signup, SignupData } from "./models/Signup";
-import { Feedback, FeedbackData } from "./models/Feedback";
-import { Customer, CustomerData } from "./models/Customer";
-import { AuditLog, AuditLogData } from "./models/AuditLog";
 import { smartVisitsTables } from "./schema";
+import { Visit, type VisitData } from "./schema/Visit";
+import { User, type UserData } from "./schema/User";
+import { Signup, type SignupData } from "./schema/Signup";
+import { Feedback, type FeedbackData } from "./schema/Feedback";
+import { Customer, type CustomerData } from "./schema/Customer";
+import { AuditLog, type AuditLogData } from "./schema/AuditLog";
 
 export class Dynamo {
     private readonly client: DynamoDBDocumentClient;
@@ -27,9 +26,21 @@ export class Dynamo {
         if (client) {
             this.client = client;
         } else {
+            const region =
+                process.env.AWS_REGION ||
+                process.env.AWS_DEFAULT_REGION ||
+                "us-east-1";
+            const isLocalDynamo = Boolean(process.env.DYNAMODB_ENDPOINT);
             const dynamoClient = new DynamoDBClient({
-                ...(process.env.DYNAMODB_ENDPOINT && {
+                region,
+                ...(isLocalDynamo && {
                     endpoint: process.env.DYNAMODB_ENDPOINT,
+                    credentials: {
+                        accessKeyId:
+                            process.env.AWS_ACCESS_KEY_ID || "local-access-key",
+                        secretAccessKey:
+                            process.env.AWS_SECRET_ACCESS_KEY || "local-secret-key",
+                    },
                 }),
             });
             this.client = DynamoDBDocumentClient.from(dynamoClient);

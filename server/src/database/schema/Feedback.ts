@@ -2,7 +2,7 @@ export interface FeedbackData {
     visitId: string;
     userId: string;
     userName: string;
-    role: "visitor" | "salesRep";
+    role: "salesRep" | "visitor";
     feedbackNotes: string;
     keyAreasOfFocus: string[];
     detractors: string;
@@ -14,7 +14,7 @@ export class Feedback {
     readonly visitId: string;
     readonly userId: string;
     readonly userName: string;
-    readonly role: "visitor" | "salesRep";
+    readonly role: "salesRep" | "visitor";
     readonly feedbackNotes: string;
     readonly keyAreasOfFocus: string[];
     readonly detractors: string;
@@ -27,7 +27,7 @@ export class Feedback {
         this.userName = data.userName;
         this.role = data.role;
         this.feedbackNotes = data.feedbackNotes;
-        this.keyAreasOfFocus = data.keyAreasOfFocus ?? [];
+        this.keyAreasOfFocus = data.keyAreasOfFocus;
         this.detractors = data.detractors;
         this.delighters = data.delighters;
         this.submittedAt = new Date(data.submittedAt);

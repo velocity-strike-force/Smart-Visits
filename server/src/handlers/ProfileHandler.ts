@@ -1,6 +1,7 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResult } from "aws-lambda";
 import { ApiGatewayLambdaHandler } from "./ApiGatewayLambdaHandler";
 import { Dynamo } from "../database/Dynamo";
+import { UserData } from "../database/schema/User";
 
 export class ProfileHandler extends ApiGatewayLambdaHandler {
     private readonly db: Dynamo;
@@ -22,53 +23,98 @@ export class ProfileHandler extends ApiGatewayLambdaHandler {
     private async getProfile(
         event: APIGatewayProxyEventV2
     ): Promise<APIGatewayProxyResult> {
-        const userId = event.queryStringParameters?.userId;
+        try {
+            const userId = event.queryStringParameters?.userId;
 
-        if (!userId) {
-            return this.createErrorResponse(400, {
+            if (!userId) {
+                return this.createErrorResponse(400, {
+                    success: false,
+                    message: "userId is required",
+                });
+            }
+
+            const profile = await this.db.getUserById(userId);
+            if (!profile) {
+                return this.createErrorResponse(404, {
+                    success: false,
+                    message: "Profile not found",
+                });
+            }
+
+            return this.createSuccessResponse({
+                success: true,
+                profile,
+            });
+        } catch (error) {
+            return this.createErrorResponse(500, {
                 success: false,
-                message: "userId is required",
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
             });
         }
-
-        // TODO: replace mock with real DynamoDB call — this.db.getUserById(userId)
-        return this.createSuccessResponse({
-            success: true,
-            profile: {
-                userId,
-                name: "Jane Smith",
-                email: "jane.smith@rfsmart.com",
-                productLines: ["NetSuite", "Oracle Cloud"],
-                city: "Jacksonville",
-                state: "FL",
-                emailNotifications: true,
-                slackNotifications: false,
-                proximityAlerts: true,
-                proximityDistanceMiles: 50,
-                createdAt: "2026-01-15T08:00:00Z",
-                updatedAt: "2026-04-01T10:00:00Z",
-            },
-        });
     }
 
     private async updateProfile(
         event: APIGatewayProxyEventV2
     ): Promise<APIGatewayProxyResult> {
-        const body = JSON.parse(event.body ?? "{}");
-        const { userId } = body;
+        try {
+            const body = JSON.parse(event.body ?? "{}") as Partial<UserData>;
+            const { userId } = body;
 
-        if (!userId) {
-            return this.createErrorResponse(400, {
+            if (!userId) {
+                return this.createErrorResponse(400, {
+                    success: false,
+                    message: "userId is required",
+                });
+            }
+
+            const nowIso = new Date().toISOString();
+            const existingProfile = await this.db.getUserById(userId);
+
+            const profileData: UserData = {
+                userId,
+                name: body.name ?? existingProfile?.name ?? "",
+                email: body.email ?? existingProfile?.email ?? "",
+                productLines:
+                    body.productLines ?? existingProfile?.productLines ?? [],
+                city: body.city ?? existingProfile?.city ?? "",
+                state: body.state ?? existingProfile?.state ?? "",
+                emailNotifications:
+                    body.emailNotifications ??
+                    existingProfile?.emailNotifications ??
+                    false,
+                slackNotifications:
+                    body.slackNotifications ??
+                    existingProfile?.slackNotifications ??
+                    false,
+                proximityAlerts:
+                    body.proximityAlerts ?? existingProfile?.proximityAlerts ?? false,
+                proximityDistanceMiles:
+                    body.proximityDistanceMiles ??
+                    existingProfile?.proximityDistanceMiles ??
+                    0,
+                createdAt: existingProfile
+                    ? existingProfile.createdAt.toISOString()
+                    : nowIso,
+                updatedAt: nowIso,
+            };
+
+            await this.db.createOrUpdateUser(profileData);
+
+            return this.createSuccessResponse({
+                success: true,
+                message: "Profile updated successfully",
+            });
+        } catch (error) {
+            return this.createErrorResponse(500, {
                 success: false,
-                message: "userId is required",
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
             });
         }
-
-        // TODO: replace mock with real DynamoDB call — this.db.createOrUpdateUser(body)
-
-        return this.createSuccessResponse({
-            success: true,
-            message: "Profile updated successfully",
-        });
     }
 }
