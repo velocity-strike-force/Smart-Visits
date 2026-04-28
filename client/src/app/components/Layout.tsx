@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { BarChart3, Users, Briefcase } from "lucide-react";
+import { BarChart3, Users, Briefcase, MessageSquare } from "lucide-react";
 import ProfileMenu from "./ProfileMenu";
 import AccountSettingsModal from "./AccountSettingsModal";
 import NotificationsModal from "./NotificationsModal";
@@ -50,6 +50,19 @@ export default function Layout() {
                                     }`}
                                 >
                                     Dashboard
+                                </button>
+                                <button
+                                    onClick={() => navigate("/feedback")}
+                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                        location.pathname.startsWith(
+                                            "/feedback",
+                                        )
+                                            ? "bg-blue-50 text-blue-600"
+                                            : "text-gray-600 hover:bg-gray-50"
+                                    }`}
+                                >
+                                    <MessageSquare className="w-4 h-4" />
+                                    Feedback
                                 </button>
                                 {user.role === "visitor" && (
                                     <button

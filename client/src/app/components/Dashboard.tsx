@@ -1135,7 +1135,16 @@ export default function Dashboard() {
                                 {hasPostVisitRecord(selectedVisit) && (
                                     <span className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
                                         <CheckCircle2 className="w-3 h-3" />
-                                        Done ({selectedVisit.postVisitRecordCount} post-visit record{selectedVisit.postVisitRecordCount === 1 ? "" : "s"})
+                                        Done (
+                                        {
+                                            selectedVisit.postVisitRecordCount
+                                        }{" "}
+                                        post-visit record
+                                        {selectedVisit.postVisitRecordCount ===
+                                        1
+                                            ? ""
+                                            : "s"}
+                                        )
                                     </span>
                                 )}
                             </div>

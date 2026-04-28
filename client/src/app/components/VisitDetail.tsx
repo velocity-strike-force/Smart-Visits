@@ -146,7 +146,12 @@ export default function VisitDetail() {
                             {hasPostVisitRecord && (
                                 <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm flex items-center gap-1">
                                     <CheckCircle2 className="w-4 h-4" />
-                                    Done ({visit.postVisitRecordCount} post-visit record{visit.postVisitRecordCount === 1 ? "" : "s"})
+                                    Done ({visit.postVisitRecordCount}{" "}
+                                    post-visit record
+                                    {visit.postVisitRecordCount === 1
+                                        ? ""
+                                        : "s"}
+                                    )
                                 </span>
                             )}
                         </div>

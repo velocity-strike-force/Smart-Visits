@@ -28,6 +28,7 @@ export default function App() {
                                     path="visit/:id"
                                     element={<VisitDetail />}
                                 />
+                                <Route path="feedback" element={<Feedback />} />
                                 <Route
                                     path="feedback/:id"
                                     element={<Feedback />}
