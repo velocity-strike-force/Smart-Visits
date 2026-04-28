@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { ApiVisit, getVisits } from "../lib/api";
 
 export interface Visit {
     id: string;
@@ -21,16 +22,53 @@ export interface Visit {
     purpose?: string;
     details?: string;
     isPrivate?: boolean;
+    currentAttendees?: number;
 }
 
 interface VisitsContextType {
     visits: Visit[];
+    isLoadingVisits: boolean;
+    visitsError: string;
     addAttendee: (visitId: string, attendeeName: string) => void;
     removeAttendee: (visitId: string, attendeeName: string) => void;
     getVisit: (visitId: string) => Visit | undefined;
 }
 
 const VisitsContext = createContext<VisitsContextType | undefined>(undefined);
+
+function normalizeApiVisit(visit: ApiVisit): Visit | undefined {
+    const id = visit.id ?? visit.visitId;
+    const date = new Date(visit.date ?? visit.startDate ?? "");
+    const endDate = visit.endDate ? new Date(visit.endDate) : undefined;
+
+    if (!id || Number.isNaN(date.getTime())) {
+        return undefined;
+    }
+
+    return {
+        id,
+        title: visit.title ?? visit.purposeForVisit ?? "",
+        customer: visit.customer ?? visit.customerName ?? "",
+        date,
+        endDate:
+            endDate && !Number.isNaN(endDate.getTime()) ? endDate : undefined,
+        productLine: visit.productLine ?? "",
+        location: visit.location ?? "",
+        arr: visit.arr ?? visit.customerARR ?? 0,
+        salesRep: visit.salesRep ?? visit.salesRepName ?? "",
+        domain: visit.domain ?? "",
+        isKeyAccount: visit.isKeyAccount,
+        isDraft: visit.isDraft ?? false,
+        capacity: visit.capacity ?? 0,
+        attendees: visit.invitees ?? [],
+        currentAttendees: visit.currentAttendees,
+        creatorEmail: visit.creatorEmail ?? "",
+        customerContact: visit.customerContact ?? visit.customerContactRep,
+        purpose: visit.purpose ?? visit.purposeForVisit,
+        details: visit.details ?? visit.visitDetails,
+        isPrivate: visit.isPrivate,
+    };
+}
 
 const mockVisits: Visit[] = [
     {
@@ -676,6 +714,47 @@ const mockVisits: Visit[] = [
 
 export function VisitsProvider({ children }: { children: ReactNode }) {
     const [visits, setVisits] = useState<Visit[]>(mockVisits);
+    const [isLoadingVisits, setIsLoadingVisits] = useState(true);
+    const [visitsError, setVisitsError] = useState("");
+
+    useEffect(() => {
+        let isMounted = true;
+
+        async function loadVisits() {
+            try {
+                setIsLoadingVisits(true);
+                setVisitsError("");
+
+                const apiVisits = await getVisits();
+                const normalizedVisits = apiVisits
+                    .map(normalizeApiVisit)
+                    .filter((visit): visit is Visit => Boolean(visit));
+
+                if (isMounted) {
+                    setVisits(normalizedVisits);
+                }
+            } catch (error) {
+                console.error("Failed to load visits:", error);
+                if (isMounted) {
+                    setVisitsError(
+                        error instanceof Error
+                            ? error.message
+                            : "Failed to load visits",
+                    );
+                }
+            } finally {
+                if (isMounted) {
+                    setIsLoadingVisits(false);
+                }
+            }
+        }
+
+        loadVisits();
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const addAttendee = (visitId: string, attendeeName: string) => {
         setVisits((prevVisits) =>
@@ -684,6 +763,8 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
                     ? {
                           ...visit,
                           attendees: [...visit.attendees, attendeeName],
+                          currentAttendees:
+                              (visit.currentAttendees ?? visit.attendees.length) + 1,
                       }
                     : visit,
             ),
@@ -699,6 +780,10 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
                           attendees: visit.attendees.filter(
                               (a) => a !== attendeeName,
                           ),
+                          currentAttendees: Math.max(
+                              (visit.currentAttendees ?? visit.attendees.length) - 1,
+                              0,
+                          ),
                       }
                     : visit,
             ),
@@ -711,7 +796,14 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
 
     return (
         <VisitsContext.Provider
-            value={{ visits, addAttendee, removeAttendee, getVisit }}
+            value={{
+                visits,
+                isLoadingVisits,
+                visitsError,
+                addAttendee,
+                removeAttendee,
+                getVisit,
+            }}
         >
             {children}
         </VisitsContext.Provider>

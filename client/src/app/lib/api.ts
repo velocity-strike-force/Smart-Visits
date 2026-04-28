@@ -4,6 +4,7 @@ export interface ApiVisit {
   id?: string;
   visitId?: string;
   title?: string;
+  purposeForVisit?: string;
   customer?: string;
   customerName?: string;
   date?: string;
@@ -20,6 +21,14 @@ export interface ApiVisit {
   capacity?: number;
   currentAttendees?: number;
   invitees?: string[];
+  creatorEmail?: string;
+  customerContact?: string;
+  customerContactRep?: string;
+  purpose?: string;
+  details?: string;
+  visitDetails?: string;
+  isKeyAccount?: boolean;
+  isPrivate?: boolean;
 }
 
 interface VisitListResponse {
