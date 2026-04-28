@@ -67,17 +67,35 @@ export default function Layout() {
                                     </button>
                                 )}
                                 {user.role === "sales_rep" && (
-                                    <button
-                                        onClick={() => navigate("/analytics")}
-                                        className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
-                                            location.pathname === "/analytics"
-                                                ? "bg-blue-50 text-blue-600"
-                                                : "text-gray-600 hover:bg-gray-50"
-                                        }`}
-                                    >
-                                        <BarChart3 className="w-4 h-4" />
-                                        Analytics
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() =>
+                                                navigate("/visit-requests")
+                                            }
+                                            className={`px-4 py-2 rounded-lg ${
+                                                location.pathname ===
+                                                "/visit-requests"
+                                                    ? "bg-blue-50 text-blue-600"
+                                                    : "text-gray-600 hover:bg-gray-50"
+                                            }`}
+                                        >
+                                            Visit Requests
+                                        </button>
+                                        <button
+                                            onClick={() =>
+                                                navigate("/analytics")
+                                            }
+                                            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                                location.pathname ===
+                                                "/analytics"
+                                                    ? "bg-blue-50 text-blue-600"
+                                                    : "text-gray-600 hover:bg-gray-50"
+                                            }`}
+                                        >
+                                            <BarChart3 className="w-4 h-4" />
+                                            Analytics
+                                        </button>
+                                    </>
                                 )}
                             </nav>
                         </div>
