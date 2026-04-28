@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Slider } from "./ui/slider";
-import { DEFAULT_VISIT_FILTERS, type VisitFilters } from "./visitFilters";
+import { createDefaultVisitFilters, type VisitFilters } from "./visitFilters";
 
 interface Visit {
     id: string;
@@ -226,7 +226,7 @@ export default function FilterPanel({
 
             <div className="flex gap-2 pt-4 border-t">
                 <button
-                    onClick={() => onChange(DEFAULT_VISIT_FILTERS)}
+                    onClick={() => onChange(createDefaultVisitFilters())}
                     className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                 >
                     Clear Filters

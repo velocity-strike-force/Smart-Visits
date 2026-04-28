@@ -23,7 +23,7 @@ import {
 } from "date-fns";
 import FilterPanel from "./FilterPanel";
 import { useUser } from "./UserContext";
-import { DEFAULT_VISIT_FILTERS, type VisitFilters } from "./visitFilters";
+import { createDefaultVisitFilters, type VisitFilters } from "./visitFilters";
 
 interface Visit {
     id: string;
@@ -192,7 +192,7 @@ export default function Dashboard() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showFilters, setShowFilters] = useState(false);
     const [appliedFilters, setAppliedFilters] = useState<VisitFilters>(
-        DEFAULT_VISIT_FILTERS,
+        createDefaultVisitFilters(),
     );
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);

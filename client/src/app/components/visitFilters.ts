@@ -9,7 +9,7 @@ export interface VisitFilters {
     keyAccounts: boolean;
 }
 
-export const DEFAULT_VISIT_FILTERS: VisitFilters = {
+export const createDefaultVisitFilters = (): VisitFilters => ({
     productLines: [],
     location: "",
     arrMin: "",
@@ -18,4 +18,6 @@ export const DEFAULT_VISIT_FILTERS: VisitFilters = {
     domain: "",
     customer: "",
     keyAccounts: false,
-};
+});
+
+export const DEFAULT_VISIT_FILTERS: VisitFilters = createDefaultVisitFilters();
