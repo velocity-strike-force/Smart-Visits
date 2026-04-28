@@ -123,97 +123,93 @@ export default function Feedback() {
                         />
                     </div>
 
-                    {isSalesRep && (
-                        <>
-                            <div>
-                                <label className="block mb-2 text-sm">
-                                    Key Areas of Focus
-                                </label>
-                                <div className="flex gap-2 mb-2">
-                                    <input
-                                        type="text"
-                                        placeholder="Enter key area"
-                                        value={keyAreaInput}
-                                        onChange={(e) =>
-                                            setKeyAreaInput(e.target.value)
-                                        }
-                                        onKeyPress={(e) =>
-                                            e.key === "Enter" && addKeyArea()
-                                        }
-                                        className="flex-1 px-3 py-2 border rounded-lg"
-                                    />
-                                    <button
-                                        onClick={addKeyArea}
-                                        className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                    <>
+                        <div>
+                            <label className="block mb-2 text-sm">
+                                Key Areas of Focus
+                            </label>
+                            <div className="flex gap-2 mb-2">
+                                <input
+                                    type="text"
+                                    placeholder="Enter key area"
+                                    value={keyAreaInput}
+                                    onChange={(e) =>
+                                        setKeyAreaInput(e.target.value)
+                                    }
+                                    onKeyPress={(e) =>
+                                        e.key === "Enter" && addKeyArea()
+                                    }
+                                    className="flex-1 px-3 py-2 border rounded-lg"
+                                />
+                                <button
+                                    onClick={addKeyArea}
+                                    className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                                >
+                                    Add
+                                </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                                {feedbackData.keyAreas.map((area) => (
+                                    <span
+                                        key={area}
+                                        className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2"
                                     >
-                                        Add
-                                    </button>
-                                </div>
-                                <div className="flex flex-wrap gap-2">
-                                    {feedbackData.keyAreas.map((area) => (
-                                        <span
-                                            key={area}
-                                            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2"
+                                        {area}
+                                        <button
+                                            onClick={() => removeKeyArea(area)}
+                                            className="hover:text-blue-900"
                                         >
-                                            {area}
-                                            <button
-                                                onClick={() =>
-                                                    removeKeyArea(area)
-                                                }
-                                                className="hover:text-blue-900"
-                                            >
-                                                ×
-                                            </button>
-                                        </span>
-                                    ))}
-                                </div>
+                                            ×
+                                        </button>
+                                    </span>
+                                ))}
                             </div>
+                        </div>
 
-                            <div>
-                                <label className="block mb-2 text-sm">
-                                    Detractors
-                                </label>
-                                <p className="text-sm text-gray-600 mb-2">
-                                    What challenges or concerns did the customer
-                                    express?
-                                </p>
-                                <textarea
-                                    value={feedbackData.detractors}
-                                    onChange={(e) =>
-                                        setFeedbackData({
-                                            ...feedbackData,
-                                            detractors: e.target.value,
-                                        })
-                                    }
-                                    rows={4}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    placeholder="Enter detractors..."
-                                />
-                            </div>
+                        <div>
+                            <label className="block mb-2 text-sm">
+                                Detractors
+                            </label>
+                            <p className="text-sm text-gray-600 mb-2">
+                                What challenges or concerns did the customer
+                                express?
+                            </p>
+                            <textarea
+                                value={feedbackData.detractors}
+                                onChange={(e) =>
+                                    setFeedbackData({
+                                        ...feedbackData,
+                                        detractors: e.target.value,
+                                    })
+                                }
+                                rows={4}
+                                className="w-full px-3 py-2 border rounded-lg"
+                                placeholder="Enter detractors..."
+                            />
+                        </div>
 
-                            <div>
-                                <label className="block mb-2 text-sm">
-                                    Delighters
-                                </label>
-                                <p className="text-sm text-gray-600 mb-2">
-                                    What aspects of the visit or product
-                                    exceeded expectations?
-                                </p>
-                                <textarea
-                                    value={feedbackData.delighters}
-                                    onChange={(e) =>
-                                        setFeedbackData({
-                                            ...feedbackData,
-                                            delighters: e.target.value,
-                                        })
-                                    }
-                                    rows={4}
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                    placeholder="Enter delighters..."
-                                />
-                            </div>
-                        </>
-                    )}
+                        <div>
+                            <label className="block mb-2 text-sm">
+                                Delighters
+                            </label>
+                            <p className="text-sm text-gray-600 mb-2">
+                                What aspects of the visit or product exceeded
+                                expectations?
+                            </p>
+                            <textarea
+                                value={feedbackData.delighters}
+                                onChange={(e) =>
+                                    setFeedbackData({
+                                        ...feedbackData,
+                                        delighters: e.target.value,
+                                    })
+                                }
+                                rows={4}
+                                className="w-full px-3 py-2 border rounded-lg"
+                                placeholder="Enter delighters..."
+                            />
+                        </div>
+                    </>
 
                     <div className="flex gap-3 pt-4">
                         <button
