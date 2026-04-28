@@ -16,7 +16,7 @@ This guide covers every element in the project scaffold, how each piece fits tog
 8. [How To: Wire a Handler to DynamoDB](#8-how-to-wire-a-handler-to-dynamodb)
 9. [How To: Write Tests](#9-how-to-write-tests)
 10. [Next Steps — Client (React)](#10-next-steps--client-react)
-11. [Next Steps — Terraform](#11-next-steps--terraform)
+11. [Next Steps — Manual AWS Deployment](#11-next-steps--manual-aws-deployment)
 12. [Troubleshooting](#12-troubleshooting)
 
 ---
@@ -517,16 +517,16 @@ The server endpoints are already structured to match what the client will need. 
 
 ---
 
-## 11. Next Steps — Terraform
+## 11. Next Steps — Manual AWS Deployment
 
-When ready for production deployment (per the ARCHITECTURE_BLUEPRINT):
+When ready for production deployment with manually managed AWS resources:
 
-1. Create `terraform/smart-visits/` directory
-2. Set up provider, backend, variables
-3. One `module` block in `lambda.tf` per handler (6 total)
-4. CloudFront distribution with S3 origin + 6 Lambda function URL origins
-5. WAF, ACM, Route53 as needed
-6. IAM policies granting DynamoDB access to `*-smart-visits-*` tables
+1. Create/update DynamoDB tables manually (`<env>-smart-visits-*`)
+2. Create/update the six Lambda functions manually
+3. Ensure Lambda IAM roles include DynamoDB + CloudWatch permissions
+4. Package Lambdas with `.\scripts\package-lambdas.ps1 -Stage <env>`
+5. Deploy backend with `.\scripts\deploy-manual.ps1 -Stage <env> -Region <region>`
+6. If using S3 + CloudFront frontend hosting, run `deploy-manual.ps1` with `-DeployFrontend`
 
 ---
 

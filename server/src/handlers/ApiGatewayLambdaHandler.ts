@@ -17,17 +17,18 @@ export class ApiGatewayLambdaHandler {
         };
     }
 
-    protected handleEndpoint(
+    protected async handleEndpoint(
         event: APIGatewayProxyEventV2,
         handlers: {
             [key: string]: (
                 event: APIGatewayProxyEventV2
             ) => Promise<APIGatewayProxyResult>;
         }
-    ) {
+    ): Promise<APIGatewayProxyResult> {
         try {
-            const httpMethod =
-                event?.requestContext?.http?.method?.toUpperCase();
+            const httpMethod = (
+                (event as any).httpMethod || event?.requestContext?.http?.method
+            )?.toUpperCase();
             const handler = handlers[httpMethod];
             if (!handler) {
                 return this.createErrorResponse(405, {
@@ -35,7 +36,7 @@ export class ApiGatewayLambdaHandler {
                     message: `Method not allowed: ${httpMethod}`,
                 });
             }
-            return handler(event);
+            return await handler(event);
         } catch (error) {
             return this.createErrorResponse(500, {
                 success: false,

@@ -6,25 +6,25 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.x",
     "@aws-sdk/client-ssm": "^3.x",
-    "@aws-sdk/lib-dynamodb": "^3.x",
-    "@types/aws-lambda": "^8.x",
-    "@types/node": "^22.x",
-    "lodash": "^4.x",
-    "ts-node": "^10.x",
-    "typescript": "^5.x",
-    "uuid": "^11.x"
+    "@aws-sdk/lib-dynamodb": "^3.x"
   },
   "devDependencies": {
-    "@types/lodash": "^4.x",
-    "@types/uuid": "^10.x",
+    "@types/aws-lambda": "^8.x",
+    "@types/node": "^22.x",
     "aws-sdk-client-mock": "^4.x",
+    "esbuild": "^0.25.x",
     "jest": "^29.x",
     "@types/jest": "^29.x",
-    "ts-jest": "^29.x"
+    "ts-jest": "^29.x",
+    "ts-node": "^10.x",
+    "typescript": "^5.x"
   },
   "scripts": {
+    "build": "tsc --project tsconfig.json --outDir dist",
+    "build:prod": "npm run build && npm prune --production",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "start:local": "sam local start-api --warm-containers EAGER",
+    "db:setup": "ts-node scripts/create-local-tables.ts",
+    "start:local": "sam local start-api --warm-containers EAGER --env-vars env.local.json",
     "seed:test": "ts-node --project tsconfig.seed.json --transpile-only scripts/seed-test-records.ts"
   }
 }

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Mail, Slack } from "lucide-react";
 import { toast } from "sonner";
 import Typeahead from "./Typeahead";
 import { Switch } from "./ui/switch";
@@ -15,7 +15,7 @@ export default function PostVisit() {
     const [formData, setFormData] = useState({
         productLine: "",
         location: "",
-        salesRep: "John Smith",
+        salesRep: "Kevin Reiter",
         domain: "",
         customer: "",
         startDate: initialDate.toISOString().split("T")[0],
@@ -26,6 +26,8 @@ export default function PostVisit() {
         purpose: "",
         details: "",
         isPrivate: false,
+        notifyEmail: true,
+        notifySlack: false,
     });
 
     const [inviteeInput, setInviteeInput] = useState("");
@@ -120,7 +122,17 @@ export default function PostVisit() {
         if (isDraft) {
             toast.success("Visit saved as draft");
         } else {
-            toast.success("Visit posted successfully!");
+            const notificationChannels = [
+                formData.notifyEmail ? "email" : null,
+                formData.notifySlack ? "Slack" : null,
+            ].filter(Boolean);
+
+            const notificationMessage =
+                notificationChannels.length > 0
+                    ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
+                    : "";
+
+            toast.success(`Visit posted successfully!${notificationMessage}`);
         }
         navigate("/");
     };
@@ -401,6 +413,54 @@ export default function PostVisit() {
                                     setFormData({
                                         ...formData,
                                         isPrivate: checked,
+                                    })
+                                }
+                            />
+                        </label>
+                    </div>
+
+                    <div className="border rounded-lg p-4 space-y-3">
+                        <h3 className="text-sm font-medium">Notifications</h3>
+
+                        <label className="flex items-center justify-between rounded-lg border p-3 gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-red-100 text-red-700 flex items-center justify-center">
+                                    <Mail className="w-4 h-4" />
+                                </div>
+
+                                <div>
+                                    <p className="text-sm">Notify by Email</p>
+                                </div>
+                            </div>
+
+                            <Switch
+                                checked={formData.notifyEmail}
+                                onCheckedChange={(checked) =>
+                                    setFormData({
+                                        ...formData,
+                                        notifyEmail: checked,
+                                    })
+                                }
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between rounded-lg border p-3 gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+                                    <Slack className="w-4 h-4" />
+                                </div>
+
+                                <div>
+                                    <p className="text-sm">Notify in Slack</p>
+                                </div>
+                            </div>
+
+                            <Switch
+                                checked={formData.notifySlack}
+                                onCheckedChange={(checked) =>
+                                    setFormData({
+                                        ...formData,
+                                        notifySlack: checked,
                                     })
                                 }
                             />

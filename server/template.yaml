@@ -6,6 +6,13 @@ Parameters:
   STAGE:
     Type: String
     Default: dev
+  DYNAMODB_ENDPOINT:
+    Type: String
+    Default: ""
+    Description: "DynamoDB endpoint override (set for local dev, leave empty for AWS)."
+
+Conditions:
+  IsLocalStage: !Equals [!Ref STAGE, "local"]
 
 Globals:
   Function:
@@ -21,7 +28,7 @@ Globals:
     Environment:
       Variables:
         STAGE: !Ref STAGE
-        DYNAMODB_ENDPOINT: ""
+        DYNAMODB_ENDPOINT: !Ref DYNAMODB_ENDPOINT
   Api:
     Cors:
       AllowHeaders: "'*'"
@@ -30,13 +37,116 @@ Globals:
     TracingEnabled: true
 
 Resources:
+  VisitsTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Visits"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: visitId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: visitId
+          KeyType: HASH
+
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Users"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  SignupsTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Signups"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: visitId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: visitId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+
+  FeedbackTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Feedback"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: visitId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: visitId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+
+  CustomersTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Customers"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: customerId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: customerId
+          KeyType: HASH
+
+  AuditLogTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-AuditLog"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: entityId
+          AttributeType: S
+        - AttributeName: timestamp
+          AttributeType: S
+      KeySchema:
+        - AttributeName: entityId
+          KeyType: HASH
+        - AttributeName: timestamp
+          KeyType: RANGE
+
   # ── Visit ────────────────────────────────────────────────
   HandleVisitFunction:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub smart-visits-${STAGE}-handle-visit
       CodeUri: ./
-      Handler: src/handlers/visit.handleVisitEndpoint
+      Handler: visit.handleVisitEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SignupsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FeedbackTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditLogTable
       Events:
         GetApi:
           Type: HttpApi
@@ -58,6 +168,16 @@ Resources:
           Properties:
             Path: /api/visit
             Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/visit.ts
+        External:
+          - "@aws-sdk/*"
 
   # ── Signup ───────────────────────────────────────────────
   HandleSignupFunction:
@@ -65,7 +185,20 @@ Resources:
     Properties:
       FunctionName: !Sub smart-visits-${STAGE}-handle-signup
       CodeUri: ./
-      Handler: src/handlers/signup.handleSignupEndpoint
+      Handler: signup.handleSignupEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SignupsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FeedbackTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditLogTable
       Events:
         GetApi:
           Type: HttpApi
@@ -82,6 +215,16 @@ Resources:
           Properties:
             Path: /api/signup
             Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/signup.ts
+        External:
+          - "@aws-sdk/*"
 
   # ── Feedback ─────────────────────────────────────────────
   HandleFeedbackFunction:
@@ -89,7 +232,20 @@ Resources:
     Properties:
       FunctionName: !Sub smart-visits-${STAGE}-handle-feedback
       CodeUri: ./
-      Handler: src/handlers/feedback.handleFeedbackEndpoint
+      Handler: feedback.handleFeedbackEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SignupsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FeedbackTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditLogTable
       Events:
         GetApi:
           Type: HttpApi
@@ -101,6 +257,16 @@ Resources:
           Properties:
             Path: /api/feedback
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/feedback.ts
+        External:
+          - "@aws-sdk/*"
 
   # ── Profile ──────────────────────────────────────────────
   HandleProfileFunction:
@@ -108,7 +274,20 @@ Resources:
     Properties:
       FunctionName: !Sub smart-visits-${STAGE}-handle-profile
       CodeUri: ./
-      Handler: src/handlers/profile.handleProfileEndpoint
+      Handler: profile.handleProfileEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SignupsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FeedbackTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditLogTable
       Events:
         GetApi:
           Type: HttpApi
@@ -120,6 +299,16 @@ Resources:
           Properties:
             Path: /api/profile
             Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/profile.ts
+        External:
+          - "@aws-sdk/*"
 
   # ── Analytics ────────────────────────────────────────────
   HandleAnalyticsFunction:
@@ -127,13 +316,36 @@ Resources:
     Properties:
       FunctionName: !Sub smart-visits-${STAGE}-handle-analytics
       CodeUri: ./
-      Handler: src/handlers/analytics.handleAnalyticsEndpoint
+      Handler: analytics.handleAnalyticsEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SignupsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FeedbackTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditLogTable
       Events:
         GetApi:
           Type: HttpApi
           Properties:
             Path: /api/analytics
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/analytics.ts
+        External:
+          - "@aws-sdk/*"
 
   # ── Customer ─────────────────────────────────────────────
   HandleCustomerFunction:
@@ -141,10 +353,33 @@ Resources:
     Properties:
       FunctionName: !Sub smart-visits-${STAGE}-handle-customer
       CodeUri: ./
-      Handler: src/handlers/customer.handleCustomerEndpoint
+      Handler: customer.handleCustomerEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref VisitsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SignupsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref FeedbackTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AuditLogTable
       Events:
         GetApi:
           Type: HttpApi
           Properties:
             Path: /api/customer
             Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/customer.ts
+        External:
+          - "@aws-sdk/*"
