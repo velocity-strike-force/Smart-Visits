@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "./UserContext";
+import Typeahead from "./Typeahead";
 
 const productLineOptions = [
     "NetSuite",
@@ -100,22 +101,13 @@ export default function RequestVisit() {
                     </div>
 
                     <div>
-                        <label className="block text-sm text-gray-600 mb-2">
-                            Product Line
-                        </label>
-                        <select
+                        <Typeahead
+                            label="Product Line"
+                            placeholder="Search product line…"
+                            options={productLineOptions}
                             value={productLine}
-                            onChange={(e) => setProductLine(e.target.value)}
-                            className="w-full px-3 py-2 border rounded-lg"
-                            required
-                        >
-                            <option value="">Select a product line</option>
-                            {productLineOptions.map((option) => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
+                            onChange={setProductLine}
+                        />
                     </div>
 
                     <div>

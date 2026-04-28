@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import Typeahead from "./Typeahead";
 
 export default function PostVisit() {
     const navigate = useNavigate();
@@ -148,28 +149,15 @@ export default function PostVisit() {
             <div className="max-w-4xl mx-auto p-8">
                 <div className="bg-white rounded-lg border p-6 space-y-6">
                     <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block mb-2 text-sm">
-                                Product Line
-                            </label>
-                            <select
-                                value={formData.productLine}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        productLine: e.target.value,
-                                    })
-                                }
-                                className="w-full px-3 py-2 border rounded-lg"
-                            >
-                                <option value="">Select product line</option>
-                                {productLineOptions.map((option) => (
-                                    <option key={option} value={option}>
-                                        {option}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <Typeahead
+                            label="Product Line"
+                            placeholder="Search product line…"
+                            options={productLineOptions}
+                            value={formData.productLine}
+                            onChange={(v) =>
+                                setFormData({ ...formData, productLine: v })
+                            }
+                        />
 
                         <div>
                             <label className="block mb-2 text-sm">
@@ -206,26 +194,15 @@ export default function PostVisit() {
                             />
                         </div>
 
-                        <div>
-                            <label className="block mb-2 text-sm">Domain</label>
-                            <select
-                                value={formData.domain}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        domain: e.target.value,
-                                    })
-                                }
-                                className="w-full px-3 py-2 border rounded-lg"
-                            >
-                                <option value="">Select domain</option>
-                                {domainOptions.map((option) => (
-                                    <option key={option} value={option}>
-                                        {option}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <Typeahead
+                            label="Domain"
+                            placeholder="Search domain…"
+                            options={domainOptions}
+                            value={formData.domain}
+                            onChange={(v) =>
+                                setFormData({ ...formData, domain: v })
+                            }
+                        />
                     </div>
 
                     <div className="relative">
@@ -389,28 +366,15 @@ export default function PostVisit() {
                         />
                     </div>
 
-                    <div>
-                        <label className="block mb-2 text-sm">
-                            Purpose for Visit
-                        </label>
-                        <select
-                            value={formData.purpose}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    purpose: e.target.value,
-                                })
-                            }
-                            className="w-full px-3 py-2 border rounded-lg"
-                        >
-                            <option value="">Select purpose</option>
-                            {purposeOptions.map((option) => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <Typeahead
+                        label="Purpose for Visit"
+                        placeholder="Search purpose…"
+                        options={purposeOptions}
+                        value={formData.purpose}
+                        onChange={(v) =>
+                            setFormData({ ...formData, purpose: v })
+                        }
+                    />
 
                     <div>
                         <label className="block mb-2 text-sm">
