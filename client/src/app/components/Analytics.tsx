@@ -14,6 +14,7 @@ import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useVisits } from "./VisitsContext";
+import { Switch } from "./ui/switch";
 
 interface CustomerVisitStat {
     name: string;
@@ -160,19 +161,17 @@ export default function Analytics() {
                                 {availableProductLines.map((line) => (
                                     <label
                                         key={line}
-                                        className="flex items-center gap-2 text-sm"
+                                        className="flex items-center justify-between gap-3 text-sm"
                                     >
-                                        <input
-                                            type="checkbox"
+                                        <span>{line}</span>
+                                        <Switch
                                             checked={selectedProductLines.includes(
                                                 line,
                                             )}
-                                            onChange={() =>
+                                            onCheckedChange={() =>
                                                 toggleProductLine(line)
                                             }
-                                            className="rounded"
                                         />
-                                        {line}
                                     </label>
                                 ))}
                             </div>

@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { useUser } from "./UserContext";
 import { useVisits } from "./VisitsContext";
 import VisitorSignUpCard from "./VisitorSignUpCard";
+import { Switch } from "./ui/switch";
 
 export default function VisitDetail() {
     const navigate = useNavigate();
@@ -390,11 +391,11 @@ export default function VisitDetail() {
                     {canManageVisit && (
                         <div className="border-t pt-6">
                             <h3 className="mb-3">Visitor Restrictions</h3>
-                            <label className="flex items-center gap-2">
-                                <input type="checkbox" className="rounded" />
+                            <label className="flex items-center justify-between gap-3">
                                 <span className="text-sm">
                                     Restrict by Product Line
                                 </span>
+                                <Switch />
                             </label>
                         </div>
                     )}

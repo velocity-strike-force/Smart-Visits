@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import Typeahead from "./Typeahead";
+import { Switch } from "./ui/switch";
 
 export default function PostVisit() {
     const navigate = useNavigate();
@@ -445,19 +446,17 @@ export default function PostVisit() {
                     </div>
 
                     <div>
-                        <label className="flex items-center gap-2">
-                            <input
-                                type="checkbox"
+                        <label className="flex items-center justify-between gap-3">
+                            <span className="text-sm">Private Event</span>
+                            <Switch
                                 checked={formData.isPrivate}
-                                onChange={(e) =>
+                                onCheckedChange={(checked) =>
                                     setFormData({
                                         ...formData,
-                                        isPrivate: e.target.checked,
+                                        isPrivate: checked,
                                     })
                                 }
-                                className="rounded"
                             />
-                            <span className="text-sm">Private Event</span>
                         </label>
                     </div>
 

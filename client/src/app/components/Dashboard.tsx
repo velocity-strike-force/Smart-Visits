@@ -673,13 +673,13 @@ export default function Dashboard() {
 
     return (
         <div className="flex-1 flex flex-col bg-gray-50">
-            <div className="bg-white border-b px-8 py-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="bg-white border-b px-4 py-3">
+                <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-4">
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setViewMode("calendar")}
-                                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                     viewMode === "calendar"
                                         ? "bg-red-50 text-red-600"
                                         : "bg-gray-100 text-gray-600"
@@ -691,7 +691,7 @@ export default function Dashboard() {
 
                             <button
                                 onClick={() => setViewMode("list")}
-                                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                     viewMode === "list"
                                         ? "bg-red-50 text-red-600"
                                         : "bg-gray-100 text-gray-600"
@@ -706,7 +706,7 @@ export default function Dashboard() {
                     <div className="flex gap-3">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50"
+                            className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg flex items-center gap-1.5 hover:bg-gray-50"
                         >
                             <Filter className="w-4 h-4" />
                             Filters
@@ -725,31 +725,33 @@ export default function Dashboard() {
                 </div>
 
                 {viewMode === "calendar" && (
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl">
+                    <div className="flex items-center justify-center gap-3">
+                        <button
+                            onClick={previousMonth}
+                            aria-label="Previous month"
+                            className="p-1.5 border rounded hover:bg-gray-50"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        <h2 className="text-lg min-w-[140px] text-center">
                             {format(currentDate, "MMMM yyyy")}
                         </h2>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={previousMonth}
-                                className="px-3 py-1 border rounded hover:bg-gray-50"
-                            >
-                                Previous
-                            </button>
-                            <button
-                                onClick={nextMonth}
-                                className="px-3 py-1 border rounded hover:bg-gray-50"
-                            >
-                                Next
-                            </button>
-                        </div>
+
+                        <button
+                            onClick={nextMonth}
+                            aria-label="Next month"
+                            className="p-1.5 border rounded hover:bg-gray-50"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
             </div>
 
             <div className="flex-1 overflow-auto">
                 {showFilters && (
-                    <div className="bg-white border-b p-6">
+                    <div className="bg-white border-b p-4">
                         <FilterPanel
                             visits={baseVisits}
                             filters={appliedFilters}
@@ -758,7 +760,7 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                <div className="p-8">
+                <div className="p-4">
                     {viewMode === "calendar" ? (
                         <div className="bg-white rounded-lg border overflow-hidden">
                             <div className="grid grid-cols-7 border-b">
@@ -773,7 +775,7 @@ export default function Dashboard() {
                                 ].map((day) => (
                                     <div
                                         key={day}
-                                        className="px-4 py-3 text-center border-r last:border-r-0"
+                                        className="px-2 py-2 text-center text-sm border-r last:border-r-0"
                                     >
                                         {day}
                                     </div>
@@ -794,7 +796,7 @@ export default function Dashboard() {
                                     return (
                                         <div
                                             key={idx}
-                                            className="min-h-[120px] border-r border-b last:border-r-0 p-2 hover:bg-gray-50 cursor-pointer"
+                                            className="min-h-[92px] border-r border-b last:border-r-0 p-1.5 hover:bg-gray-50 cursor-pointer"
                                             onClick={() =>
                                                 navigate(
                                                     `/post-visit?date=${day.toISOString()}`,
@@ -912,27 +914,26 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg border overflow-hidden">
-                            <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
-                                <h2 className="text-lg">
+                            <div className="flex items-center justify-center gap-3 px-6 py-4 border-b bg-gray-50">
+                                <button
+                                    onClick={previousMonth}
+                                    aria-label="Previous month"
+                                    className="p-1.5 border rounded hover:bg-white"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+
+                                <h2 className="text-lg min-w-[140px] text-center">
                                     {format(currentDate, "MMMM yyyy")}
                                 </h2>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={previousMonth}
-                                        className="px-3 py-1 border rounded hover:bg-white flex items-center gap-1"
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                        Previous
-                                    </button>
 
-                                    <button
-                                        onClick={nextMonth}
-                                        className="px-3 py-1 border rounded hover:bg-white flex items-center gap-1"
-                                    >
-                                        Next
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={nextMonth}
+                                    aria-label="Next month"
+                                    className="p-1.5 border rounded hover:bg-white"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
                             </div>
 
                             <table className="w-full">
