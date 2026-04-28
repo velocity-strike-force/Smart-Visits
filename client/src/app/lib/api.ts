@@ -16,10 +16,18 @@ export interface ApiVisit {
   salesRep?: string;
   salesRepName?: string;
   domain?: string;
+  isKeyAccount?: boolean;
   isDraft?: boolean;
   capacity?: number;
   currentAttendees?: number;
   invitees?: string[];
+  customerContact?: string;
+  customerContactRep?: string;
+  purpose?: string;
+  purposeForVisit?: string;
+  details?: string;
+  visitDetails?: string;
+  isPrivate?: boolean;
 }
 
 interface VisitListResponse {

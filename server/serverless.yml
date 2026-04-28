@@ -1,0 +1,132 @@
+service: smart-visits-api
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  environment:
+    STAGE: ${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Scan
+            - dynamodb:Query
+          Resource:
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-smart-visits-Visits
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-smart-visits-Users
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-smart-visits-Signups
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-smart-visits-Feedback
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-smart-visits-Customers
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.stage}-smart-visits-AuditLog
+
+functions:
+  visits:
+    handler: src/handlers/visit.handleVisitEndpoint
+    events:
+      - httpApi:
+          path: /visits
+          method: get
+      - httpApi:
+          path: /visits
+          method: post
+      - httpApi:
+          path: /visits
+          method: put
+      - httpApi:
+          path: /visits
+          method: delete
+
+resources:
+  Resources:
+    VisitsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-smart-visits-Visits
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: visitId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: visitId
+            KeyType: HASH
+
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-smart-visits-Users
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: userId
+            KeyType: HASH
+
+    CustomersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-smart-visits-Customers
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: customerId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: customerId
+            KeyType: HASH
+
+    SignupsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-smart-visits-Signups
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: visitId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: visitId
+            KeyType: HASH
+          - AttributeName: userId
+            KeyType: RANGE
+
+    FeedbackTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-smart-visits-Feedback
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: visitId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: visitId
+            KeyType: HASH
+          - AttributeName: userId
+            KeyType: RANGE
+
+    AuditLogTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.stage}-smart-visits-AuditLog
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: entityId
+            AttributeType: S
+          - AttributeName: timestamp
+            AttributeType: S
+        KeySchema:
+          - AttributeName: entityId
+            KeyType: HASH
+          - AttributeName: timestamp
+            KeyType: RANGE

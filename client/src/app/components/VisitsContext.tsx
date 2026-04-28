@@ -1,69 +1,681 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from 'react';
-import type { Visit } from '../types/visit';
-import { getVisitsDataSourceMode } from '../visits/visitSourceConfig';
-import { getMockVisits } from '../visits/mockVisitsData';
-import { loadVisits } from '../visits/loadVisits';
+import { createContext, useContext, useState, ReactNode } from "react";
 
-export type { Visit } from '../types/visit';
+export interface Visit {
+    id: string;
+    title: string;
+    customer: string;
+    date: Date;
+    productLine: string;
+    location: string;
+    arr: number;
+    salesRep: string;
+    domain: string;
+    isKeyAccount?: boolean;
+    isDraft?: boolean;
+    postVisitRecordCount?: number;
+    capacity: number;
+    attendees: string[];
+    creatorEmail: string;
+    endDate?: Date;
+    customerContact?: string;
+    purpose?: string;
+    details?: string;
+    isPrivate?: boolean;
+}
 
 interface VisitsContextType {
-  visits: Visit[];
-  visitsLoading: boolean;
-  visitsError: string | null;
-  addAttendee: (visitId: string, attendeeName: string) => void;
-  removeAttendee: (visitId: string, attendeeName: string) => void;
-  getVisit: (visitId: string) => Visit | undefined;
+    visits: Visit[];
+    addAttendee: (visitId: string, attendeeName: string) => void;
+    removeAttendee: (visitId: string, attendeeName: string) => void;
+    getVisit: (visitId: string) => Visit | undefined;
 }
 
 const VisitsContext = createContext<VisitsContextType | undefined>(undefined);
 
+const mockVisits: Visit[] = [
+    {
+        id: "1",
+        title: "Q2 Executive Briefing",
+        purpose: "Quarterly Review",
+        customer: "Seal Shield",
+        date: new Date(2026, 0, 14),
+        endDate: new Date(2026, 0, 14),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        postVisitRecordCount: 2,
+        capacity: 10,
+        attendees: [
+            "Sarah Williams",
+            "Mike Johnson",
+            "Emily Davis",
+            "David Brown",
+        ],
+        creatorEmail: "john.smith@rfsmart.com",
+        customerContact: "Bob Anderson",
+        details: "Meet at building 2 lobby at 9:00 AM.",
+        isPrivate: false,
+        isDraft: false,
+    },
+    {
+        id: "2",
+        title: "Cloud Migration Discovery",
+        purpose: "Implementation Review",
+        customer: "The Nemours Foundation",
+        date: new Date(2026, 1, 6),
+        productLine: "Oracle Cloud",
+        location: "Miami, FL",
+        arr: 180000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        isDraft: true,
+        capacity: 8,
+        attendees: [],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "3",
+        title: "Warehouse Optimization Visit",
+        purpose: "Other",
+        customer: "Global Logistics",
+        date: new Date(2026, 1, 19),
+        productLine: "TMS",
+        location: "Tampa, FL",
+        arr: 520000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 5,
+        attendees: [
+            "John Smith",
+            "Sarah Williams",
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+        ],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "4",
+        title: "Shipping Workflow Training",
+        purpose: "Training",
+        customer: "RetailMax",
+        date: new Date(2026, 2, 5),
+        productLine: "Shipping",
+        location: "Orlando, FL",
+        arr: 180000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 12,
+        attendees: [
+            "Mike Johnson",
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+            "Robert Taylor",
+            "Jennifer Wilson",
+            "Thomas Moore",
+            "Amanda Clark",
+        ],
+        creatorEmail: "sarah.williams@rfsmart.com",
+    },
+    {
+        id: "5",
+        title: "Floor Operations Review",
+        purpose: "Quarterly Review",
+        customer: "Advantus Corp",
+        date: new Date(2026, 2, 18),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 8,
+        attendees: ["Emily Davis", "David Brown", "Lisa Anderson"],
+        creatorEmail: "john.smith@rfsmart.com",
+    },
+    {
+        id: "6",
+        title: "Customer Enablement Workshop",
+        purpose: "Training",
+        customer: "LifePoint Health",
+        date: new Date(2026, 2, 26),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 275000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 9,
+        attendees: [
+            "Sarah Williams",
+            "Mike Johnson",
+            "Amanda Clark",
+            "Thomas Moore",
+        ],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "7",
+        title: "Capacity Planning Session",
+        purpose: "Other",
+        customer: "Global Logistics",
+        date: new Date(2026, 3, 3),
+        productLine: "TMS",
+        location: "Tampa, FL",
+        arr: 520000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 10,
+        attendees: [
+            "John Smith",
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+        ],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "8",
+        title: "Post Go-Live Check-in",
+        purpose: "Implementation Review",
+        customer: "HC Brand",
+        date: new Date(2026, 3, 9),
+        productLine: "NetSuite",
+        location: "Houston, TX",
+        arr: 240000,
+        salesRep: "Alex Rivera",
+        domain: "Manufacturing",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 6,
+        attendees: ["Sarah Williams", "Robert Taylor"],
+        creatorEmail: "alex.rivera@rfsmart.com",
+    },
+    {
+        id: "9",
+        title: "Distribution Center Walkthrough",
+        purpose: "Other",
+        customer: "RetailMax",
+        date: new Date(2026, 3, 17),
+        productLine: "Shipping",
+        location: "Orlando, FL",
+        arr: 180000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 10,
+        attendees: ["Emily Davis", "David Brown", "Amanda Clark"],
+        creatorEmail: "sarah.williams@rfsmart.com",
+    },
+    {
+        id: "10",
+        title: "Executive Steering Committee",
+        purpose: "Quarterly Review",
+        customer: "Pharmsource LLC",
+        date: new Date(2026, 3, 23),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "Sarah Williams",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 12,
+        attendees: [
+            "John Smith",
+            "Mike Johnson",
+            "Emily Davis",
+            "Robert Taylor",
+            "Jennifer Wilson",
+        ],
+        creatorEmail: "sarah.williams@rfsmart.com",
+    },
+    {
+        id: "11",
+        title: "KPI Alignment Review",
+        purpose: "Quarterly Review",
+        customer: "Centra Health",
+        date: new Date(2026, 4, 2),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 275000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 7,
+        attendees: ["Lisa Anderson", "Thomas Moore", "Amanda Clark"],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "12",
+        title: "Network Expansion Discovery",
+        purpose: "Other",
+        customer: "Globex Industries",
+        date: new Date(2026, 4, 11),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 8,
+        attendees: [
+            "John Smith",
+            "Emily Davis",
+            "David Brown",
+            "Jennifer Wilson",
+        ],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "13",
+        title: "Demand Planning Forecast Lab",
+        purpose: "Training",
+        customer: "Summit Brands",
+        date: new Date(2026, 4, 19),
+        productLine: "Demand Planning",
+        location: "Atlanta, GA",
+        arr: 365000,
+        salesRep: "Priya Patel",
+        domain: "Counting",
+        isKeyAccount: true,
+        capacity: 9,
+        attendees: ["Emily Davis", "Robert Taylor", "Amanda Clark"],
+        creatorEmail: "priya.patel@rfsmart.com",
+    },
+    {
+        id: "14",
+        title: "AX Process Discovery",
+        purpose: "Other",
+        customer: "Vertex Distribution",
+        date: new Date(2026, 4, 27),
+        productLine: "AX",
+        location: "Dallas, TX",
+        arr: 215000,
+        salesRep: "Alex Rivera",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Thomas Moore"],
+        creatorEmail: "alex.rivera@rfsmart.com",
+    },
+    {
+        id: "15",
+        title: "Quarter-End Demand Review",
+        purpose: "Quarterly Review",
+        customer: "Summit Brands",
+        date: new Date(2026, 5, 3),
+        productLine: "Demand Planning",
+        location: "Atlanta, GA",
+        arr: 365000,
+        salesRep: "Priya Patel",
+        domain: "Counting",
+        isKeyAccount: true,
+        capacity: 10,
+        attendees: ["Emily Davis", "Amanda Clark", "Robert Taylor"],
+        creatorEmail: "priya.patel@rfsmart.com",
+    },
+    {
+        id: "16",
+        title: "June Executive Site Walk",
+        purpose: "Other",
+        customer: "T-H Marine Supplies",
+        date: new Date(2026, 5, 12),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        capacity: 12,
+        attendees: [
+            "Mike Johnson",
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+            "Jennifer Wilson",
+        ],
+        creatorEmail: "john.smith@rfsmart.com",
+    },
+    {
+        id: "17",
+        title: "Inbound Operations Clinic",
+        purpose: "Training",
+        customer: "AdaptHealth",
+        date: new Date(2026, 5, 22),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 275000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Thomas Moore", "Amanda Clark"],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "18",
+        title: "Outbound Throughput Validation",
+        purpose: "Quarterly Review",
+        customer: "Globex Industries",
+        date: new Date(2026, 5, 26),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 9,
+        attendees: ["John Smith", "Emily Davis", "David Brown"],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "19",
+        title: "End-of-April Site Debrief",
+        purpose: "Quarterly Review",
+        customer: "Mann Lake Ltd",
+        date: new Date(2026, 3, 30),
+        productLine: "NetSuite",
+        location: "Houston, TX",
+        arr: 240000,
+        salesRep: "Alex Rivera",
+        domain: "Manufacturing",
+        isKeyAccount: false,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Robert Taylor", "Amanda Clark"],
+        creatorEmail: "alex.rivera@rfsmart.com",
+    },
+    {
+        id: "20",
+        title: "May Demand Pulse Check",
+        purpose: "Other",
+        customer: "Summit Brands",
+        date: new Date(2026, 4, 21),
+        productLine: "Demand Planning",
+        location: "Atlanta, GA",
+        arr: 365000,
+        salesRep: "Priya Patel",
+        domain: "Counting",
+        isKeyAccount: true,
+        capacity: 9,
+        attendees: ["Emily Davis", "Lisa Anderson", "Jennifer Wilson"],
+        creatorEmail: "priya.patel@rfsmart.com",
+    },
+    {
+        id: "21",
+        title: "June Network Optimization Visit",
+        purpose: "Other",
+        customer: "Globex Industries",
+        date: new Date(2026, 5, 24),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 10,
+        attendees: ["John Smith", "David Brown", "Emily Davis", "Thomas Moore"],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "22",
+        title: "April Inbound Readiness Review",
+        purpose: "Implementation Review",
+        customer: "CHSPSC, LLC",
+        date: new Date(2026, 3, 7),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 275000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Amanda Clark"],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "23",
+        title: "April Manufacturing Sync",
+        purpose: "Other",
+        customer: "Seal Shield",
+        date: new Date(2026, 3, 14),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 10,
+        attendees: ["Emily Davis", "David Brown", "Lisa Anderson"],
+        creatorEmail: "john.smith@rfsmart.com",
+    },
+    {
+        id: "24",
+        title: "April Outbound Review",
+        purpose: "Quarterly Review",
+        customer: "Globex Industries",
+        date: new Date(2026, 3, 21),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 9,
+        attendees: ["John Smith", "Emily Davis", "Thomas Moore"],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "25",
+        title: "April Counting Calibration",
+        purpose: "Quarterly Review",
+        customer: "Metro Retail Group",
+        date: new Date(2026, 3, 24),
+        productLine: "Shipping",
+        location: "Charlotte, NC",
+        arr: 195000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 10,
+        attendees: ["David Brown", "Amanda Clark", "Robert Taylor"],
+        creatorEmail: "sarah.williams@rfsmart.com",
+    },
+    {
+        id: "26",
+        title: "May Integration Design Review",
+        purpose: "Implementation Review",
+        customer: "Providence Health & Services",
+        date: new Date(2026, 4, 5),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 275000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Thomas Moore", "Amanda Clark"],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "27",
+        title: "May Site Expansion Debrief",
+        purpose: "Quarterly Review",
+        customer: "Advantus Corp",
+        date: new Date(2026, 4, 12),
+        productLine: "NetSuite",
+        location: "Houston, TX",
+        arr: 240000,
+        salesRep: "Alex Rivera",
+        domain: "Manufacturing",
+        isKeyAccount: false,
+        capacity: 7,
+        attendees: ["Robert Taylor", "Jennifer Wilson"],
+        creatorEmail: "alex.rivera@rfsmart.com",
+    },
+    {
+        id: "28",
+        title: "May Distribution Workflow Audit",
+        purpose: "Other",
+        customer: "Vertex Distribution",
+        date: new Date(2026, 4, 26),
+        productLine: "AX",
+        location: "Dallas, TX",
+        arr: 215000,
+        salesRep: "Alex Rivera",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Lisa Anderson", "David Brown"],
+        creatorEmail: "alex.rivera@rfsmart.com",
+    },
+    {
+        id: "29",
+        title: "June Kickoff Planning Session",
+        purpose: "Other",
+        customer: "The Nemours Foundation",
+        date: new Date(2026, 5, 2),
+        productLine: "Oracle Cloud",
+        location: "Savannah, GA",
+        arr: 205000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        attendees: ["Amanda Clark", "Thomas Moore"],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "30",
+        title: "June Factory Readiness Workshop",
+        purpose: "Training",
+        customer: "HC Brand",
+        date: new Date(2026, 5, 9),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        capacity: 10,
+        attendees: [
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+            "Robert Taylor",
+        ],
+        creatorEmail: "john.smith@rfsmart.com",
+    },
+    {
+        id: "31",
+        title: "June Mid-Month Throughput Check",
+        purpose: "Other",
+        customer: "Metro Retail Group",
+        date: new Date(2026, 5, 18),
+        productLine: "Shipping",
+        location: "Charlotte, NC",
+        arr: 195000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        capacity: 9,
+        attendees: ["Emily Davis", "Amanda Clark", "Thomas Moore"],
+        creatorEmail: "sarah.williams@rfsmart.com",
+    },
+    {
+        id: "32",
+        title: "June Route Optimization Review",
+        purpose: "Quarterly Review",
+        customer: "Globex Industries",
+        date: new Date(2026, 5, 25),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 10,
+        attendees: [
+            "John Smith",
+            "Emily Davis",
+            "David Brown",
+            "Jennifer Wilson",
+        ],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+    {
+        id: "33",
+        title: "April Go-Live Readiness Check",
+        purpose: "Implementation Review",
+        customer: "Pharmsource LLC",
+        date: new Date(2026, 3, 1),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 315000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 10,
+        attendees: ["Emily Davis", "David Brown", "Lisa Anderson"],
+        creatorEmail: "john.smith@rfsmart.com",
+    },
+    {
+        id: "34",
+        title: "April Inventory Alignment Session",
+        purpose: "Quarterly Review",
+        customer: "LifePoint Health",
+        date: new Date(2026, 3, 2),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 278000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 8,
+        attendees: ["Sarah Williams", "Amanda Clark", "Thomas Moore"],
+        creatorEmail: "jane.doe@rfsmart.com",
+    },
+    {
+        id: "35",
+        title: "April Network Planning Kickoff",
+        purpose: "Other",
+        customer: "Globex Industries",
+        date: new Date(2026, 3, 6),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 462000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 9,
+        attendees: ["John Smith", "Emily Davis", "Jennifer Wilson"],
+        creatorEmail: "mike.johnson@rfsmart.com",
+    },
+];
+
 export function VisitsProvider({ children }: { children: ReactNode }) {
-  const isApi = getVisitsDataSourceMode() === 'api';
-
-  const [visits, setVisits] = useState<Visit[]>(() =>
-    isApi ? [] : getMockVisits()
-  );
-  const [visitsLoading, setVisitsLoading] = useState(isApi);
-  const [visitsError, setVisitsError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!isApi) {
-      setVisits(getMockVisits());
-      setVisitsLoading(false);
-      setVisitsError(null);
-      return;
-    }
-
-    let cancelled = false;
-    setVisitsLoading(true);
-    setVisitsError(null);
-
-    loadVisits()
-      .then(rows => {
-        if (!cancelled) setVisits(rows);
-      })
-      .catch((err: unknown) => {
-        if (!cancelled) {
-          setVisits([]);
-          setVisitsError(
-            err instanceof Error ? err.message : 'Failed to load visits'
-          );
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setVisitsLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [isApi]);
+    const [visits, setVisits] = useState<Visit[]>(mockVisits);
 
     const addAttendee = (visitId: string, attendeeName: string) => {
         setVisits((prevVisits) =>
@@ -78,41 +690,40 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         );
     };
 
-  const removeAttendee = (visitId: string, attendeeName: string) => {
-    setVisits(prevVisits =>
-      prevVisits.map(visit =>
-        visit.id === visitId
-          ? {
-              ...visit,
-              attendees: visit.attendees.filter(a => a !== attendeeName),
-            }
-          : visit
-      )
+    const removeAttendee = (visitId: string, attendeeName: string) => {
+        setVisits((prevVisits) =>
+            prevVisits.map((visit) =>
+                visit.id === visitId
+                    ? {
+                          ...visit,
+                          attendees: visit.attendees.filter(
+                              (a) => a !== attendeeName,
+                          ),
+                      }
+                    : visit,
+            ),
+        );
+    };
+
+    const getVisit = (visitId: string) => {
+        return visits.find((v) => v.id === visitId);
+    };
+
+    return (
+        <VisitsContext.Provider
+            value={{ visits, addAttendee, removeAttendee, getVisit }}
+        >
+            {children}
+        </VisitsContext.Provider>
     );
-  };
-
-  const getVisit = (visitId: string) => visits.find(v => v.id === visitId);
-
-  return (
-    <VisitsContext.Provider
-      value={{
-        visits,
-        visitsLoading,
-        visitsError,
-        addAttendee,
-        removeAttendee,
-        getVisit,
-      }}
-    >
-      {children}
-    </VisitsContext.Provider>
-  );
 }
 
 export function useVisits() {
     const context = useContext(VisitsContext);
+
     if (context === undefined) {
         throw new Error("useVisits must be used within a VisitsProvider");
     }
+
     return context;
 }

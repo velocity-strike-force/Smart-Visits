@@ -17,11 +17,10 @@ import VisitorSignUpCard from "./VisitorSignUpCard";
 import { Switch } from "./ui/switch";
 
 export default function VisitDetail() {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const { user } = useUser();
-  const { getVisit, addAttendee, removeAttendee, visitsLoading, visitsError } =
-    useVisits();
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const { user } = useUser();
+    const { getVisit, addAttendee, removeAttendee, isLoadingVisits } = useVisits();
 
   const visit = getVisit(id || "");
 
