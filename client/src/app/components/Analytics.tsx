@@ -181,8 +181,21 @@ export default function Analytics() {
                         <Typeahead
                             label="Date Range"
                             placeholder="Select range…"
-                            options={["Month to Date", "Quarter to Date", "Year to Date", "Custom Range"]}
-                            value={dateRange === "mtd" ? "Month to Date" : dateRange === "qtd" ? "Quarter to Date" : dateRange === "ytd" ? "Year to Date" : "Custom Range"}
+                            options={[
+                                "Month to Date",
+                                "Quarter to Date",
+                                "Year to Date",
+                                "Custom Range",
+                            ]}
+                            value={
+                                dateRange === "mtd"
+                                    ? "Month to Date"
+                                    : dateRange === "qtd"
+                                      ? "Quarter to Date"
+                                      : dateRange === "ytd"
+                                        ? "Year to Date"
+                                        : "Custom Range"
+                            }
                             onChange={(v) => {
                                 const map: Record<string, string> = {
                                     "Month to Date": "mtd",
