@@ -25,6 +25,7 @@ import {
 import FilterPanel from "./FilterPanel";
 import { useUser } from "./UserContext";
 import { createDefaultVisitFilters, type VisitFilters } from "./visitFilters";
+import { getProductLineTheme } from "./productLineTheme";
 
 interface Visit {
     id: string;
@@ -47,7 +48,7 @@ const mockVisits: Visit[] = [
     {
         id: "1",
         title: "Quarterly Review",
-        customer: "Acme Corp",
+        customer: "Seal Shield",
         date: new Date(2026, 3, 10),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -62,7 +63,7 @@ const mockVisits: Visit[] = [
     {
         id: "2",
         title: "Product Demo",
-        customer: "TechStart Inc",
+        customer: "Centra Health",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
         location: "Miami, FL",
@@ -77,7 +78,7 @@ const mockVisits: Visit[] = [
     {
         id: "5",
         title: "Executive Briefing",
-        customer: "Sunrise Health",
+        customer: "Advantus Corp",
         date: new Date(2026, 3, 15),
         productLine: "NetSuite",
         location: "Miami, FL",
@@ -92,7 +93,7 @@ const mockVisits: Visit[] = [
     {
         id: "6",
         title: "Architecture Workshop",
-        customer: "redwave Energy",
+        customer: "AdaptHealth",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
         location: "Miami, FL",
@@ -210,7 +211,7 @@ const mockVisits: Visit[] = [
     {
         id: "12",
         title: "May Launch Planning",
-        customer: "Harbor Wholesale",
+        customer: "CHSPSC, LLC",
         date: new Date(2026, 4, 6),
         productLine: "Oracle Cloud",
         location: "Savannah, GA",
@@ -225,7 +226,7 @@ const mockVisits: Visit[] = [
     {
         id: "13",
         title: "Factory Floor Alignment",
-        customer: "Acme Corp",
+        customer: "HC Brand",
         date: new Date(2026, 4, 14),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -281,7 +282,7 @@ const mockVisits: Visit[] = [
     {
         id: "17",
         title: "Late-April Customer Readout",
-        customer: "redwave Energy",
+        customer: "Pharmsource LLC",
         date: new Date(2026, 3, 29),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -324,7 +325,7 @@ const mockVisits: Visit[] = [
     {
         id: "20",
         title: "May Integration Design Review",
-        customer: "Northstar Foods",
+        customer: "Providence Health & Services",
         date: new Date(2026, 4, 5),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -338,7 +339,7 @@ const mockVisits: Visit[] = [
     {
         id: "21",
         title: "May Site Expansion Debrief",
-        customer: "redwave Energy",
+        customer: "T-H Marine Supplies",
         date: new Date(2026, 4, 12),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -380,7 +381,7 @@ const mockVisits: Visit[] = [
     {
         id: "24",
         title: "June Kickoff Planning Session",
-        customer: "Harbor Wholesale",
+        customer: "The Nemours Foundation",
         date: new Date(2026, 5, 2),
         productLine: "Oracle Cloud",
         location: "Savannah, GA",
@@ -394,7 +395,7 @@ const mockVisits: Visit[] = [
     {
         id: "25",
         title: "June Factory Readiness Workshop",
-        customer: "Acme Corp",
+        customer: "Mann Lake Ltd",
         date: new Date(2026, 5, 9),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -436,7 +437,7 @@ const mockVisits: Visit[] = [
     {
         id: "28",
         title: "April Go-Live Readiness Check",
-        customer: "Acme Corp",
+        customer: "Seal Shield",
         date: new Date(2026, 3, 1),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -451,7 +452,7 @@ const mockVisits: Visit[] = [
     {
         id: "29",
         title: "April Inventory Alignment Session",
-        customer: "Northstar Foods",
+        customer: "LifePoint Health",
         date: new Date(2026, 3, 2),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -479,64 +480,6 @@ const mockVisits: Visit[] = [
         currentAttendees: 5,
     },
 ];
-
-const getProductLineTheme = (productLine: string) => {
-    const normalized = productLine.toLowerCase();
-
-    if (normalized.includes("netsuite")) {
-        return {
-            calendarCard: "bg-emerald-100 text-emerald-800",
-            badge: "bg-emerald-100 text-emerald-800",
-            subtleText: "text-emerald-700",
-        };
-    }
-
-    if (normalized.includes("oracle")) {
-        return {
-            calendarCard: "bg-indigo-100 text-indigo-800",
-            badge: "bg-indigo-100 text-indigo-800",
-            subtleText: "text-indigo-700",
-        };
-    }
-
-    if (normalized.includes("tms")) {
-        return {
-            calendarCard: "bg-teal-100 text-teal-800",
-            badge: "bg-teal-100 text-teal-800",
-            subtleText: "text-teal-700",
-        };
-    }
-
-    if (normalized.includes("shipping")) {
-        return {
-            calendarCard: "bg-amber-100 text-amber-800",
-            badge: "bg-amber-100 text-amber-800",
-            subtleText: "text-amber-700",
-        };
-    }
-
-    if (normalized.includes("demand")) {
-        return {
-            calendarCard: "bg-fuchsia-100 text-fuchsia-800",
-            badge: "bg-fuchsia-100 text-fuchsia-800",
-            subtleText: "text-fuchsia-700",
-        };
-    }
-
-    if (normalized.includes("ax")) {
-        return {
-            calendarCard: "bg-cyan-100 text-cyan-800",
-            badge: "bg-cyan-100 text-cyan-800",
-            subtleText: "text-cyan-700",
-        };
-    }
-
-    return {
-        calendarCard: "bg-red-100 text-red-800",
-        badge: "bg-red-100 text-red-800",
-        subtleText: "text-red-700",
-    };
-};
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -673,15 +616,15 @@ export default function Dashboard() {
 
     return (
         <div className="flex-1 flex flex-col bg-gray-50">
-            <div className="bg-white border-b px-8 py-6">
-                <div className="flex items-center justify-between mb-6">
+            <div className="bg-white border-b px-4 py-3">
+                <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-4">
                         <div className="flex gap-2">
                             <button
                                 onClick={() => setViewMode("calendar")}
-                                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                     viewMode === "calendar"
-                                        ? "bg-red-50 text-red-600"
+                                        ? "bg-blue-50 text-blue-600"
                                         : "bg-gray-100 text-gray-600"
                                 }`}
                             >
@@ -691,9 +634,9 @@ export default function Dashboard() {
 
                             <button
                                 onClick={() => setViewMode("list")}
-                                className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                     viewMode === "list"
-                                        ? "bg-red-50 text-red-600"
+                                        ? "bg-blue-50 text-blue-600"
                                         : "bg-gray-100 text-gray-600"
                                 }`}
                             >
@@ -706,7 +649,7 @@ export default function Dashboard() {
                     <div className="flex gap-3">
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg flex items-center gap-2 hover:bg-gray-50"
+                            className="px-3 py-1.5 text-sm bg-white border border-gray-300 rounded-lg flex items-center gap-1.5 hover:bg-gray-50"
                         >
                             <Filter className="w-4 h-4" />
                             Filters
@@ -715,7 +658,7 @@ export default function Dashboard() {
                         {user.role === "sales_rep" && (
                             <button
                                 onClick={() => navigate("/post-visit")}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
                             >
                                 <Plus className="w-4 h-4" />
                                 Post a Visit
@@ -725,31 +668,33 @@ export default function Dashboard() {
                 </div>
 
                 {viewMode === "calendar" && (
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl">
+                    <div className="flex items-center justify-center gap-3">
+                        <button
+                            onClick={previousMonth}
+                            aria-label="Previous month"
+                            className="p-1.5 border rounded hover:bg-gray-50"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+
+                        <h2 className="text-lg min-w-[140px] text-center">
                             {format(currentDate, "MMMM yyyy")}
                         </h2>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={previousMonth}
-                                className="px-3 py-1 border rounded hover:bg-gray-50"
-                            >
-                                Previous
-                            </button>
-                            <button
-                                onClick={nextMonth}
-                                className="px-3 py-1 border rounded hover:bg-gray-50"
-                            >
-                                Next
-                            </button>
-                        </div>
+
+                        <button
+                            onClick={nextMonth}
+                            aria-label="Next month"
+                            className="p-1.5 border rounded hover:bg-gray-50"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
             </div>
 
             <div className="flex-1 overflow-auto">
                 {showFilters && (
-                    <div className="bg-white border-b p-6">
+                    <div className="bg-white border-b p-4">
                         <FilterPanel
                             visits={baseVisits}
                             filters={appliedFilters}
@@ -758,7 +703,7 @@ export default function Dashboard() {
                     </div>
                 )}
 
-                <div className="p-8">
+                <div className="p-4">
                     {viewMode === "calendar" ? (
                         <div className="bg-white rounded-lg border overflow-hidden">
                             <div className="grid grid-cols-7 border-b">
@@ -773,7 +718,7 @@ export default function Dashboard() {
                                 ].map((day) => (
                                     <div
                                         key={day}
-                                        className="px-4 py-3 text-center border-r last:border-r-0"
+                                        className="px-2 py-2 text-center text-sm border-r last:border-r-0"
                                     >
                                         {day}
                                     </div>
@@ -794,7 +739,7 @@ export default function Dashboard() {
                                     return (
                                         <div
                                             key={idx}
-                                            className="min-h-[120px] border-r border-b last:border-r-0 p-2 hover:bg-gray-50 cursor-pointer"
+                                            className="min-h-[92px] border-r border-b last:border-r-0 p-1.5 hover:bg-gray-50 cursor-pointer"
                                             onClick={() =>
                                                 navigate(
                                                     `/post-visit?date=${day.toISOString()}`,
@@ -899,7 +844,7 @@ export default function Dashboard() {
                                                                 0,
                                                             );
                                                         }}
-                                                        className="w-full text-left px-2 py-1 text-[11px] text-red-700 bg-red-50 rounded font-medium hover:bg-red-100"
+                                                        className="w-full text-left px-2 py-1 text-[11px] text-blue-700 bg-blue-50 rounded font-medium hover:bg-blue-100"
                                                     >
                                                         +{hiddenVisitCount} more
                                                     </button>
@@ -912,27 +857,26 @@ export default function Dashboard() {
                         </div>
                     ) : (
                         <div className="bg-white rounded-lg border overflow-hidden">
-                            <div className="flex items-center justify-between px-6 py-4 border-b bg-gray-50">
-                                <h2 className="text-lg">
+                            <div className="flex items-center justify-center gap-3 px-6 py-4 border-b bg-gray-50">
+                                <button
+                                    onClick={previousMonth}
+                                    aria-label="Previous month"
+                                    className="p-1.5 border rounded hover:bg-white"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+
+                                <h2 className="text-lg min-w-[140px] text-center">
                                     {format(currentDate, "MMMM yyyy")}
                                 </h2>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={previousMonth}
-                                        className="px-3 py-1 border rounded hover:bg-white flex items-center gap-1"
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                        Previous
-                                    </button>
 
-                                    <button
-                                        onClick={nextMonth}
-                                        className="px-3 py-1 border rounded hover:bg-white flex items-center gap-1"
-                                    >
-                                        Next
-                                        <ChevronRight className="w-4 h-4" />
-                                    </button>
-                                </div>
+                                <button
+                                    onClick={nextMonth}
+                                    aria-label="Next month"
+                                    className="p-1.5 border rounded hover:bg-white"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
                             </div>
 
                             <table className="w-full">
@@ -1103,7 +1047,7 @@ export default function Dashboard() {
                                                                 className={`px-4 py-2 rounded-lg text-sm ${
                                                                     isFull
                                                                         ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                                        : "bg-red-600 text-white hover:bg-red-700"
+                                                                        : "bg-blue-600 text-white hover:bg-blue-700"
                                                                 }`}
                                                             >
                                                                 {isFull
@@ -1220,7 +1164,7 @@ export default function Dashboard() {
                                 onClick={() =>
                                     navigate(`/visit/${selectedVisit.id}`)
                                 }
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 View Full Details

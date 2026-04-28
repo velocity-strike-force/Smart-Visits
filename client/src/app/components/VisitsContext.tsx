@@ -36,7 +36,7 @@ const mockVisits: Visit[] = [
     {
         id: "1",
         title: "Q2 Executive Briefing",
-        customer: "Acme Corp",
+        customer: "Seal Shield",
         date: new Date(2026, 0, 14),
         endDate: new Date(2026, 0, 14),
         productLine: "NetSuite",
@@ -63,7 +63,7 @@ const mockVisits: Visit[] = [
     {
         id: "2",
         title: "Cloud Migration Discovery",
-        customer: "TechStart Inc",
+        customer: "The Nemours Foundation",
         date: new Date(2026, 1, 6),
         productLine: "Oracle Cloud",
         location: "Miami, FL",
@@ -126,7 +126,7 @@ const mockVisits: Visit[] = [
     {
         id: "5",
         title: "Floor Operations Review",
-        customer: "Acme Corp",
+        customer: "Advantus Corp",
         date: new Date(2026, 2, 18),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -142,7 +142,7 @@ const mockVisits: Visit[] = [
     {
         id: "6",
         title: "Customer Enablement Workshop",
-        customer: "Northstar Foods",
+        customer: "LifePoint Health",
         date: new Date(2026, 2, 26),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -184,7 +184,7 @@ const mockVisits: Visit[] = [
     {
         id: "8",
         title: "Post Go-Live Check-in",
-        customer: "redwave Energy",
+        customer: "HC Brand",
         date: new Date(2026, 3, 9),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -216,7 +216,7 @@ const mockVisits: Visit[] = [
     {
         id: "10",
         title: "Executive Steering Committee",
-        customer: "Acme Corp",
+        customer: "Pharmsource LLC",
         date: new Date(2026, 3, 23),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -238,7 +238,7 @@ const mockVisits: Visit[] = [
     {
         id: "11",
         title: "KPI Alignment Review",
-        customer: "Northstar Foods",
+        customer: "Centra Health",
         date: new Date(2026, 4, 2),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -318,7 +318,7 @@ const mockVisits: Visit[] = [
     {
         id: "16",
         title: "June Executive Site Walk",
-        customer: "Acme Corp",
+        customer: "T-H Marine Supplies",
         date: new Date(2026, 5, 12),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -339,7 +339,7 @@ const mockVisits: Visit[] = [
     {
         id: "17",
         title: "Inbound Operations Clinic",
-        customer: "Northstar Foods",
+        customer: "AdaptHealth",
         date: new Date(2026, 5, 22),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -369,7 +369,7 @@ const mockVisits: Visit[] = [
     {
         id: "19",
         title: "End-of-April Site Debrief",
-        customer: "redwave Energy",
+        customer: "Mann Lake Ltd",
         date: new Date(2026, 3, 30),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -414,7 +414,7 @@ const mockVisits: Visit[] = [
     {
         id: "22",
         title: "April Inbound Readiness Review",
-        customer: "Northstar Foods",
+        customer: "CHSPSC, LLC",
         date: new Date(2026, 3, 7),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -430,7 +430,7 @@ const mockVisits: Visit[] = [
     {
         id: "23",
         title: "April Manufacturing Sync",
-        customer: "Acme Corp",
+        customer: "Seal Shield",
         date: new Date(2026, 3, 14),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -478,7 +478,7 @@ const mockVisits: Visit[] = [
     {
         id: "26",
         title: "May Integration Design Review",
-        customer: "Northstar Foods",
+        customer: "Providence Health & Services",
         date: new Date(2026, 4, 5),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -493,7 +493,7 @@ const mockVisits: Visit[] = [
     {
         id: "27",
         title: "May Site Expansion Debrief",
-        customer: "redwave Energy",
+        customer: "Advantus Corp",
         date: new Date(2026, 4, 12),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -523,7 +523,7 @@ const mockVisits: Visit[] = [
     {
         id: "29",
         title: "June Kickoff Planning Session",
-        customer: "Harbor Wholesale",
+        customer: "The Nemours Foundation",
         date: new Date(2026, 5, 2),
         productLine: "Oracle Cloud",
         location: "Savannah, GA",
@@ -538,7 +538,7 @@ const mockVisits: Visit[] = [
     {
         id: "30",
         title: "June Factory Readiness Workshop",
-        customer: "Acme Corp",
+        customer: "HC Brand",
         date: new Date(2026, 5, 9),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -593,7 +593,7 @@ const mockVisits: Visit[] = [
     {
         id: "33",
         title: "April Go-Live Readiness Check",
-        customer: "Acme Corp",
+        customer: "Pharmsource LLC",
         date: new Date(2026, 3, 1),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -609,7 +609,7 @@ const mockVisits: Visit[] = [
     {
         id: "34",
         title: "April Inventory Alignment Session",
-        customer: "Northstar Foods",
+        customer: "LifePoint Health",
         date: new Date(2026, 3, 2),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",

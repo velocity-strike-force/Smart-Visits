@@ -4,6 +4,7 @@ import { ArrowLeft, Building2, Sparkles, Boxes, Users } from "lucide-react";
 import { format } from "date-fns";
 import { useUser } from "./UserContext";
 import { mockVisitRequests } from "./visitRequestsData";
+import { getProductLineTheme } from "./productLineTheme";
 
 export default function VisitRequests() {
     const navigate = useNavigate();
@@ -43,7 +44,7 @@ export default function VisitRequests() {
                     </p>
                     <button
                         onClick={() => navigate("/")}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                         Back to Dashboard
                     </button>
@@ -159,7 +160,9 @@ export default function VisitRequests() {
                                             {request.customer}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
+                                            <span
+                                                className={`px-2 py-1 rounded text-xs ${getProductLineTheme(request.productLine).badge}`}
+                                            >
                                                 {request.productLine}
                                             </span>
                                         </td>

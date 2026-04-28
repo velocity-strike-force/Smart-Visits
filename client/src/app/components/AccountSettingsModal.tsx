@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import Typeahead from "./Typeahead";
+import { Switch } from "./ui/switch";
 
 interface AccountSettingsModalProps {
     isOpen: boolean;
@@ -140,19 +141,17 @@ export default function AccountSettingsModal({
                             {productLineOptions.map((line) => (
                                 <label
                                     key={line}
-                                    className="flex items-center gap-2 text-sm"
+                                    className="flex items-center justify-between gap-3 text-sm"
                                 >
-                                    <input
-                                        type="checkbox"
+                                    <span>{line}</span>
+                                    <Switch
                                         checked={settings.productLines.includes(
                                             line,
                                         )}
-                                        onChange={() =>
+                                        onCheckedChange={() =>
                                             handleProductLineToggle(line)
                                         }
-                                        className="rounded"
                                     />
-                                    {line}
                                 </label>
                             ))}
                         </div>
@@ -198,50 +197,42 @@ export default function AccountSettingsModal({
                                 <span className="text-sm">
                                     Email notifications
                                 </span>
-                                <input
-                                    type="checkbox"
+                                <Switch
                                     checked={settings.emailNotifications}
-                                    onChange={(e) =>
+                                    onCheckedChange={(checked) =>
                                         setSettings({
                                             ...settings,
-                                            emailNotifications:
-                                                e.target.checked,
+                                            emailNotifications: checked,
                                         })
                                     }
-                                    className="rounded"
                                 />
                             </label>
                             <label className="flex items-center justify-between">
                                 <span className="text-sm">
                                     Slack DM notifications
                                 </span>
-                                <input
-                                    type="checkbox"
+                                <Switch
                                     checked={settings.slackNotifications}
-                                    onChange={(e) =>
+                                    onCheckedChange={(checked) =>
                                         setSettings({
                                             ...settings,
-                                            slackNotifications:
-                                                e.target.checked,
+                                            slackNotifications: checked,
                                         })
                                     }
-                                    className="rounded"
                                 />
                             </label>
                             <label className="flex items-center justify-between">
                                 <span className="text-sm">
                                     Distance from location alerts
                                 </span>
-                                <input
-                                    type="checkbox"
+                                <Switch
                                     checked={settings.distanceAlerts}
-                                    onChange={(e) =>
+                                    onCheckedChange={(checked) =>
                                         setSettings({
                                             ...settings,
-                                            distanceAlerts: e.target.checked,
+                                            distanceAlerts: checked,
                                         })
                                     }
-                                    className="rounded"
                                 />
                             </label>
                         </div>
@@ -257,7 +248,7 @@ export default function AccountSettingsModal({
                     </button>
                     <button
                         onClick={onClose}
-                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
                         Save Changes
                     </button>

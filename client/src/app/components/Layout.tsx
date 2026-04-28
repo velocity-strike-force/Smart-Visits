@@ -23,29 +23,29 @@ export default function Layout() {
             <div
                 className={`h-screen flex flex-col ${showSettings || showNotifications ? "blur-sm" : ""}`}
             >
-                <header className="bg-gray-100 border-b border-gray-300 px-8 py-4">
+                <header className="bg-gray-100 border-b border-gray-300 px-4 py-2">
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-8">
+                        <div className="flex items-center gap-4">
                             <button
                                 type="button"
                                 onClick={() => navigate("/")}
-                                className="flex items-center gap-3"
+                                className="flex items-center gap-2"
                             >
                                 <img
                                     src="/rfsmart_logo.png"
                                     alt="RF-SMART"
-                                    className="h-8 w-auto"
+                                    className="h-6 w-auto"
                                 />
-                                <span className="text-xl hover:text-red-600">
-                                    Customer Visits
+                                <span className="text-lg hover:text-blue-600">
+                                    Visits
                                 </span>
                             </button>
                             <nav className="flex gap-1">
                                 <button
                                     onClick={() => navigate("/")}
-                                    className={`px-4 py-2 rounded-lg ${
+                                    className={`px-3 py-1.5 rounded-lg text-sm ${
                                         location.pathname === "/"
-                                            ? "bg-red-50 text-red-600"
+                                            ? "bg-blue-50 text-blue-600"
                                             : "text-gray-600 hover:bg-gray-50"
                                     }`}
                                 >
@@ -53,11 +53,11 @@ export default function Layout() {
                                 </button>
                                 <button
                                     onClick={() => navigate("/feedback")}
-                                    className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                    className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                         location.pathname.startsWith(
                                             "/feedback",
                                         )
-                                            ? "bg-red-50 text-red-600"
+                                            ? "bg-blue-50 text-blue-600"
                                             : "text-gray-600 hover:bg-gray-50"
                                     }`}
                                 >
@@ -69,10 +69,10 @@ export default function Layout() {
                                         onClick={() =>
                                             navigate("/request-visit")
                                         }
-                                        className={`px-4 py-2 rounded-lg ${
+                                        className={`px-3 py-1.5 rounded-lg text-sm ${
                                             location.pathname ===
                                             "/request-visit"
-                                                ? "bg-red-50 text-red-600"
+                                                ? "bg-blue-50 text-blue-600"
                                                 : "text-gray-600 hover:bg-gray-50"
                                         }`}
                                     >
@@ -85,10 +85,10 @@ export default function Layout() {
                                             onClick={() =>
                                                 navigate("/visit-requests")
                                             }
-                                            className={`px-4 py-2 rounded-lg ${
+                                            className={`px-3 py-1.5 rounded-lg text-sm ${
                                                 location.pathname ===
                                                 "/visit-requests"
-                                                    ? "bg-red-50 text-red-600"
+                                                    ? "bg-blue-50 text-blue-600"
                                                     : "text-gray-600 hover:bg-gray-50"
                                             }`}
                                         >
@@ -98,10 +98,10 @@ export default function Layout() {
                                             onClick={() =>
                                                 navigate("/analytics")
                                             }
-                                            className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
+                                            className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                                 location.pathname ===
                                                 "/analytics"
-                                                    ? "bg-red-50 text-red-600"
+                                                    ? "bg-blue-50 text-blue-600"
                                                     : "text-gray-600 hover:bg-gray-50"
                                             }`}
                                         >
@@ -113,13 +113,13 @@ export default function Layout() {
                             </nav>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2">
                             <div className="flex bg-gray-100 rounded-lg p-1">
                                 <button
                                     onClick={() => handleRoleSwitch("visitor")}
-                                    className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm transition-colors ${
+                                    className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 text-sm transition-colors ${
                                         user.role === "visitor"
-                                            ? "bg-white text-red-600 shadow-sm"
+                                            ? "bg-white text-blue-600 shadow-sm"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
                                 >
@@ -130,9 +130,9 @@ export default function Layout() {
                                     onClick={() =>
                                         handleRoleSwitch("sales_rep")
                                     }
-                                    className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm transition-colors ${
+                                    className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 text-sm transition-colors ${
                                         user.role === "sales_rep"
-                                            ? "bg-white text-red-600 shadow-sm"
+                                            ? "bg-white text-blue-600 shadow-sm"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
                                 >
