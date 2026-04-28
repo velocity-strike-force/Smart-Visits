@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     Calendar,
     List,
@@ -16,6 +16,8 @@ import {
     format,
     startOfMonth,
     endOfMonth,
+    startOfDay,
+    endOfDay,
     startOfWeek,
     endOfWeek,
     eachDayOfInterval,
@@ -24,497 +26,16 @@ import {
 } from "date-fns";
 import FilterPanel from "./FilterPanel";
 import { useUser } from "./UserContext";
+import { useVisits, type Visit as VisitsContextVisit } from "./VisitsContext";
 import { createDefaultVisitFilters, type VisitFilters } from "./visitFilters";
 import { getProductLineTheme } from "./productLineTheme";
 
-interface Visit {
-    id: string;
-    title: string;
-    customer: string;
-    date: Date;
-    productLine: string;
-    location: string;
-    arr: number;
-    salesRep: string;
-    domain: string;
-    purpose?: string;
-    isKeyAccount?: boolean;
-    isDraft?: boolean;
-    postVisitRecordCount?: number;
-    capacity: number;
-    currentAttendees: number;
-}
-
-const mockVisits: Visit[] = [
-    {
-        id: "1",
-        title: "Quarterly Review",
-        purpose: "Quarterly Review",
-        customer: "Seal Shield",
-        date: new Date(2026, 3, 10),
-        productLine: "NetSuite",
-        location: "Jacksonville, FL",
-        arr: 250000,
-        salesRep: "John Smith",
-        domain: "Manufacturing",
-        isKeyAccount: true,
-        postVisitRecordCount: 2,
-        capacity: 10,
-        currentAttendees: 3,
-    },
-    {
-        id: "2",
-        title: "Product Demo",
-        purpose: "Product Demo",
-        customer: "Centra Health",
-        date: new Date(2026, 3, 15),
-        productLine: "Oracle Cloud",
-        location: "Miami, FL",
-        arr: 150000,
-        salesRep: "Jane Doe",
-        domain: "Inbound",
-        isKeyAccount: false,
-        isDraft: true,
-        capacity: 8,
-        currentAttendees: 0,
-    },
-    {
-        id: "5",
-        title: "Executive Briefing",
-        purpose: "Quarterly Review",
-        customer: "Advantus Corp",
-        date: new Date(2026, 3, 15),
-        productLine: "NetSuite",
-        location: "Miami, FL",
-        arr: 320000,
-        salesRep: "Alex Rivera",
-        domain: "Outbound",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 6,
-        currentAttendees: 4,
-    },
-    {
-        id: "6",
-        title: "Architecture Workshop",
-        purpose: "Training",
-        customer: "AdaptHealth",
-        date: new Date(2026, 3, 15),
-        productLine: "Oracle Cloud",
-        location: "Miami, FL",
-        arr: 410000,
-        salesRep: "Priya Patel",
-        domain: "Counting",
-        isKeyAccount: false,
-        postVisitRecordCount: 1,
-        capacity: 5,
-        currentAttendees: 5,
-    },
-    {
-        id: "3",
-        title: "Implementation Review",
-        purpose: "Implementation Review",
-        customer: "Global Logistics",
-        date: new Date(2026, 3, 22),
-        productLine: "TMS",
-        location: "Tampa, FL",
-        arr: 500000,
-        salesRep: "Mike Johnson",
-        domain: "Manufacturing",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 5,
-        currentAttendees: 5,
-    },
-    {
-        id: "4",
-        title: "Training Session",
-        purpose: "Training",
-        customer: "RetailMax",
-        date: new Date(2026, 3, 28),
-        productLine: "Shipping",
-        location: "Orlando, FL",
-        arr: 180000,
-        salesRep: "Sarah Williams",
-        domain: "Inbound",
-        isKeyAccount: false,
-        capacity: 12,
-        currentAttendees: 8,
-    },
-    {
-        id: "7",
-        title: "Post Go-Live Review",
-        purpose: "Implementation Review",
-        customer: "Northstar Foods",
-        date: new Date(2026, 3, 28),
-        productLine: "TMS",
-        location: "Orlando, FL",
-        arr: 275000,
-        salesRep: "Chris Morgan",
-        domain: "Outbound",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 10,
-        currentAttendees: 2,
-    },
-    {
-        id: "8",
-        title: "Demand Planning Strategy Session",
-        purpose: "Other",
-        customer: "Summit Brands",
-        date: new Date(2026, 3, 17),
-        productLine: "Demand Planning",
-        location: "Atlanta, GA",
-        arr: 360000,
-        salesRep: "Priya Patel",
-        domain: "Counting",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 9,
-        currentAttendees: 5,
-    },
-    {
-        id: "9",
-        title: "Warehouse Mobility Deep Dive",
-        purpose: "Other",
-        customer: "Vertex Distribution",
-        date: new Date(2026, 3, 17),
-        productLine: "AX",
-        location: "Dallas, TX",
-        arr: 210000,
-        salesRep: "Alex Rivera",
-        domain: "Inbound",
-        isKeyAccount: false,
-        postVisitRecordCount: 1,
-        capacity: 7,
-        currentAttendees: 3,
-    },
-    {
-        id: "10",
-        title: "Outbound Throughput Workshop",
-        purpose: "Training",
-        customer: "Globex Industries",
-        date: new Date(2026, 3, 22),
-        productLine: "TMS",
-        location: "Tampa, FL",
-        arr: 460000,
-        salesRep: "Mike Johnson",
-        domain: "Outbound",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 8,
-        currentAttendees: 6,
-    },
-    {
-        id: "11",
-        title: "Counting Process Calibration",
-        purpose: "Quarterly Review",
-        customer: "Metro Retail Group",
-        date: new Date(2026, 3, 28),
-        productLine: "Shipping",
-        location: "Charlotte, NC",
-        arr: 195000,
-        salesRep: "Sarah Williams",
-        domain: "Counting",
-        isKeyAccount: false,
-        capacity: 10,
-        currentAttendees: 4,
-    },
-    {
-        id: "12",
-        title: "May Launch Planning",
-        purpose: "Other",
-        customer: "CHSPSC, LLC",
-        date: new Date(2026, 4, 6),
-        productLine: "Oracle Cloud",
-        location: "Savannah, GA",
-        arr: 205000,
-        salesRep: "Jane Doe",
-        domain: "Inbound",
-        isKeyAccount: false,
-        postVisitRecordCount: 1,
-        capacity: 8,
-        currentAttendees: 3,
-    },
-    {
-        id: "13",
-        title: "Factory Floor Alignment",
-        purpose: "Quarterly Review",
-        customer: "HC Brand",
-        date: new Date(2026, 4, 14),
-        productLine: "NetSuite",
-        location: "Jacksonville, FL",
-        arr: 320000,
-        salesRep: "John Smith",
-        domain: "Manufacturing",
-        isKeyAccount: true,
-        capacity: 10,
-        currentAttendees: 7,
-    },
-    {
-        id: "14",
-        title: "Outbound Routing Roundtable",
-        purpose: "Quarterly Review",
-        customer: "Globex Industries",
-        date: new Date(2026, 4, 28),
-        productLine: "TMS",
-        location: "Atlanta, GA",
-        arr: 460000,
-        salesRep: "Mike Johnson",
-        domain: "Outbound",
-        isKeyAccount: true,
-        capacity: 9,
-        currentAttendees: 6,
-    },
-    {
-        id: "15",
-        title: "June Forecast Workshop",
-        purpose: "Training",
-        customer: "Summit Brands",
-        date: new Date(2026, 5, 4),
-        productLine: "Demand Planning",
-        location: "Atlanta, GA",
-        arr: 365000,
-        salesRep: "Priya Patel",
-        domain: "Counting",
-        isKeyAccount: true,
-        capacity: 9,
-        currentAttendees: 4,
-    },
-    {
-        id: "16",
-        title: "Warehouse Mobility Review",
-        purpose: "Quarterly Review",
-        customer: "Vertex Distribution",
-        date: new Date(2026, 5, 19),
-        productLine: "AX",
-        location: "Dallas, TX",
-        arr: 215000,
-        salesRep: "Alex Rivera",
-        domain: "Inbound",
-        isKeyAccount: false,
-        capacity: 8,
-        currentAttendees: 2,
-    },
-    {
-        id: "17",
-        title: "Late-April Customer Readout",
-        purpose: "Other",
-        customer: "Pharmsource LLC",
-        date: new Date(2026, 3, 29),
-        productLine: "NetSuite",
-        location: "Houston, TX",
-        arr: 240000,
-        salesRep: "Alex Rivera",
-        domain: "Manufacturing",
-        isKeyAccount: false,
-        capacity: 8,
-        currentAttendees: 3,
-    },
-    {
-        id: "18",
-        title: "May Throughput Assessment",
-        purpose: "Quarterly Review",
-        customer: "Metro Retail Group",
-        date: new Date(2026, 4, 21),
-        productLine: "Shipping",
-        location: "Charlotte, NC",
-        arr: 195000,
-        salesRep: "Sarah Williams",
-        domain: "Counting",
-        isKeyAccount: false,
-        postVisitRecordCount: 1,
-        capacity: 10,
-        currentAttendees: 5,
-    },
-    {
-        id: "19",
-        title: "June Operations Roundtable",
-        purpose: "Quarterly Review",
-        customer: "Globex Industries",
-        date: new Date(2026, 5, 24),
-        productLine: "TMS",
-        location: "Atlanta, GA",
-        arr: 460000,
-        salesRep: "Mike Johnson",
-        domain: "Outbound",
-        isKeyAccount: true,
-        capacity: 9,
-        currentAttendees: 6,
-    },
-    {
-        id: "20",
-        title: "May Integration Design Review",
-        purpose: "Implementation Review",
-        customer: "Providence Health & Services",
-        date: new Date(2026, 4, 5),
-        productLine: "Oracle Cloud",
-        location: "Nashville, TN",
-        arr: 275000,
-        salesRep: "Jane Doe",
-        domain: "Inbound",
-        isKeyAccount: false,
-        capacity: 8,
-        currentAttendees: 3,
-    },
-    {
-        id: "21",
-        title: "May Site Expansion Debrief",
-        purpose: "Quarterly Review",
-        customer: "T-H Marine Supplies",
-        date: new Date(2026, 4, 12),
-        productLine: "NetSuite",
-        location: "Houston, TX",
-        arr: 240000,
-        salesRep: "Alex Rivera",
-        domain: "Manufacturing",
-        isKeyAccount: false,
-        capacity: 7,
-        currentAttendees: 4,
-    },
-    {
-        id: "22",
-        title: "May Forecast Validation",
-        purpose: "Quarterly Review",
-        customer: "Summit Brands",
-        date: new Date(2026, 4, 20),
-        productLine: "Demand Planning",
-        location: "Atlanta, GA",
-        arr: 365000,
-        salesRep: "Priya Patel",
-        domain: "Counting",
-        isKeyAccount: true,
-        capacity: 9,
-        currentAttendees: 6,
-    },
-    {
-        id: "23",
-        title: "May Distribution Workflow Audit",
-        purpose: "Other",
-        customer: "Vertex Distribution",
-        date: new Date(2026, 4, 26),
-        productLine: "AX",
-        location: "Dallas, TX",
-        arr: 215000,
-        salesRep: "Alex Rivera",
-        domain: "Inbound",
-        isKeyAccount: false,
-        capacity: 8,
-        currentAttendees: 5,
-    },
-    {
-        id: "24",
-        title: "June Kickoff Planning Session",
-        purpose: "Other",
-        customer: "The Nemours Foundation",
-        date: new Date(2026, 5, 2),
-        productLine: "Oracle Cloud",
-        location: "Savannah, GA",
-        arr: 205000,
-        salesRep: "Jane Doe",
-        domain: "Inbound",
-        isKeyAccount: false,
-        capacity: 8,
-        currentAttendees: 4,
-    },
-    {
-        id: "25",
-        title: "June Factory Readiness Workshop",
-        purpose: "Training",
-        customer: "Mann Lake Ltd",
-        date: new Date(2026, 5, 9),
-        productLine: "NetSuite",
-        location: "Jacksonville, FL",
-        arr: 320000,
-        salesRep: "John Smith",
-        domain: "Manufacturing",
-        isKeyAccount: true,
-        capacity: 10,
-        currentAttendees: 7,
-    },
-    {
-        id: "26",
-        title: "June Mid-Month Throughput Check",
-        purpose: "Other",
-        customer: "Metro Retail Group",
-        date: new Date(2026, 5, 18),
-        productLine: "Shipping",
-        location: "Charlotte, NC",
-        arr: 195000,
-        salesRep: "Sarah Williams",
-        domain: "Counting",
-        isKeyAccount: false,
-        capacity: 10,
-        currentAttendees: 5,
-    },
-    {
-        id: "27",
-        title: "June Route Optimization Review",
-        purpose: "Quarterly Review",
-        customer: "Globex Industries",
-        date: new Date(2026, 5, 25),
-        productLine: "TMS",
-        location: "Atlanta, GA",
-        arr: 460000,
-        salesRep: "Mike Johnson",
-        domain: "Outbound",
-        isKeyAccount: true,
-        capacity: 9,
-        currentAttendees: 7,
-    },
-    {
-        id: "28",
-        title: "April Go-Live Readiness Check",
-        purpose: "Implementation Review",
-        customer: "Seal Shield",
-        date: new Date(2026, 3, 1),
-        productLine: "NetSuite",
-        location: "Jacksonville, FL",
-        arr: 315000,
-        salesRep: "John Smith",
-        domain: "Manufacturing",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 10,
-        currentAttendees: 6,
-    },
-    {
-        id: "29",
-        title: "April Inventory Alignment Session",
-        purpose: "Quarterly Review",
-        customer: "LifePoint Health",
-        date: new Date(2026, 3, 2),
-        productLine: "Oracle Cloud",
-        location: "Nashville, TN",
-        arr: 278000,
-        salesRep: "Jane Doe",
-        domain: "Inbound",
-        isKeyAccount: false,
-        postVisitRecordCount: 1,
-        capacity: 8,
-        currentAttendees: 4,
-    },
-    {
-        id: "30",
-        title: "April Network Planning Kickoff",
-        purpose: "Other",
-        customer: "Globex Industries",
-        date: new Date(2026, 3, 6),
-        productLine: "TMS",
-        location: "Atlanta, GA",
-        arr: 462000,
-        salesRep: "Mike Johnson",
-        domain: "Outbound",
-        isKeyAccount: true,
-        postVisitRecordCount: 1,
-        capacity: 9,
-        currentAttendees: 5,
-    },
-];
+type Visit = VisitsContextVisit & { currentAttendees: number };
 
 export default function Dashboard() {
     const navigate = useNavigate();
     const { user } = useUser();
+    const { visits: contextVisits } = useVisits();
     const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showFilters, setShowFilters] = useState(false);
@@ -525,7 +46,14 @@ export default function Dashboard() {
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
     const [dayModalFocusIndex, setDayModalFocusIndex] = useState(0);
     const dayModalVisitRefs = useRef<Array<HTMLButtonElement | null>>([]);
-    const [visits] = useState<Visit[]>(mockVisits);
+    const visits = useMemo<Visit[]>(
+        () =>
+            contextVisits.map((visit) => ({
+                ...visit,
+                currentAttendees: visit.attendees.length,
+            })),
+        [contextVisits],
+    );
 
     const baseVisits =
         user.role === "visitor" ? visits.filter((v) => !v.isDraft) : visits;
@@ -581,8 +109,41 @@ export default function Dashboard() {
         end: calendarEnd,
     });
 
+    const getVisitEndDate = (visit: Visit) => visit.endDate ?? visit.date;
+
+    const doesVisitOccurOnDay = (visit: Visit, day: Date) => {
+        const dayTime = startOfDay(day).getTime();
+        const visitStart = startOfDay(visit.date).getTime();
+        const visitEnd = endOfDay(getVisitEndDate(visit)).getTime();
+
+        return dayTime >= visitStart && dayTime <= visitEnd;
+    };
+
+    const doesVisitOverlapMonth = (visit: Visit) => {
+        const visitStart = startOfDay(visit.date).getTime();
+        const visitEnd = endOfDay(getVisitEndDate(visit)).getTime();
+        const visibleMonthStart = startOfDay(monthStart).getTime();
+        const visibleMonthEnd = endOfDay(monthEnd).getTime();
+
+        return visitStart <= visibleMonthEnd && visitEnd >= visibleMonthStart;
+    };
+
+    const formatVisitDateRange = (
+        visit: Visit,
+        formatPattern = "MMM dd, yyyy",
+    ) => {
+        const visitEndDate = getVisitEndDate(visit);
+
+        if (isSameDay(visit.date, visitEndDate)) {
+            return format(visit.date, formatPattern);
+        }
+
+        return `${format(visit.date, formatPattern)} - ${format(visitEndDate, formatPattern)}`;
+    };
     const getVisitsForDay = (day: Date) => {
-        return filteredVisits.filter((visit) => isSameDay(visit.date, day));
+        return filteredVisits.filter((visit) =>
+            doesVisitOccurOnDay(visit, day),
+        );
     };
 
     const hasPostVisitRecord = (visit: Visit) =>
@@ -769,7 +330,7 @@ export default function Dashboard() {
 
                                     return (
                                         <div
-                                            key={idx}
+                                            key={`${day.toISOString()}-${idx}`}
                                             className="min-h-[92px] border-r border-b last:border-r-0 p-1.5 hover:bg-gray-50 cursor-pointer"
                                             onClick={() =>
                                                 navigate(
@@ -948,10 +509,7 @@ export default function Dashboard() {
                                 <tbody>
                                     {filteredVisits
                                         .filter((visit) =>
-                                            isSameMonth(
-                                                visit.date,
-                                                currentDate,
-                                            ),
+                                            doesVisitOverlapMonth(visit),
                                         )
                                         .map((visit) => {
                                             const isFull =
@@ -976,9 +534,8 @@ export default function Dashboard() {
                                                     className="border-b hover:bg-gray-50 cursor-pointer"
                                                 >
                                                     <td className="px-6 py-4">
-                                                        {format(
-                                                            visit.date,
-                                                            "MMM dd, yyyy",
+                                                        {formatVisitDateRange(
+                                                            visit,
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4">
@@ -1109,8 +666,8 @@ export default function Dashboard() {
                                     {selectedVisit.customer}
                                 </h2>
                                 <p className="text-sm text-gray-500">
-                                    {format(
-                                        selectedVisit.date,
+                                    {formatVisitDateRange(
+                                        selectedVisit,
                                         "MMMM dd, yyyy",
                                     )}
                                 </p>
