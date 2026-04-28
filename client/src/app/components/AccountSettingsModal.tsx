@@ -116,7 +116,7 @@ export default function AccountSettingsModal({
                                 </label>
                                 <input
                                     type="text"
-                                    value="John Smith"
+                                    value="Sonny Antunes"
                                     disabled
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                                 />
@@ -127,7 +127,7 @@ export default function AccountSettingsModal({
                                 </label>
                                 <input
                                     type="email"
-                                    value="john.smith@rfsmart.com"
+                                    value="sonny.antunes@rfsmart.com"
                                     disabled
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                                 />

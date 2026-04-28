@@ -15,7 +15,7 @@ export default function PostVisit() {
     const [formData, setFormData] = useState({
         productLine: "",
         location: "",
-        salesRep: "John Smith",
+        salesRep: "Kevin Reiter",
         domain: "",
         customer: "",
         startDate: initialDate.toISOString().split("T")[0],
