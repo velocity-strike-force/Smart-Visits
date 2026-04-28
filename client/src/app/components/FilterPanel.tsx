@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { Slider } from "./ui/slider";
 import { createDefaultVisitFilters, type VisitFilters } from "./visitFilters";
+import Typeahead from "./Typeahead";
 
 interface Visit {
     id: string;
@@ -119,38 +120,21 @@ export default function FilterPanel({
                     </div>
                 </div>
 
-                <div>
-                    <label className="block mb-2">Location</label>
-                    <select
+                <div className="space-y-4">
+                    <Typeahead
+                        label="Location"
+                        placeholder="All Locations"
+                        options={locationOptions}
                         value={filters.location}
-                        onChange={(e) =>
-                            onChange({ ...filters, location: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border rounded-lg"
-                    >
-                        <option value="">All Locations</option>
-                        {locationOptions.map((location) => (
-                            <option key={location} value={location}>
-                                {location}
-                            </option>
-                        ))}
-                    </select>
-
-                    <label className="block mb-2 mt-4">Domain</label>
-                    <select
+                        onChange={(v) => onChange({ ...filters, location: v })}
+                    />
+                    <Typeahead
+                        label="Domain"
+                        placeholder="All Domains"
+                        options={domainOptions}
                         value={filters.domain}
-                        onChange={(e) =>
-                            onChange({ ...filters, domain: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border rounded-lg"
-                    >
-                        <option value="">All Domains</option>
-                        {domainOptions.map((domain) => (
-                            <option key={domain} value={domain}>
-                                {domain}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => onChange({ ...filters, domain: v })}
+                    />
                 </div>
 
                 <div>
@@ -180,21 +164,13 @@ export default function FilterPanel({
                 </div>
 
                 <div>
-                    <label className="block mb-2">Sales Rep</label>
-                    <select
+                    <Typeahead
+                        label="Sales Rep"
+                        placeholder="All Sales Reps"
+                        options={salesRepOptions}
                         value={filters.salesRep}
-                        onChange={(e) =>
-                            onChange({ ...filters, salesRep: e.target.value })
-                        }
-                        className="w-full px-3 py-2 border rounded-lg"
-                    >
-                        <option value="">All Sales Reps</option>
-                        {salesRepOptions.map((rep) => (
-                            <option key={rep} value={rep}>
-                                {rep}
-                            </option>
-                        ))}
-                    </select>
+                        onChange={(v) => onChange({ ...filters, salesRep: v })}
+                    />
 
                     <label className="block mb-2 mt-4">Customer</label>
                     <input

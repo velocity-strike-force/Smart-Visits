@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import Typeahead from "./Typeahead";
 
 interface AccountSettingsModalProps {
     isOpen: boolean;
@@ -177,25 +178,15 @@ export default function AccountSettingsModal({
                                 />
                             </div>
                             <div>
-                                <label className="block mb-2 text-sm">
-                                    State
-                                </label>
-                                <select
+                                <Typeahead
+                                    label="State"
+                                    placeholder="Search state…"
+                                    options={stateOptions}
                                     value={settings.state}
-                                    onChange={(e) =>
-                                        setSettings({
-                                            ...settings,
-                                            state: e.target.value,
-                                        })
+                                    onChange={(v) =>
+                                        setSettings({ ...settings, state: v })
                                     }
-                                    className="w-full px-3 py-2 border rounded-lg"
-                                >
-                                    {stateOptions.map((state) => (
-                                        <option key={state} value={state}>
-                                            {state}
-                                        </option>
-                                    ))}
-                                </select>
+                                />
                             </div>
                         </div>
                     </div>

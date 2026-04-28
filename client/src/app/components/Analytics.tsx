@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Typeahead from "./Typeahead";
 import {
     BarChart,
     Bar,
@@ -177,16 +178,34 @@ export default function Analytics() {
                             </div>
                         </div>
 
-                        <select
-                            value={dateRange}
-                            onChange={(e) => setDateRange(e.target.value)}
-                            className="px-4 py-2 border rounded-lg"
-                        >
-                            <option value="mtd">Month to Date</option>
-                            <option value="qtd">Quarter to Date</option>
-                            <option value="ytd">Year to Date</option>
-                            <option value="custom">Custom Range</option>
-                        </select>
+                        <Typeahead
+                            label="Date Range"
+                            placeholder="Select range…"
+                            options={[
+                                "Month to Date",
+                                "Quarter to Date",
+                                "Year to Date",
+                                "Custom Range",
+                            ]}
+                            value={
+                                dateRange === "mtd"
+                                    ? "Month to Date"
+                                    : dateRange === "qtd"
+                                      ? "Quarter to Date"
+                                      : dateRange === "ytd"
+                                        ? "Year to Date"
+                                        : "Custom Range"
+                            }
+                            onChange={(v) => {
+                                const map: Record<string, string> = {
+                                    "Month to Date": "mtd",
+                                    "Quarter to Date": "qtd",
+                                    "Year to Date": "ytd",
+                                    "Custom Range": "custom",
+                                };
+                                setDateRange(map[v] ?? "ytd");
+                            }}
+                        />
                     </div>
                 </div>
             </div>
