@@ -1052,7 +1052,7 @@ export default function Dashboard() {
                                                             >
                                                                 {isFull
                                                                     ? "Full"
-                                                                    : "Join Visit"}
+                                                                    : "View Details"}
                                                             </button>
                                                         </td>
                                                     )}

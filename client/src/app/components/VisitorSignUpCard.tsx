@@ -59,7 +59,7 @@ export default function VisitorSignUpCard({
     }
 
     return (
-        <div className="bg-red-50 border-2 border-red-300 rounded-lg p-6">
+        <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h3 className="text-xl font-medium mb-2 text-gray-900">
