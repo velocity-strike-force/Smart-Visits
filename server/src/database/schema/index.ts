@@ -21,6 +21,9 @@ export type {
   CustomerRecord,
   AuditLogRecord,
   UserRole,
+  RoleRecord,
+  ProductLineRecord,
+  UserProductLineRecord,
 } from "./entities";
 export { Visit, type VisitData } from "./Visit";
 export { User, type UserData } from "./User";

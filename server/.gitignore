@@ -7,3 +7,5 @@ dist/
 .env
 .env.*
 docs/
+scripts/*
+!scripts/seed-test-records.ts

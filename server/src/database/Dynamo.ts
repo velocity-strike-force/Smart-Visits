@@ -152,6 +152,85 @@ export class Dynamo {
         await this.client.send(command);
     }
 
+    // ── Roles ───────────────────────────────────────────────
+
+    async getRoleById(roleId: string): Promise<Role | undefined> {
+        const command = new GetCommand({
+            TableName: this.tables.roles,
+            Key: { roleId },
+        });
+        const result = await this.client.send(command);
+        return result.Item ? new Role(result.Item as RoleData) : undefined;
+    }
+
+    async putRole(data: RoleData): Promise<void> {
+        await this.client.send(
+            new PutCommand({
+                TableName: this.tables.roles,
+                Item: data,
+            })
+        );
+    }
+
+    // ── Product lines ───────────────────────────────────────
+
+    async getProductLineById(
+        productLineId: string
+    ): Promise<ProductLine | undefined> {
+        const command = new GetCommand({
+            TableName: this.tables.productLines,
+            Key: { productLineId },
+        });
+        const result = await this.client.send(command);
+        return result.Item
+            ? new ProductLine(result.Item as ProductLineData)
+            : undefined;
+    }
+
+    async putProductLine(data: ProductLineData): Promise<void> {
+        await this.client.send(
+            new PutCommand({
+                TableName: this.tables.productLines,
+                Item: data,
+            })
+        );
+    }
+
+    // ── User ↔ product line (junction) ──────────────────────
+
+    async getUserProductLines(userId: string): Promise<UserProductLine[]> {
+        const command = new QueryCommand({
+            TableName: this.tables.userProductLines,
+            KeyConditionExpression: "userId = :uid",
+            ExpressionAttributeValues: { ":uid": userId },
+        });
+        const result = await this.client.send(command);
+        return (result.Items ?? []).map(
+            (i) => new UserProductLine(i as UserProductLineData)
+        );
+    }
+
+    async putUserProductLine(data: UserProductLineData): Promise<void> {
+        await this.client.send(
+            new PutCommand({
+                TableName: this.tables.userProductLines,
+                Item: data,
+            })
+        );
+    }
+
+    async deleteUserProductLine(
+        userId: string,
+        productLineId: string
+    ): Promise<void> {
+        await this.client.send(
+            new DeleteCommand({
+                TableName: this.tables.userProductLines,
+                Key: { userId, productLineId },
+            })
+        );
+    }
+
     // ── Signups ─────────────────────────────────────────────
 
     async getSignupsForVisit(visitId: string): Promise<Signup[]> {

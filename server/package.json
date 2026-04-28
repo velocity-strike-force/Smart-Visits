@@ -24,6 +24,7 @@
     "build:prod": "npm run build && npm prune --production",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "db:setup": "ts-node scripts/create-local-tables.ts",
-    "start:local": "sam local start-api --warm-containers EAGER --env-vars env.local.json"
+    "start:local": "sam local start-api --warm-containers EAGER --env-vars env.local.json",
+    "seed:test": "ts-node --project tsconfig.seed.json --transpile-only scripts/seed-test-records.ts"
   }
 }

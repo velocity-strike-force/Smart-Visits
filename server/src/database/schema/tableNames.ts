@@ -12,7 +12,10 @@ export type SmartVisitsLogicalTable =
   | "Signups"
   | "Feedback"
   | "Customers"
-  | "AuditLog";
+  | "AuditLog"
+  | "Roles"
+  | "ProductLines"
+  | "UserProductLines";
 
 export function smartVisitsTableName(
   env: DeploymentEnv,
@@ -30,5 +33,8 @@ export function smartVisitsTables(env: DeploymentEnv) {
     feedback: smartVisitsTableName(env, "Feedback"),
     customers: smartVisitsTableName(env, "Customers"),
     auditLog: smartVisitsTableName(env, "AuditLog"),
+    roles: smartVisitsTableName(env, "Roles"),
+    productLines: smartVisitsTableName(env, "ProductLines"),
+    userProductLines: smartVisitsTableName(env, "UserProductLines"),
   } as const;
 }

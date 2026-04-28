@@ -1,115 +1,160 @@
-import { X, Mail, Bell, MapPin } from 'lucide-react';
+import { useState } from "react";
+import { X, Slack, Mail, MapPin } from "lucide-react";
 
 interface NotificationsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+    isOpen: boolean;
+    onClose: () => void;
 }
 
-interface Notification {
-  id: string;
-  type: 'email' | 'proximity' | 'general';
-  title: string;
-  message: string;
-  time: string;
-  read: boolean;
-}
+export default function NotificationsModal({
+    isOpen,
+    onClose,
+}: NotificationsModalProps) {
+    const [slackEnabled, setSlackEnabled] = useState(false);
+    const [outlookEnabled, setOutlookEnabled] = useState(false);
+    const [proximityEnabled, setProximityEnabled] = useState(false);
 
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'email',
-    title: 'New Visit Posted',
-    message: 'Sarah Williams posted a visit to RetailMax on April 28',
-    time: '2 hours ago',
-    read: false,
-  },
-  {
-    id: '2',
-    type: 'proximity',
-    title: 'Nearby Visit Alert',
-    message: 'A new visit has been posted within 50 miles of your location',
-    time: '5 hours ago',
-    read: false,
-  },
-  {
-    id: '3',
-    type: 'general',
-    title: 'Visit Updated',
-    message: 'Mike Johnson updated the visit details for Global Logistics',
-    time: '1 day ago',
-    read: true,
-  },
-];
+    if (!isOpen) return null;
 
-export default function NotificationsModal({ isOpen, onClose }: NotificationsModalProps) {
-  if (!isOpen) return null;
-
-  const getIcon = (type: string) => {
-    switch (type) {
-      case 'email':
-        return <Mail className="w-5 h-5 text-blue-600" />;
-      case 'proximity':
-        return <MapPin className="w-5 h-5 text-green-600" />;
-      default:
-        return <Bell className="w-5 h-5 text-gray-600" />;
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-xl">Notifications</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-auto">
-          {mockNotifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-              <Bell className="w-12 h-12 mb-4" />
-              <p>No notifications yet</p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {mockNotifications.map(notification => (
-                <div
-                  key={notification.id}
-                  className={`px-6 py-4 hover:bg-gray-50 cursor-pointer ${
-                    !notification.read ? 'bg-blue-50' : ''
-                  }`}
-                >
-                  <div className="flex gap-4">
-                    <div className="mt-1">{getIcon(notification.type)}</div>
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-1">
-                        <h4 className={!notification.read ? '' : 'text-gray-600'}>
-                          {notification.title}
-                        </h4>
-                        <span className="text-xs text-gray-500">{notification.time}</span>
-                      </div>
-                      <p className="text-sm text-gray-600">{notification.message}</p>
+    return (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-full max-w-xl overflow-hidden flex flex-col shadow-xl border">
+                <div className="flex items-center justify-between px-6 py-4 border-b">
+                    <div>
+                        <h2 className="text-xl">Notification Settings</h2>
+                        <p className="text-sm text-gray-500 mt-1">
+                            Choose where you want to receive visit updates.
+                        </p>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
 
-        <div className="flex gap-3 px-6 py-4 border-t">
-          <button className="px-4 py-2 border rounded-lg hover:bg-gray-50">
-            Mark All as Read
-          </button>
-          <button
-            onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Close
-          </button>
+                    <button
+                        onClick={onClose}
+                        className="text-gray-400 hover:text-gray-600"
+                    >
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                <div className="p-6 space-y-4">
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+                                <Slack className="w-5 h-5" />
+                            </div>
+
+                            <div>
+                                <h3>Slack Notifications</h3>
+                                <p className="text-sm text-gray-500">
+                                    Receive visit updates in Slack.
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Integration coming soon.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setSlackEnabled(!slackEnabled)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                slackEnabled ? "bg-blue-600" : "bg-gray-300"
+                            }`}
+                            aria-pressed={slackEnabled}
+                        >
+                            <span
+                                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                                    slackEnabled
+                                        ? "translate-x-5"
+                                        : "translate-x-1"
+                                }`}
+                            />
+                        </button>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-red-100 text-red-700 flex items-center justify-center">
+                                <Mail className="w-5 h-5" />
+                            </div>
+
+                            <div>
+                                <h3>Outlook Notifications</h3>
+                                <p className="text-sm text-gray-500">
+                                    Receive visit updates through Outlook.
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Integration coming soon.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() => setOutlookEnabled(!outlookEnabled)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                outlookEnabled ? "bg-blue-600" : "bg-gray-300"
+                            }`}
+                            aria-pressed={outlookEnabled}
+                        >
+                            <span
+                                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                                    outlookEnabled
+                                        ? "translate-x-5"
+                                        : "translate-x-1"
+                                }`}
+                            />
+                        </button>
+                    </div>
+
+                    <div className="flex items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-green-100 text-green-700 flex items-center justify-center">
+                                <MapPin className="w-5 h-5" />
+                            </div>
+
+                            <div>
+                                <h3>Proximity Notifications</h3>
+                                <p className="text-sm text-gray-500">
+                                    Receive updates for events created within
+                                    preferred proximity.
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    Preferred proximity settings can be added
+                                    later.
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setProximityEnabled(!proximityEnabled)
+                            }
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                                proximityEnabled ? "bg-blue-600" : "bg-gray-300"
+                            }`}
+                            aria-pressed={proximityEnabled}
+                        >
+                            <span
+                                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                                    proximityEnabled
+                                        ? "translate-x-5"
+                                        : "translate-x-1"
+                                }`}
+                            />
+                        </button>
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-3 px-6 py-4 border-t">
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        Done
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 }
