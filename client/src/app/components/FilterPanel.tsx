@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Slider } from "./ui/slider";
 import { DEFAULT_VISIT_FILTERS, type VisitFilters } from "./visitFilters";
 
@@ -18,16 +18,15 @@ interface Visit {
 
 interface FilterPanelProps {
     visits: Visit[];
-    onApply: (filters: VisitFilters) => void;
+    filters: VisitFilters;
+    onChange: (filters: VisitFilters) => void;
 }
 
-export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
-    const [filters, setFilters] = useState<VisitFilters>(DEFAULT_VISIT_FILTERS);
-
-    useEffect(() => {
-        onApply(filters);
-    }, [filters, onApply]);
-
+export default function FilterPanel({
+    visits,
+    filters,
+    onChange,
+}: FilterPanelProps) {
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat("en-US", {
             style: "currency",
@@ -79,12 +78,12 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
     ];
 
     const handleProductLineToggle = (line: string) => {
-        setFilters((prev) => ({
-            ...prev,
-            productLines: prev.productLines.includes(line)
-                ? prev.productLines.filter((l) => l !== line)
-                : [...prev.productLines, line],
-        }));
+        onChange({
+            ...filters,
+            productLines: filters.productLines.includes(line)
+                ? filters.productLines.filter((l) => l !== line)
+                : [...filters.productLines, line],
+        });
     };
 
     return (
@@ -125,7 +124,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
                     <select
                         value={filters.location}
                         onChange={(e) =>
-                            setFilters({ ...filters, location: e.target.value })
+                            onChange({ ...filters, location: e.target.value })
                         }
                         className="w-full px-3 py-2 border rounded-lg"
                     >
@@ -141,7 +140,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
                     <select
                         value={filters.domain}
                         onChange={(e) =>
-                            setFilters({ ...filters, domain: e.target.value })
+                            onChange({ ...filters, domain: e.target.value })
                         }
                         className="w-full px-3 py-2 border rounded-lg"
                     >
@@ -164,7 +163,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
                             minStepsBetweenThumbs={1}
                             value={arrRange}
                             onValueChange={(value) =>
-                                setFilters({
+                                onChange({
                                     ...filters,
                                     arrMin: String(value[0]),
                                     arrMax: String(value[1]),
@@ -185,7 +184,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
                     <select
                         value={filters.salesRep}
                         onChange={(e) =>
-                            setFilters({ ...filters, salesRep: e.target.value })
+                            onChange({ ...filters, salesRep: e.target.value })
                         }
                         className="w-full px-3 py-2 border rounded-lg"
                     >
@@ -203,7 +202,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
                         placeholder="Search customer"
                         value={filters.customer}
                         onChange={(e) =>
-                            setFilters({ ...filters, customer: e.target.value })
+                            onChange({ ...filters, customer: e.target.value })
                         }
                         className="w-full px-3 py-2 border rounded-lg"
                     />
@@ -213,7 +212,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
                             type="checkbox"
                             checked={filters.keyAccounts}
                             onChange={(e) =>
-                                setFilters({
+                                onChange({
                                     ...filters,
                                     keyAccounts: e.target.checked,
                                 })
@@ -227,7 +226,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
 
             <div className="flex gap-2 pt-4 border-t">
                 <button
-                    onClick={() => setFilters(DEFAULT_VISIT_FILTERS)}
+                    onClick={() => onChange(DEFAULT_VISIT_FILTERS)}
                     className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                 >
                     Clear Filters

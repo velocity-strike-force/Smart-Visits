@@ -396,7 +396,8 @@ export default function Dashboard() {
                     <div className="bg-white border-b p-6">
                         <FilterPanel
                             visits={baseVisits}
-                            onApply={setAppliedFilters}
+                            filters={appliedFilters}
+                            onChange={setAppliedFilters}
                         />
                     </div>
                 )}
