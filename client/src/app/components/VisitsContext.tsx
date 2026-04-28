@@ -28,6 +28,7 @@ interface VisitsContextType {
     addAttendee: (visitId: string, attendeeName: string) => void;
     removeAttendee: (visitId: string, attendeeName: string) => void;
     getVisit: (visitId: string) => Visit | undefined;
+    saveFeedbackRecord: (visitId: string) => void;
 }
 
 const VisitsContext = createContext<VisitsContextType | undefined>(undefined);
@@ -53,6 +54,7 @@ const mockVisits: Visit[] = [
             "Mike Johnson",
             "Emily Davis",
             "David Brown",
+            "Sonny Antunes",
         ],
         creatorEmail: "john.smith@rfsmart.com",
         customerContact: "Bob Anderson",
@@ -123,6 +125,7 @@ const mockVisits: Visit[] = [
             "Jennifer Wilson",
             "Thomas Moore",
             "Amanda Clark",
+            "Sonny Antunes",
         ],
         creatorEmail: "sarah.williams@rfsmart.com",
     },
@@ -141,7 +144,12 @@ const mockVisits: Visit[] = [
         isKeyAccount: true,
         postVisitRecordCount: 1,
         capacity: 8,
-        attendees: ["Emily Davis", "David Brown", "Lisa Anderson"],
+        attendees: [
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+            "Sonny Antunes",
+        ],
         creatorEmail: "john.smith@rfsmart.com",
     },
     {
@@ -163,6 +171,7 @@ const mockVisits: Visit[] = [
             "Mike Johnson",
             "Amanda Clark",
             "Thomas Moore",
+            "Sonny Antunes",
         ],
         creatorEmail: "jane.doe@rfsmart.com",
     },
@@ -186,6 +195,7 @@ const mockVisits: Visit[] = [
             "Emily Davis",
             "David Brown",
             "Lisa Anderson",
+            "Sonny Antunes",
         ],
         creatorEmail: "mike.johnson@rfsmart.com",
     },
@@ -201,9 +211,9 @@ const mockVisits: Visit[] = [
         salesRep: "Alex Rivera",
         domain: "Manufacturing",
         isKeyAccount: false,
-        postVisitRecordCount: 1,
+        postVisitRecordCount: 0,
         capacity: 6,
-        attendees: ["Sarah Williams", "Robert Taylor"],
+        attendees: ["Sarah Williams", "Robert Taylor", "Sonny Antunes"],
         creatorEmail: "alex.rivera@rfsmart.com",
     },
     {
@@ -218,9 +228,14 @@ const mockVisits: Visit[] = [
         salesRep: "Sarah Williams",
         domain: "Counting",
         isKeyAccount: false,
-        postVisitRecordCount: 1,
+        postVisitRecordCount: 0,
         capacity: 10,
-        attendees: ["Emily Davis", "David Brown", "Amanda Clark"],
+        attendees: [
+            "Emily Davis",
+            "David Brown",
+            "Amanda Clark",
+            "Sonny Antunes",
+        ],
         creatorEmail: "sarah.williams@rfsmart.com",
     },
     {
@@ -243,6 +258,7 @@ const mockVisits: Visit[] = [
             "Emily Davis",
             "Robert Taylor",
             "Jennifer Wilson",
+            "Sonny Antunes",
         ],
         creatorEmail: "sarah.williams@rfsmart.com",
     },
@@ -450,9 +466,9 @@ const mockVisits: Visit[] = [
         salesRep: "Jane Doe",
         domain: "Inbound",
         isKeyAccount: false,
-        postVisitRecordCount: 1,
+        postVisitRecordCount: 0,
         capacity: 8,
-        attendees: ["Sarah Williams", "Amanda Clark"],
+        attendees: ["Sarah Williams", "Amanda Clark", "Sonny Antunes"],
         creatorEmail: "jane.doe@rfsmart.com",
     },
     {
@@ -469,7 +485,12 @@ const mockVisits: Visit[] = [
         isKeyAccount: true,
         postVisitRecordCount: 1,
         capacity: 10,
-        attendees: ["Emily Davis", "David Brown", "Lisa Anderson"],
+        attendees: [
+            "Emily Davis",
+            "David Brown",
+            "Lisa Anderson",
+            "Sonny Antunes",
+        ],
         creatorEmail: "john.smith@rfsmart.com",
     },
     {
@@ -486,7 +507,12 @@ const mockVisits: Visit[] = [
         isKeyAccount: true,
         postVisitRecordCount: 1,
         capacity: 9,
-        attendees: ["Kevin Reiter", "Emily Davis", "Thomas Moore"],
+        attendees: [
+            "Kevin Reiter",
+            "Emily Davis",
+            "Thomas Moore",
+            "Sonny Antunes",
+        ],
         creatorEmail: "mike.johnson@rfsmart.com",
     },
     {
@@ -503,7 +529,12 @@ const mockVisits: Visit[] = [
         isKeyAccount: false,
         postVisitRecordCount: 1,
         capacity: 10,
-        attendees: ["David Brown", "Amanda Clark", "Robert Taylor"],
+        attendees: [
+            "David Brown",
+            "Amanda Clark",
+            "Robert Taylor",
+            "Sonny Antunes",
+        ],
         creatorEmail: "sarah.williams@rfsmart.com",
     },
     {
@@ -717,9 +748,31 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
         return visits.find((v) => v.id === visitId);
     };
 
+    const saveFeedbackRecord = (visitId: string) => {
+        setVisits((prevVisits) =>
+            prevVisits.map((visit) =>
+                visit.id === visitId
+                    ? {
+                          ...visit,
+                          postVisitRecordCount: Math.max(
+                              1,
+                              visit.postVisitRecordCount ?? 0,
+                          ),
+                      }
+                    : visit,
+            ),
+        );
+    };
+
     return (
         <VisitsContext.Provider
-            value={{ visits, addAttendee, removeAttendee, getVisit }}
+            value={{
+                visits,
+                addAttendee,
+                removeAttendee,
+                getVisit,
+                saveFeedbackRecord,
+            }}
         >
             {children}
         </VisitsContext.Provider>

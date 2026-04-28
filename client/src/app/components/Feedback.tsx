@@ -11,7 +11,7 @@ export default function Feedback() {
     const navigate = useNavigate();
     const { id } = useParams();
     const { user } = useUser();
-    const { visits, getVisit } = useVisits();
+    const { visits, getVisit, saveFeedbackRecord } = useVisits();
     const isSalesRep = user.role === "sales_rep";
 
     const [feedbackData, setFeedbackData] = useState({
@@ -39,6 +39,13 @@ export default function Feedback() {
             return v.attendees.includes(user.name);
         })
         .sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    const hasFeedbackRecord = (postVisitRecordCount?: number) =>
+        (postVisitRecordCount ?? 0) > 0;
+
+    const isEditingExistingFeedback =
+        selectedPastVisit &&
+        hasFeedbackRecord(selectedPastVisit.postVisitRecordCount);
 
     const selectableVisitOptions = selectableVisits.map((v) => ({
         id: v.id,
@@ -85,7 +92,12 @@ export default function Feedback() {
             return;
         }
 
-        toast.success("Feedback submitted successfully!");
+        saveFeedbackRecord(selectedPastVisit.id);
+        toast.success(
+            isEditingExistingFeedback
+                ? "Feedback updated successfully!"
+                : "Feedback submitted successfully!",
+        );
         navigate("/");
     };
 
@@ -156,11 +168,26 @@ export default function Feedback() {
                                                     {pastVisit.location}
                                                 </div>
                                             </div>
-                                            <div className="text-sm text-gray-600 whitespace-nowrap">
-                                                {format(
-                                                    pastVisit.date,
-                                                    "MMM dd, yyyy",
-                                                )}
+                                            <div className="text-right">
+                                                <div className="text-sm text-gray-600 whitespace-nowrap">
+                                                    {format(
+                                                        pastVisit.date,
+                                                        "MMM dd, yyyy",
+                                                    )}
+                                                </div>
+                                                <div className="mt-1">
+                                                    {hasFeedbackRecord(
+                                                        pastVisit.postVisitRecordCount,
+                                                    ) ? (
+                                                        <span className="inline-flex px-2 py-1 rounded text-xs bg-green-100 text-green-800">
+                                                            Feedback Added
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex px-2 py-1 rounded text-xs bg-gray-100 text-gray-700">
+                                                            No Feedback Yet
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </button>
@@ -217,6 +244,13 @@ export default function Feedback() {
 
                 {selectedPastVisit && (
                     <div className="bg-white rounded-lg border p-6 space-y-6">
+                        {isEditingExistingFeedback && (
+                            <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-900">
+                                Feedback was already posted for this visit. You
+                                can edit and re-save it.
+                            </div>
+                        )}
+
                         <div>
                             <label className="block mb-2 text-sm">
                                 Feedback Notes{" "}
@@ -342,7 +376,9 @@ export default function Feedback() {
                                 onClick={handleSubmit}
                                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
-                                Submit Feedback
+                                {isEditingExistingFeedback
+                                    ? "Update Feedback"
+                                    : "Submit Feedback"}
                             </button>
                         </div>
                     </div>
