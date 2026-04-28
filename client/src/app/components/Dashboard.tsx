@@ -21,8 +21,9 @@ import {
     isSameMonth,
     isSameDay,
 } from "date-fns";
-import FilterPanel, { type VisitFilters } from "./FilterPanel";
+import FilterPanel from "./FilterPanel";
 import { useUser } from "./UserContext";
+import { DEFAULT_VISIT_FILTERS, type VisitFilters } from "./visitFilters";
 
 interface Visit {
     id: string;
@@ -39,17 +40,6 @@ interface Visit {
     capacity: number;
     currentAttendees: number;
 }
-
-const defaultFilters: VisitFilters = {
-    productLines: [],
-    location: "",
-    arrMin: "",
-    arrMax: "",
-    salesRep: "",
-    domain: "",
-    customer: "",
-    keyAccounts: false,
-};
 
 const mockVisits: Visit[] = [
     {
@@ -201,8 +191,9 @@ export default function Dashboard() {
     const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showFilters, setShowFilters] = useState(false);
-    const [appliedFilters, setAppliedFilters] =
-        useState<VisitFilters>(defaultFilters);
+    const [appliedFilters, setAppliedFilters] = useState<VisitFilters>(
+        DEFAULT_VISIT_FILTERS,
+    );
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
     const [dayModalFocusIndex, setDayModalFocusIndex] = useState(0);

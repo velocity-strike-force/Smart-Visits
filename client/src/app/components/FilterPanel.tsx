@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Slider } from "./ui/slider";
+import { DEFAULT_VISIT_FILTERS, type VisitFilters } from "./visitFilters";
 
 interface Visit {
     id: string;
@@ -15,35 +16,13 @@ interface Visit {
     isDraft?: boolean;
 }
 
-export interface VisitFilters {
-    productLines: string[];
-    location: string;
-    arrMin: string;
-    arrMax: string;
-    salesRep: string;
-    domain: string;
-    customer: string;
-    keyAccounts: boolean;
-}
-
-const defaultFilters: VisitFilters = {
-    productLines: [],
-    location: "",
-    arrMin: "",
-    arrMax: "",
-    salesRep: "",
-    domain: "",
-    customer: "",
-    keyAccounts: false,
-};
-
 interface FilterPanelProps {
     visits: Visit[];
     onApply: (filters: VisitFilters) => void;
 }
 
 export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
-    const [filters, setFilters] = useState<VisitFilters>(defaultFilters);
+    const [filters, setFilters] = useState<VisitFilters>(DEFAULT_VISIT_FILTERS);
 
     useEffect(() => {
         onApply(filters);
@@ -248,7 +227,7 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
 
             <div className="flex gap-2 pt-4 border-t">
                 <button
-                    onClick={() => setFilters(defaultFilters)}
+                    onClick={() => setFilters(DEFAULT_VISIT_FILTERS)}
                     className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                 >
                     Clear Filters
