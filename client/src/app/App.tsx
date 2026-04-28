@@ -47,7 +47,15 @@ export default function App() {
                                 />
                             </Route>
                         </Routes>
-                        <Toaster position="top-right" />
+                        <Toaster
+                            position="top-right"
+                            toastOptions={{
+                                classNames: {
+                                    success:
+                                        "!bg-green-600 !text-white !border-green-700",
+                                },
+                            }}
+                        />
                     </div>
                 </BrowserRouter>
             </VisitsProvider>

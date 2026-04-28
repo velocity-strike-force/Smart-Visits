@@ -48,7 +48,7 @@ const mockVisits: Visit[] = [
     {
         id: "1",
         title: "Quarterly Review",
-        customer: "Acme Corp",
+        customer: "Seal Shield",
         date: new Date(2026, 3, 10),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -63,7 +63,7 @@ const mockVisits: Visit[] = [
     {
         id: "2",
         title: "Product Demo",
-        customer: "TechStart Inc",
+        customer: "Centra Health",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
         location: "Miami, FL",
@@ -78,7 +78,7 @@ const mockVisits: Visit[] = [
     {
         id: "5",
         title: "Executive Briefing",
-        customer: "Sunrise Health",
+        customer: "Advantus Corp",
         date: new Date(2026, 3, 15),
         productLine: "NetSuite",
         location: "Miami, FL",
@@ -93,7 +93,7 @@ const mockVisits: Visit[] = [
     {
         id: "6",
         title: "Architecture Workshop",
-        customer: "redwave Energy",
+        customer: "AdaptHealth",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
         location: "Miami, FL",
@@ -211,7 +211,7 @@ const mockVisits: Visit[] = [
     {
         id: "12",
         title: "May Launch Planning",
-        customer: "Harbor Wholesale",
+        customer: "CHSPSC, LLC",
         date: new Date(2026, 4, 6),
         productLine: "Oracle Cloud",
         location: "Savannah, GA",
@@ -226,7 +226,7 @@ const mockVisits: Visit[] = [
     {
         id: "13",
         title: "Factory Floor Alignment",
-        customer: "Acme Corp",
+        customer: "HC Brand",
         date: new Date(2026, 4, 14),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -282,7 +282,7 @@ const mockVisits: Visit[] = [
     {
         id: "17",
         title: "Late-April Customer Readout",
-        customer: "redwave Energy",
+        customer: "Pharmsource LLC",
         date: new Date(2026, 3, 29),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -325,7 +325,7 @@ const mockVisits: Visit[] = [
     {
         id: "20",
         title: "May Integration Design Review",
-        customer: "Northstar Foods",
+        customer: "Providence Health & Services",
         date: new Date(2026, 4, 5),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -339,7 +339,7 @@ const mockVisits: Visit[] = [
     {
         id: "21",
         title: "May Site Expansion Debrief",
-        customer: "redwave Energy",
+        customer: "T-H Marine Supplies",
         date: new Date(2026, 4, 12),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -381,7 +381,7 @@ const mockVisits: Visit[] = [
     {
         id: "24",
         title: "June Kickoff Planning Session",
-        customer: "Harbor Wholesale",
+        customer: "The Nemours Foundation",
         date: new Date(2026, 5, 2),
         productLine: "Oracle Cloud",
         location: "Savannah, GA",
@@ -395,7 +395,7 @@ const mockVisits: Visit[] = [
     {
         id: "25",
         title: "June Factory Readiness Workshop",
-        customer: "Acme Corp",
+        customer: "Mann Lake Ltd",
         date: new Date(2026, 5, 9),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -437,7 +437,7 @@ const mockVisits: Visit[] = [
     {
         id: "28",
         title: "April Go-Live Readiness Check",
-        customer: "Acme Corp",
+        customer: "Seal Shield",
         date: new Date(2026, 3, 1),
         productLine: "NetSuite",
         location: "Jacksonville, FL",
@@ -452,7 +452,7 @@ const mockVisits: Visit[] = [
     {
         id: "29",
         title: "April Inventory Alignment Session",
-        customer: "Northstar Foods",
+        customer: "LifePoint Health",
         date: new Date(2026, 3, 2),
         productLine: "Oracle Cloud",
         location: "Nashville, TN",
@@ -624,7 +624,7 @@ export default function Dashboard() {
                                 onClick={() => setViewMode("calendar")}
                                 className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                     viewMode === "calendar"
-                                        ? "bg-red-50 text-red-600"
+                                        ? "bg-blue-50 text-blue-600"
                                         : "bg-gray-100 text-gray-600"
                                 }`}
                             >
@@ -636,7 +636,7 @@ export default function Dashboard() {
                                 onClick={() => setViewMode("list")}
                                 className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                     viewMode === "list"
-                                        ? "bg-red-50 text-red-600"
+                                        ? "bg-blue-50 text-blue-600"
                                         : "bg-gray-100 text-gray-600"
                                 }`}
                             >
@@ -658,7 +658,7 @@ export default function Dashboard() {
                         {user.role === "sales_rep" && (
                             <button
                                 onClick={() => navigate("/post-visit")}
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
                             >
                                 <Plus className="w-4 h-4" />
                                 Post a Visit
@@ -844,7 +844,7 @@ export default function Dashboard() {
                                                                 0,
                                                             );
                                                         }}
-                                                        className="w-full text-left px-2 py-1 text-[11px] text-red-700 bg-red-50 rounded font-medium hover:bg-red-100"
+                                                        className="w-full text-left px-2 py-1 text-[11px] text-blue-700 bg-blue-50 rounded font-medium hover:bg-blue-100"
                                                     >
                                                         +{hiddenVisitCount} more
                                                     </button>
@@ -1047,7 +1047,7 @@ export default function Dashboard() {
                                                                 className={`px-4 py-2 rounded-lg text-sm ${
                                                                     isFull
                                                                         ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                                        : "bg-red-600 text-white hover:bg-red-700"
+                                                                        : "bg-blue-600 text-white hover:bg-blue-700"
                                                                 }`}
                                                             >
                                                                 {isFull
@@ -1164,7 +1164,7 @@ export default function Dashboard() {
                                 onClick={() =>
                                     navigate(`/visit/${selectedVisit.id}`)
                                 }
-                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 View Full Details

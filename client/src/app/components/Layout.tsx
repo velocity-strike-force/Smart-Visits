@@ -36,7 +36,7 @@ export default function Layout() {
                                     alt="RF-SMART"
                                     className="h-6 w-auto"
                                 />
-                                <span className="text-lg hover:text-red-600">
+                                <span className="text-lg hover:text-blue-600">
                                     Visits
                                 </span>
                             </button>
@@ -45,7 +45,7 @@ export default function Layout() {
                                     onClick={() => navigate("/")}
                                     className={`px-3 py-1.5 rounded-lg text-sm ${
                                         location.pathname === "/"
-                                            ? "bg-red-50 text-red-600"
+                                            ? "bg-blue-50 text-blue-600"
                                             : "text-gray-600 hover:bg-gray-50"
                                     }`}
                                 >
@@ -57,7 +57,7 @@ export default function Layout() {
                                         location.pathname.startsWith(
                                             "/feedback",
                                         )
-                                            ? "bg-red-50 text-red-600"
+                                            ? "bg-blue-50 text-blue-600"
                                             : "text-gray-600 hover:bg-gray-50"
                                     }`}
                                 >
@@ -72,7 +72,7 @@ export default function Layout() {
                                         className={`px-3 py-1.5 rounded-lg text-sm ${
                                             location.pathname ===
                                             "/request-visit"
-                                                ? "bg-red-50 text-red-600"
+                                                ? "bg-blue-50 text-blue-600"
                                                 : "text-gray-600 hover:bg-gray-50"
                                         }`}
                                     >
@@ -88,7 +88,7 @@ export default function Layout() {
                                             className={`px-3 py-1.5 rounded-lg text-sm ${
                                                 location.pathname ===
                                                 "/visit-requests"
-                                                    ? "bg-red-50 text-red-600"
+                                                    ? "bg-blue-50 text-blue-600"
                                                     : "text-gray-600 hover:bg-gray-50"
                                             }`}
                                         >
@@ -101,7 +101,7 @@ export default function Layout() {
                                             className={`px-3 py-1.5 rounded-lg text-sm flex items-center gap-1.5 ${
                                                 location.pathname ===
                                                 "/analytics"
-                                                    ? "bg-red-50 text-red-600"
+                                                    ? "bg-blue-50 text-blue-600"
                                                     : "text-gray-600 hover:bg-gray-50"
                                             }`}
                                         >
@@ -119,7 +119,7 @@ export default function Layout() {
                                     onClick={() => handleRoleSwitch("visitor")}
                                     className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 text-sm transition-colors ${
                                         user.role === "visitor"
-                                            ? "bg-white text-red-600 shadow-sm"
+                                            ? "bg-white text-blue-600 shadow-sm"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
                                 >
@@ -132,7 +132,7 @@ export default function Layout() {
                                     }
                                     className={`px-3 py-1.5 rounded-md flex items-center gap-1.5 text-sm transition-colors ${
                                         user.role === "sales_rep"
-                                            ? "bg-white text-red-600 shadow-sm"
+                                            ? "bg-white text-blue-600 shadow-sm"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
                                 >
