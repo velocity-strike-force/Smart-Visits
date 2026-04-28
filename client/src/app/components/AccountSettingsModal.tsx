@@ -34,7 +34,7 @@ export default function AccountSettingsModal({ isOpen, onClose }: AccountSetting
     <div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-xl">Account Settings</h2>
+          <h2 className="text-xl">Preferences</h2>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
             <X className="w-5 h-5" />
           </button>

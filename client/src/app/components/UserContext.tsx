@@ -17,7 +17,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User>({
     name: 'John Smith',
     email: 'john.smith@rfsmart.com',
-    role: 'sales_rep', // Change to 'visitor' to see visitor experience
+    role: 'visitor',
   });
 
   return (
