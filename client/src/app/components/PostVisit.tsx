@@ -25,9 +25,6 @@ export default function PostVisit() {
         customerContact: "",
         purpose: "",
         details: "",
-        keyAreasOfFocus: "",
-        detractors: "",
-        delighters: "",
         isPrivate: false,
     });
 
@@ -391,56 +388,6 @@ export default function PostVisit() {
                                 })
                             }
                             rows={4}
-                            className="w-full px-3 py-2 border rounded-lg"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-2 text-sm">
-                            Key areas of focus
-                        </label>
-                        <textarea
-                            placeholder="What key areas were discussed during the visit?"
-                            value={formData.keyAreasOfFocus}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    keyAreasOfFocus: e.target.value,
-                                })
-                            }
-                            rows={3}
-                            className="w-full px-3 py-2 border rounded-lg"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-2 text-sm">Detractors</label>
-                        <textarea
-                            placeholder="What concerns or blockers came up?"
-                            value={formData.detractors}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    detractors: e.target.value,
-                                })
-                            }
-                            rows={3}
-                            className="w-full px-3 py-2 border rounded-lg"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block mb-2 text-sm">Delighters</label>
-                        <textarea
-                            placeholder="What went well or exceeded expectations?"
-                            value={formData.delighters}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    delighters: e.target.value,
-                                })
-                            }
-                            rows={3}
                             className="w-full px-3 py-2 border rounded-lg"
                         />
                     </div>
