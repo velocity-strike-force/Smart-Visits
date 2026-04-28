@@ -327,16 +327,31 @@ export default function Dashboard() {
                                     const hiddenVisitCount =
                                         dayVisits.length -
                                         visibleDayVisits.length;
+                                    const canClickDayCell =
+                                        user.role === "sales_rep" ||
+                                        dayVisits.length > 0;
 
                                     return (
                                         <div
                                             key={`${day.toISOString()}-${idx}`}
-                                            className="min-h-[92px] border-r border-b last:border-r-0 p-1.5 hover:bg-gray-50 cursor-pointer"
-                                            onClick={() =>
-                                                navigate(
-                                                    `/post-visit?date=${day.toISOString()}`,
-                                                )
-                                            }
+                                            className={`min-h-[92px] border-r border-b last:border-r-0 p-1.5 ${
+                                                canClickDayCell
+                                                    ? "hover:bg-gray-50 cursor-pointer"
+                                                    : "cursor-default"
+                                            }`}
+                                            onClick={() => {
+                                                if (user.role === "sales_rep") {
+                                                    navigate(
+                                                        `/post-visit?date=${day.toISOString()}`,
+                                                    );
+                                                    return;
+                                                }
+
+                                                if (dayVisits.length > 0) {
+                                                    setSelectedDay(day);
+                                                    setDayModalFocusIndex(0);
+                                                }
+                                            }}
                                         >
                                             <div
                                                 className={`mb-2 ${!isSameMonth(day, currentDate) ? "text-gray-400" : ""}`}
