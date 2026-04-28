@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     Calendar,
     List,
@@ -67,6 +67,32 @@ const mockVisits: Visit[] = [
         currentAttendees: 0,
     },
     {
+        id: "5",
+        title: "Executive Briefing",
+        customer: "Sunrise Health",
+        date: new Date(2026, 3, 15),
+        productLine: "NetSuite",
+        location: "Miami, FL",
+        arr: 320000,
+        salesRep: "Alex Rivera",
+        domain: "Healthcare",
+        capacity: 6,
+        currentAttendees: 4,
+    },
+    {
+        id: "6",
+        title: "Architecture Workshop",
+        customer: "Bluewave Energy",
+        date: new Date(2026, 3, 15),
+        productLine: "Oracle Cloud",
+        location: "Miami, FL",
+        arr: 410000,
+        salesRep: "Priya Patel",
+        domain: "Energy",
+        capacity: 5,
+        currentAttendees: 5,
+    },
+    {
         id: "3",
         title: "Implementation Review",
         customer: "Global Logistics",
@@ -92,6 +118,19 @@ const mockVisits: Visit[] = [
         capacity: 12,
         currentAttendees: 8,
     },
+    {
+        id: "7",
+        title: "Post Go-Live Review",
+        customer: "Northstar Foods",
+        date: new Date(2026, 3, 28),
+        productLine: "TMS",
+        location: "Orlando, FL",
+        arr: 275000,
+        salesRep: "Chris Morgan",
+        domain: "Food & Beverage",
+        capacity: 10,
+        currentAttendees: 2,
+    },
 ];
 
 export default function Dashboard() {
@@ -101,6 +140,9 @@ export default function Dashboard() {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showFilters, setShowFilters] = useState(false);
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
+    const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+    const [dayModalFocusIndex, setDayModalFocusIndex] = useState(0);
+    const dayModalVisitRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const [visits] = useState<Visit[]>(mockVisits);
 
     const filteredVisits =
@@ -118,6 +160,52 @@ export default function Dashboard() {
     const getVisitsForDay = (day: Date) => {
         return filteredVisits.filter((visit) => isSameDay(visit.date, day));
     };
+
+    const selectedDayVisits = selectedDay ? getVisitsForDay(selectedDay) : [];
+
+    useEffect(() => {
+        if (!selectedVisit && !selectedDay) {
+            return;
+        }
+
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== "Escape") {
+                return;
+            }
+
+            if (selectedVisit) {
+                setSelectedVisit(null);
+                return;
+            }
+
+            if (selectedDay) {
+                setSelectedDay(null);
+            }
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [selectedVisit, selectedDay]);
+
+    useEffect(() => {
+        if (!selectedDay || selectedDayVisits.length === 0) {
+            return;
+        }
+
+        setDayModalFocusIndex(0);
+        dayModalVisitRefs.current = [];
+    }, [selectedDay, selectedDayVisits.length]);
+
+    useEffect(() => {
+        if (!selectedDay) {
+            return;
+        }
+
+        const target = dayModalVisitRefs.current[dayModalFocusIndex];
+        if (target) {
+            target.focus();
+        }
+    }, [selectedDay, dayModalFocusIndex]);
 
     const previousMonth = () => {
         setCurrentDate(
@@ -239,6 +327,13 @@ export default function Dashboard() {
                             <div className="grid grid-cols-7">
                                 {daysInMonth.map((day, idx) => {
                                     const dayVisits = getVisitsForDay(day);
+                                    const visibleDayVisits = dayVisits.slice(
+                                        0,
+                                        2,
+                                    );
+                                    const hiddenVisitCount =
+                                        dayVisits.length -
+                                        visibleDayVisits.length;
 
                                     return (
                                         <div
@@ -257,69 +352,90 @@ export default function Dashboard() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                {dayVisits.map((visit) => {
-                                                    const isFull =
-                                                        visit.currentAttendees >=
-                                                        visit.capacity;
+                                                {visibleDayVisits.map(
+                                                    (visit) => {
+                                                        const isFull =
+                                                            visit.currentAttendees >=
+                                                            visit.capacity;
 
-                                                    return (
-                                                        <div
-                                                            key={visit.id}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedVisit(
-                                                                    visit,
-                                                                );
-                                                            }}
-                                                            className={`text-xs p-2 rounded hover:opacity-90 relative cursor-pointer ${
-                                                                isFull
-                                                                    ? "bg-gray-100 text-gray-600"
-                                                                    : "bg-blue-100 text-blue-800"
-                                                            }`}
-                                                        >
-                                                            <div className="truncate">
-                                                                {visit.customer}
-                                                            </div>
+                                                        return (
+                                                            <div
+                                                                key={visit.id}
+                                                                onClick={(
+                                                                    e,
+                                                                ) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedVisit(
+                                                                        visit,
+                                                                    );
+                                                                }}
+                                                                className={`text-xs p-2 rounded hover:opacity-90 relative cursor-pointer ${
+                                                                    isFull
+                                                                        ? "bg-gray-100 text-gray-600"
+                                                                        : "bg-blue-100 text-blue-800"
+                                                                }`}
+                                                            >
+                                                                <div className="truncate">
+                                                                    {
+                                                                        visit.customer
+                                                                    }
+                                                                </div>
 
-                                                            <div className="text-[10px] mt-1 flex items-center justify-between">
-                                                                <span>
-                                                                    {
-                                                                        visit.location
-                                                                    }
-                                                                </span>
-                                                                <span
-                                                                    className={
-                                                                        isFull
-                                                                            ? "text-red-600 font-medium"
-                                                                            : ""
-                                                                    }
-                                                                >
-                                                                    {
-                                                                        visit.currentAttendees
-                                                                    }
-                                                                    /
-                                                                    {
-                                                                        visit.capacity
-                                                                    }
-                                                                </span>
-                                                            </div>
+                                                                <div className="text-[10px] mt-1 flex items-center justify-between">
+                                                                    <span>
+                                                                        {
+                                                                            visit.location
+                                                                        }
+                                                                    </span>
+                                                                    <span
+                                                                        className={
+                                                                            isFull
+                                                                                ? "text-red-600 font-medium"
+                                                                                : ""
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            visit.currentAttendees
+                                                                        }
+                                                                        /
+                                                                        {
+                                                                            visit.capacity
+                                                                        }
+                                                                    </span>
+                                                                </div>
 
-                                                            {visit.isDraft &&
-                                                                user.role ===
-                                                                    "sales_rep" && (
-                                                                    <span className="absolute top-0 right-0 px-1 text-[10px] bg-gray-400 text-white rounded-bl">
-                                                                        Draft
+                                                                {visit.isDraft &&
+                                                                    user.role ===
+                                                                        "sales_rep" && (
+                                                                        <span className="absolute top-0 right-0 px-1 text-[10px] bg-gray-400 text-white rounded-bl">
+                                                                            Draft
+                                                                        </span>
+                                                                    )}
+
+                                                                {isFull && (
+                                                                    <span className="absolute top-0 right-0 px-1 text-[10px] bg-red-500 text-white rounded-bl">
+                                                                        Full
                                                                     </span>
                                                                 )}
+                                                            </div>
+                                                        );
+                                                    },
+                                                )}
 
-                                                            {isFull && (
-                                                                <span className="absolute top-0 right-0 px-1 text-[10px] bg-red-500 text-white rounded-bl">
-                                                                    Full
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
+                                                {hiddenVisitCount > 0 && (
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedDay(day);
+                                                            setDayModalFocusIndex(
+                                                                0,
+                                                            );
+                                                        }}
+                                                        className="w-full text-left px-2 py-1 text-[11px] text-blue-700 bg-blue-50 rounded font-medium hover:bg-blue-100"
+                                                    >
+                                                        +{hiddenVisitCount} more
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -603,6 +719,143 @@ export default function Dashboard() {
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 View Full Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {selectedDay && (
+                <div
+                    className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
+                    onClick={() => setSelectedDay(null)}
+                >
+                    <div
+                        className="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                            if (selectedDayVisits.length === 0) {
+                                return;
+                            }
+
+                            if (e.key === "ArrowDown") {
+                                e.preventDefault();
+                                setDayModalFocusIndex((idx) =>
+                                    Math.min(
+                                        idx + 1,
+                                        selectedDayVisits.length - 1,
+                                    ),
+                                );
+                            }
+
+                            if (e.key === "ArrowUp") {
+                                e.preventDefault();
+                                setDayModalFocusIndex((idx) =>
+                                    Math.max(idx - 1, 0),
+                                );
+                            }
+
+                            if (e.key === "Home") {
+                                e.preventDefault();
+                                setDayModalFocusIndex(0);
+                            }
+
+                            if (e.key === "End") {
+                                e.preventDefault();
+                                setDayModalFocusIndex(
+                                    selectedDayVisits.length - 1,
+                                );
+                            }
+
+                            if (e.key === "Enter" || e.key === " ") {
+                                const target =
+                                    dayModalVisitRefs.current[
+                                        dayModalFocusIndex
+                                    ];
+
+                                if (!target) {
+                                    return;
+                                }
+
+                                e.preventDefault();
+                                target.click();
+                            }
+                        }}
+                        tabIndex={-1}
+                    >
+                        <div className="flex items-start justify-between mb-4">
+                            <div>
+                                <h2 className="text-xl">
+                                    {format(selectedDay, "EEEE, MMMM dd, yyyy")}
+                                </h2>
+                                <p className="text-sm text-gray-500">
+                                    {selectedDayVisits.length} visits
+                                </p>
+                            </div>
+
+                            <button
+                                onClick={() => setSelectedDay(null)}
+                                className="text-gray-400 hover:text-gray-700"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-3">
+                            {selectedDayVisits.map((visit, index) => {
+                                const isFull =
+                                    visit.currentAttendees >= visit.capacity;
+
+                                return (
+                                    <button
+                                        key={visit.id}
+                                        ref={(node) => {
+                                            dayModalVisitRefs.current[index] =
+                                                node;
+                                        }}
+                                        onClick={() => {
+                                            setSelectedDay(null);
+                                            setSelectedVisit(visit);
+                                        }}
+                                        className="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
+                                    >
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <div className="font-medium text-gray-900">
+                                                    {visit.customer}
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {visit.location}
+                                                </div>
+                                            </div>
+
+                                            <div className="text-xs text-right">
+                                                <div
+                                                    className={
+                                                        isFull
+                                                            ? "text-red-600 font-medium"
+                                                            : "text-gray-700"
+                                                    }
+                                                >
+                                                    {visit.currentAttendees}/
+                                                    {visit.capacity}
+                                                </div>
+                                                <div className="text-gray-500 mt-1">
+                                                    {visit.productLine}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        <div className="flex justify-end mt-6 pt-4 border-t">
+                            <button
+                                onClick={() => setSelectedDay(null)}
+                                className="px-4 py-2 border rounded-lg hover:bg-gray-50"
+                            >
+                                Close
                             </button>
                         </div>
                     </div>
