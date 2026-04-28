@@ -32,7 +32,7 @@ export default function RequestVisit() {
                     </p>
                     <button
                         onClick={() => navigate("/")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                     >
                         Back to Dashboard
                     </button>
@@ -148,7 +148,7 @@ export default function RequestVisit() {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-60 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             <Send className="w-4 h-4" />
                             {isSubmitting ? "Submitting..." : "Submit Request"}

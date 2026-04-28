@@ -92,7 +92,7 @@ const mockVisits: Visit[] = [
     {
         id: "6",
         title: "Architecture Workshop",
-        customer: "Bluewave Energy",
+        customer: "redwave Energy",
         date: new Date(2026, 3, 15),
         productLine: "Oracle Cloud",
         location: "Miami, FL",
@@ -281,7 +281,7 @@ const mockVisits: Visit[] = [
     {
         id: "17",
         title: "Late-April Customer Readout",
-        customer: "Bluewave Energy",
+        customer: "redwave Energy",
         date: new Date(2026, 3, 29),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -338,7 +338,7 @@ const mockVisits: Visit[] = [
     {
         id: "21",
         title: "May Site Expansion Debrief",
-        customer: "Bluewave Energy",
+        customer: "redwave Energy",
         date: new Date(2026, 4, 12),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -532,9 +532,9 @@ const getProductLineTheme = (productLine: string) => {
     }
 
     return {
-        calendarCard: "bg-blue-100 text-blue-800",
-        badge: "bg-blue-100 text-blue-800",
-        subtleText: "text-blue-700",
+        calendarCard: "bg-red-100 text-red-800",
+        badge: "bg-red-100 text-red-800",
+        subtleText: "text-red-700",
     };
 };
 
@@ -681,7 +681,7 @@ export default function Dashboard() {
                                 onClick={() => setViewMode("calendar")}
                                 className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
                                     viewMode === "calendar"
-                                        ? "bg-blue-50 text-blue-600"
+                                        ? "bg-red-50 text-red-600"
                                         : "bg-gray-100 text-gray-600"
                                 }`}
                             >
@@ -693,7 +693,7 @@ export default function Dashboard() {
                                 onClick={() => setViewMode("list")}
                                 className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
                                     viewMode === "list"
-                                        ? "bg-blue-50 text-blue-600"
+                                        ? "bg-red-50 text-red-600"
                                         : "bg-gray-100 text-gray-600"
                                 }`}
                             >
@@ -715,7 +715,7 @@ export default function Dashboard() {
                         {user.role === "sales_rep" && (
                             <button
                                 onClick={() => navigate("/post-visit")}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg flex items-center gap-2 hover:bg-blue-700"
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg flex items-center gap-2 hover:bg-red-700"
                             >
                                 <Plus className="w-4 h-4" />
                                 Post a Visit
@@ -899,7 +899,7 @@ export default function Dashboard() {
                                                                 0,
                                                             );
                                                         }}
-                                                        className="w-full text-left px-2 py-1 text-[11px] text-blue-700 bg-blue-50 rounded font-medium hover:bg-blue-100"
+                                                        className="w-full text-left px-2 py-1 text-[11px] text-red-700 bg-red-50 rounded font-medium hover:bg-red-100"
                                                     >
                                                         +{hiddenVisitCount} more
                                                     </button>
@@ -1103,7 +1103,7 @@ export default function Dashboard() {
                                                                 className={`px-4 py-2 rounded-lg text-sm ${
                                                                     isFull
                                                                         ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                                                                        : "bg-blue-600 text-white hover:bg-blue-700"
+                                                                        : "bg-red-600 text-white hover:bg-red-700"
                                                                 }`}
                                                             >
                                                                 {isFull
@@ -1220,7 +1220,7 @@ export default function Dashboard() {
                                 onClick={() =>
                                     navigate(`/visit/${selectedVisit.id}`)
                                 }
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2"
                             >
                                 <ExternalLink className="w-4 h-4" />
                                 View Full Details

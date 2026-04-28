@@ -51,7 +51,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
               type="button"
               onClick={() => setSlackEnabled(!slackEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                slackEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                slackEnabled ? 'bg-red-600' : 'bg-gray-300'
               }`}
               aria-pressed={slackEnabled}
             >
@@ -65,7 +65,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
 
           <div className="flex items-center justify-between rounded-lg border p-4">
             <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-lg bg-red-100 text-red-700 flex items-center justify-center">
                 <Mail className="w-5 h-5" />
               </div>
 
@@ -84,7 +84,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
               type="button"
               onClick={() => setOutlookEnabled(!outlookEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                outlookEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                outlookEnabled ? 'bg-red-600' : 'bg-gray-300'
               }`}
               aria-pressed={outlookEnabled}
             >
@@ -117,7 +117,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
               type="button"
               onClick={() => setProximityEnabled(!proximityEnabled)}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                proximityEnabled ? 'bg-blue-600' : 'bg-gray-300'
+                proximityEnabled ? 'bg-red-600' : 'bg-gray-300'
               }`}
               aria-pressed={proximityEnabled}
             >
@@ -133,7 +133,7 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
         <div className="flex justify-end gap-3 px-6 py-4 border-t">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
           >
             Done
           </button>

@@ -265,7 +265,7 @@ export default function PostVisit() {
                                     ARR: $
                                     {customerMetadata.arr?.toLocaleString()}
                                 </span>
-                                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
                                     {customerMetadata.status}
                                 </span>
                                 {customerMetadata.isKeyAccount && (
@@ -357,12 +357,12 @@ export default function PostVisit() {
                             {formData.invitees.map((invitee) => (
                                 <span
                                     key={invitee}
-                                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center gap-2"
+                                    className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm flex items-center gap-2"
                                 >
                                     {invitee}
                                     <button
                                         onClick={() => removeInvitee(invitee)}
-                                        className="hover:text-blue-900"
+                                        className="hover:text-red-900"
                                     >
                                         ×
                                     </button>
@@ -512,7 +512,7 @@ export default function PostVisit() {
                         </button>
                         <button
                             onClick={() => handleSubmit(false)}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                         >
                             Post Visit
                         </button>
