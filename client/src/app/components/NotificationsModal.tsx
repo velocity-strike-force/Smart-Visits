@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Slack, Mail } from 'lucide-react';
+import { X, Slack, Mail, MapPin } from 'lucide-react';
 
 interface NotificationsModalProps {
   isOpen: boolean;
@@ -9,12 +9,13 @@ interface NotificationsModalProps {
 export default function NotificationsModal({ isOpen, onClose }: NotificationsModalProps) {
   const [slackEnabled, setSlackEnabled] = useState(false);
   const [outlookEnabled, setOutlookEnabled] = useState(false);
+  const [proximityEnabled, setProximityEnabled] = useState(false);
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg w-full max-w-xl overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg w-full max-w-xl overflow-hidden flex flex-col shadow-xl border">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <div>
             <h2 className="text-xl">Notification Settings</h2>
@@ -90,6 +91,39 @@ export default function NotificationsModal({ isOpen, onClose }: NotificationsMod
               <span
                 className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
                   outlookEnabled ? 'translate-x-5' : 'translate-x-1'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between rounded-lg border p-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-lg bg-green-100 text-green-700 flex items-center justify-center">
+                <MapPin className="w-5 h-5" />
+              </div>
+
+              <div>
+                <h3>Proximity Notifications</h3>
+                <p className="text-sm text-gray-500">
+                  Receive updates for events created within preferred proximity.
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Preferred proximity settings can be added later.
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setProximityEnabled(!proximityEnabled)}
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                proximityEnabled ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+              aria-pressed={proximityEnabled}
+            >
+              <span
+                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
+                  proximityEnabled ? 'translate-x-5' : 'translate-x-1'
                 }`}
               />
             </button>
