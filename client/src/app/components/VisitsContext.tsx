@@ -184,7 +184,7 @@ const mockVisits: Visit[] = [
     {
         id: "8",
         title: "Post Go-Live Check-in",
-        customer: "Bluewave Energy",
+        customer: "redwave Energy",
         date: new Date(2026, 3, 9),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -369,7 +369,7 @@ const mockVisits: Visit[] = [
     {
         id: "19",
         title: "End-of-April Site Debrief",
-        customer: "Bluewave Energy",
+        customer: "redwave Energy",
         date: new Date(2026, 3, 30),
         productLine: "NetSuite",
         location: "Houston, TX",
@@ -493,7 +493,7 @@ const mockVisits: Visit[] = [
     {
         id: "27",
         title: "May Site Expansion Debrief",
-        customer: "Bluewave Energy",
+        customer: "redwave Energy",
         date: new Date(2026, 4, 12),
         productLine: "NetSuite",
         location: "Houston, TX",

@@ -50,7 +50,7 @@ export default function VisitorSignUpCard({ visit, onSignUp, isSignedUp }: Visit
   }
 
   return (
-    <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-6">
+    <div className="bg-red-50 border-2 border-red-300 rounded-lg p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-xl font-medium mb-2 text-gray-900">Join this customer visit</h3>
@@ -78,7 +78,7 @@ export default function VisitorSignUpCard({ visit, onSignUp, isSignedUp }: Visit
         </div>
         <button
           onClick={onSignUp}
-          className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
+          className="px-8 py-4 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium text-lg shadow-lg hover:shadow-xl transition-all flex items-center gap-3"
         >
           <Users className="w-6 h-6" />
           Sign Up Now

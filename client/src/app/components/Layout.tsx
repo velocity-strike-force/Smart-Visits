@@ -23,7 +23,7 @@ export default function Layout() {
             <div
                 className={`h-screen flex flex-col ${showSettings || showNotifications ? "blur-sm" : ""}`}
             >
-                <header className="bg-white border-b px-8 py-4">
+                <header className="bg-gray-100 border-b border-gray-300 px-8 py-4">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-8">
                             <button
@@ -36,7 +36,7 @@ export default function Layout() {
                                     alt="RF-SMART"
                                     className="h-8 w-auto"
                                 />
-                                <span className="text-xl hover:text-blue-600">
+                                <span className="text-xl hover:text-red-600">
                                     Customer Visits
                                 </span>
                             </button>
@@ -45,7 +45,7 @@ export default function Layout() {
                                     onClick={() => navigate("/")}
                                     className={`px-4 py-2 rounded-lg ${
                                         location.pathname === "/"
-                                            ? "bg-blue-50 text-blue-600"
+                                            ? "bg-red-50 text-red-600"
                                             : "text-gray-600 hover:bg-gray-50"
                                     }`}
                                 >
@@ -57,7 +57,7 @@ export default function Layout() {
                                         location.pathname.startsWith(
                                             "/feedback",
                                         )
-                                            ? "bg-blue-50 text-blue-600"
+                                            ? "bg-red-50 text-red-600"
                                             : "text-gray-600 hover:bg-gray-50"
                                     }`}
                                 >
@@ -72,7 +72,7 @@ export default function Layout() {
                                         className={`px-4 py-2 rounded-lg ${
                                             location.pathname ===
                                             "/request-visit"
-                                                ? "bg-blue-50 text-blue-600"
+                                                ? "bg-red-50 text-red-600"
                                                 : "text-gray-600 hover:bg-gray-50"
                                         }`}
                                     >
@@ -88,7 +88,7 @@ export default function Layout() {
                                             className={`px-4 py-2 rounded-lg ${
                                                 location.pathname ===
                                                 "/visit-requests"
-                                                    ? "bg-blue-50 text-blue-600"
+                                                    ? "bg-red-50 text-red-600"
                                                     : "text-gray-600 hover:bg-gray-50"
                                             }`}
                                         >
@@ -101,7 +101,7 @@ export default function Layout() {
                                             className={`px-4 py-2 rounded-lg flex items-center gap-2 ${
                                                 location.pathname ===
                                                 "/analytics"
-                                                    ? "bg-blue-50 text-blue-600"
+                                                    ? "bg-red-50 text-red-600"
                                                     : "text-gray-600 hover:bg-gray-50"
                                             }`}
                                         >
@@ -119,7 +119,7 @@ export default function Layout() {
                                     onClick={() => handleRoleSwitch("visitor")}
                                     className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm transition-colors ${
                                         user.role === "visitor"
-                                            ? "bg-white text-blue-600 shadow-sm"
+                                            ? "bg-white text-red-600 shadow-sm"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
                                 >
@@ -132,7 +132,7 @@ export default function Layout() {
                                     }
                                     className={`px-4 py-2 rounded-md flex items-center gap-2 text-sm transition-colors ${
                                         user.role === "sales_rep"
-                                            ? "bg-white text-blue-600 shadow-sm"
+                                            ? "bg-white text-red-600 shadow-sm"
                                             : "text-gray-600 hover:text-gray-900"
                                     }`}
                                 >

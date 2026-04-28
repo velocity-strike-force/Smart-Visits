@@ -30,7 +30,7 @@ export default function VisitDetail() {
                     <h2 className="text-2xl mb-4">Visit not found</h2>
                     <button
                         onClick={() => navigate("/")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                     >
                         Back to Dashboard
                     </button>
@@ -317,7 +317,7 @@ export default function VisitDetail() {
                             {canVisitorJoin && (
                                 <button
                                     onClick={handleSignUp}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center gap-2 shadow-sm"
+                                    className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium flex items-center gap-2 shadow-sm"
                                 >
                                     <Users className="w-4 h-4" />
                                     Sign Up for This Visit
@@ -325,8 +325,8 @@ export default function VisitDetail() {
                             )}
                         </div>
                         {visit.attendees.length === 0 ? (
-                            <div className="text-center py-12 bg-blue-50 rounded-lg border-2 border-blue-200 border-dashed">
-                                <Users className="w-16 h-16 mx-auto mb-4 text-blue-400" />
+                            <div className="text-center py-12 bg-red-50 rounded-lg border-2 border-red-200 border-dashed">
+                                <Users className="w-16 h-16 mx-auto mb-4 text-red-400" />
                                 <p className="text-lg text-gray-700 mb-2 font-medium">
                                     No attendees yet
                                 </p>
@@ -336,7 +336,7 @@ export default function VisitDetail() {
                                 {canVisitorJoin && (
                                     <button
                                         onClick={handleSignUp}
-                                        className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md hover:shadow-lg transition-shadow"
+                                        className="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium shadow-md hover:shadow-lg transition-shadow"
                                     >
                                         Sign Up Now
                                     </button>
@@ -358,7 +358,7 @@ export default function VisitDetail() {
                                             className="flex items-center justify-between p-3 bg-gray-50 rounded"
                                         >
                                             <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">
+                                                <div className="w-8 h-8 bg-red-600 text-white rounded-full flex items-center justify-center text-sm">
                                                     {attendee.charAt(0)}
                                                 </div>
                                                 <span>{attendee}</span>

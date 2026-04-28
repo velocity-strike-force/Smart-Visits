@@ -43,7 +43,7 @@ export default function VisitRequests() {
                     </p>
                     <button
                         onClick={() => navigate("/")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                     >
                         Back to Dashboard
                     </button>
@@ -77,7 +77,7 @@ export default function VisitRequests() {
                             Total Requests
                         </div>
                         <div className="text-2xl flex items-center gap-2">
-                            <Users className="w-5 h-5 text-blue-600" />
+                            <Users className="w-5 h-5 text-red-600" />
                             {mockVisitRequests.length}
                         </div>
                     </div>
@@ -159,7 +159,7 @@ export default function VisitRequests() {
                                             {request.customer}
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
+                                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded text-xs">
                                                 {request.productLine}
                                             </span>
                                         </td>
