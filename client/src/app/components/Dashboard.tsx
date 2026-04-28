@@ -6,6 +6,7 @@ import {
     Plus,
     ChevronLeft,
     ChevronRight,
+    Star,
     X,
     ExternalLink,
 } from "lucide-react";
@@ -20,7 +21,7 @@ import {
     isSameMonth,
     isSameDay,
 } from "date-fns";
-import FilterPanel from "./FilterPanel";
+import FilterPanel, { type VisitFilters } from "./FilterPanel";
 import { useUser } from "./UserContext";
 
 interface Visit {
@@ -33,10 +34,22 @@ interface Visit {
     arr: number;
     salesRep: string;
     domain: string;
+    isKeyAccount?: boolean;
     isDraft?: boolean;
     capacity: number;
     currentAttendees: number;
 }
+
+const defaultFilters: VisitFilters = {
+    productLines: [],
+    location: "",
+    arrMin: "",
+    arrMax: "",
+    salesRep: "",
+    domain: "",
+    customer: "",
+    keyAccounts: false,
+};
 
 const mockVisits: Visit[] = [
     {
@@ -49,6 +62,7 @@ const mockVisits: Visit[] = [
         arr: 250000,
         salesRep: "John Smith",
         domain: "Manufacturing",
+        isKeyAccount: true,
         capacity: 10,
         currentAttendees: 3,
     },
@@ -62,6 +76,7 @@ const mockVisits: Visit[] = [
         arr: 150000,
         salesRep: "Jane Doe",
         domain: "Technology",
+        isKeyAccount: false,
         isDraft: true,
         capacity: 8,
         currentAttendees: 0,
@@ -76,6 +91,7 @@ const mockVisits: Visit[] = [
         arr: 320000,
         salesRep: "Alex Rivera",
         domain: "Healthcare",
+        isKeyAccount: true,
         capacity: 6,
         currentAttendees: 4,
     },
@@ -89,6 +105,7 @@ const mockVisits: Visit[] = [
         arr: 410000,
         salesRep: "Priya Patel",
         domain: "Energy",
+        isKeyAccount: false,
         capacity: 5,
         currentAttendees: 5,
     },
@@ -102,6 +119,7 @@ const mockVisits: Visit[] = [
         arr: 500000,
         salesRep: "Mike Johnson",
         domain: "Logistics",
+        isKeyAccount: true,
         capacity: 5,
         currentAttendees: 5,
     },
@@ -115,6 +133,7 @@ const mockVisits: Visit[] = [
         arr: 180000,
         salesRep: "Sarah Williams",
         domain: "Retail",
+        isKeyAccount: false,
         capacity: 12,
         currentAttendees: 8,
     },
@@ -128,10 +147,53 @@ const mockVisits: Visit[] = [
         arr: 275000,
         salesRep: "Chris Morgan",
         domain: "Food & Beverage",
+        isKeyAccount: true,
         capacity: 10,
         currentAttendees: 2,
     },
 ];
+
+const getProductLineTheme = (productLine: string) => {
+    const normalized = productLine.toLowerCase();
+
+    if (normalized.includes("netsuite")) {
+        return {
+            calendarCard: "bg-emerald-100 text-emerald-800",
+            badge: "bg-emerald-100 text-emerald-800",
+            subtleText: "text-emerald-700",
+        };
+    }
+
+    if (normalized.includes("oracle")) {
+        return {
+            calendarCard: "bg-indigo-100 text-indigo-800",
+            badge: "bg-indigo-100 text-indigo-800",
+            subtleText: "text-indigo-700",
+        };
+    }
+
+    if (normalized.includes("tms")) {
+        return {
+            calendarCard: "bg-teal-100 text-teal-800",
+            badge: "bg-teal-100 text-teal-800",
+            subtleText: "text-teal-700",
+        };
+    }
+
+    if (normalized.includes("shipping")) {
+        return {
+            calendarCard: "bg-amber-100 text-amber-800",
+            badge: "bg-amber-100 text-amber-800",
+            subtleText: "text-amber-700",
+        };
+    }
+
+    return {
+        calendarCard: "bg-blue-100 text-blue-800",
+        badge: "bg-blue-100 text-blue-800",
+        subtleText: "text-blue-700",
+    };
+};
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -139,14 +201,58 @@ export default function Dashboard() {
     const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showFilters, setShowFilters] = useState(false);
+    const [appliedFilters, setAppliedFilters] =
+        useState<VisitFilters>(defaultFilters);
     const [selectedVisit, setSelectedVisit] = useState<Visit | null>(null);
     const [selectedDay, setSelectedDay] = useState<Date | null>(null);
     const [dayModalFocusIndex, setDayModalFocusIndex] = useState(0);
     const dayModalVisitRefs = useRef<Array<HTMLButtonElement | null>>([]);
     const [visits] = useState<Visit[]>(mockVisits);
 
-    const filteredVisits =
+    const baseVisits =
         user.role === "visitor" ? visits.filter((v) => !v.isDraft) : visits;
+
+    const filteredVisits = baseVisits.filter((visit) => {
+        const minArr =
+            appliedFilters.arrMin === ""
+                ? Number.NEGATIVE_INFINITY
+                : Number(appliedFilters.arrMin);
+        const maxArr =
+            appliedFilters.arrMax === ""
+                ? Number.POSITIVE_INFINITY
+                : Number(appliedFilters.arrMax);
+
+        const matchesProductLine =
+            appliedFilters.productLines.length === 0 ||
+            appliedFilters.productLines.includes(visit.productLine);
+        const matchesLocation =
+            appliedFilters.location === "" ||
+            visit.location === appliedFilters.location;
+        const matchesDomain =
+            appliedFilters.domain === "" ||
+            visit.domain === appliedFilters.domain;
+        const matchesSalesRep =
+            appliedFilters.salesRep === "" ||
+            visit.salesRep === appliedFilters.salesRep;
+        const matchesCustomer =
+            appliedFilters.customer.trim() === "" ||
+            visit.customer
+                .toLowerCase()
+                .includes(appliedFilters.customer.toLowerCase().trim());
+        const matchesArr = visit.arr >= minArr && visit.arr <= maxArr;
+        const matchesKeyAccount =
+            !appliedFilters.keyAccounts || Boolean(visit.isKeyAccount);
+
+        return (
+            matchesProductLine &&
+            matchesLocation &&
+            matchesDomain &&
+            matchesSalesRep &&
+            matchesCustomer &&
+            matchesArr &&
+            matchesKeyAccount
+        );
+    });
 
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
@@ -297,7 +403,10 @@ export default function Dashboard() {
             <div className="flex-1 overflow-auto">
                 {showFilters && (
                     <div className="bg-white border-b p-6">
-                        <FilterPanel visits={filteredVisits} />
+                        <FilterPanel
+                            visits={baseVisits}
+                            onApply={setAppliedFilters}
+                        />
                     </div>
                 )}
 
@@ -356,6 +465,10 @@ export default function Dashboard() {
                                                         const isFull =
                                                             visit.currentAttendees >=
                                                             visit.capacity;
+                                                        const productLineTheme =
+                                                            getProductLineTheme(
+                                                                visit.productLine,
+                                                            );
 
                                                         return (
                                                             <div
@@ -370,11 +483,14 @@ export default function Dashboard() {
                                                                 }}
                                                                 className={`text-xs p-2 rounded hover:opacity-90 relative cursor-pointer ${
                                                                     isFull
-                                                                        ? "bg-gray-100 text-gray-600"
-                                                                        : "bg-blue-100 text-blue-800"
+                                                                        ? "bg-gray-100 text-gray-600 border border-gray-200"
+                                                                        : productLineTheme.calendarCard
                                                                 }`}
                                                             >
                                                                 <div className="truncate">
+                                                                    {visit.isKeyAccount && (
+                                                                        <Star className="inline-block w-3 h-3 text-amber-500 fill-amber-400 mr-1" />
+                                                                    )}
                                                                     {
                                                                         visit.customer
                                                                     }
@@ -516,6 +632,10 @@ export default function Dashboard() {
                                             const spotsLeft =
                                                 visit.capacity -
                                                 visit.currentAttendees;
+                                            const productLineTheme =
+                                                getProductLineTheme(
+                                                    visit.productLine,
+                                                );
 
                                             return (
                                                 <tr
@@ -534,13 +654,18 @@ export default function Dashboard() {
                                                         )}
                                                     </td>
                                                     <td className="px-6 py-4">
+                                                        {visit.isKeyAccount && (
+                                                            <Star className="inline-block w-4 h-4 text-amber-500 fill-amber-400 mr-1" />
+                                                        )}
                                                         {visit.customer}
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         {visit.location}
                                                     </td>
                                                     <td className="px-6 py-4">
-                                                        <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                                        <span
+                                                            className={`px-2 py-1 rounded text-xs ${productLineTheme.badge}`}
+                                                        >
                                                             {visit.productLine}
                                                         </span>
                                                     </td>
@@ -642,6 +767,9 @@ export default function Dashboard() {
                         <div className="flex items-start justify-between mb-4">
                             <div>
                                 <h2 className="text-xl">
+                                    {selectedVisit.isKeyAccount && (
+                                        <Star className="inline-block w-5 h-5 text-amber-500 fill-amber-400 mr-2" />
+                                    )}
                                     {selectedVisit.customer}
                                 </h2>
                                 <p className="text-sm text-gray-500">
@@ -679,7 +807,9 @@ export default function Dashboard() {
                                 <div className="text-sm text-gray-500">
                                     Product Line
                                 </div>
-                                <span className="inline-block mt-1 px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                <span
+                                    className={`inline-block mt-1 px-2 py-1 rounded text-xs ${getProductLineTheme(selectedVisit.productLine).badge}`}
+                                >
                                     {selectedVisit.productLine}
                                 </span>
                             </div>
@@ -804,6 +934,9 @@ export default function Dashboard() {
                             {selectedDayVisits.map((visit, index) => {
                                 const isFull =
                                     visit.currentAttendees >= visit.capacity;
+                                const productLineTheme = getProductLineTheme(
+                                    visit.productLine,
+                                );
 
                                 return (
                                     <button
@@ -821,6 +954,9 @@ export default function Dashboard() {
                                         <div className="flex items-start justify-between gap-3">
                                             <div>
                                                 <div className="font-medium text-gray-900">
+                                                    {visit.isKeyAccount && (
+                                                        <Star className="inline-block w-4 h-4 text-amber-500 fill-amber-400 mr-1" />
+                                                    )}
                                                     {visit.customer}
                                                 </div>
                                                 <div className="text-xs text-gray-500 mt-1">
@@ -839,7 +975,9 @@ export default function Dashboard() {
                                                     {visit.currentAttendees}/
                                                     {visit.capacity}
                                                 </div>
-                                                <div className="text-gray-500 mt-1">
+                                                <div
+                                                    className={`mt-1 ${productLineTheme.subtleText}`}
+                                                >
                                                     {visit.productLine}
                                                 </div>
                                             </div>
