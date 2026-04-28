@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Slider } from "./ui/slider";
 
 interface Visit {
@@ -44,6 +44,10 @@ interface FilterPanelProps {
 
 export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
     const [filters, setFilters] = useState<VisitFilters>(defaultFilters);
+
+    useEffect(() => {
+        onApply(filters);
+    }, [filters, onApply]);
 
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat("en-US", {
@@ -244,19 +248,10 @@ export default function FilterPanel({ visits, onApply }: FilterPanelProps) {
 
             <div className="flex gap-2 pt-4 border-t">
                 <button
-                    onClick={() => {
-                        setFilters(defaultFilters);
-                        onApply(defaultFilters);
-                    }}
+                    onClick={() => setFilters(defaultFilters)}
                     className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                 >
                     Clear Filters
-                </button>
-                <button
-                    onClick={() => onApply(filters)}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                    Apply Filters
                 </button>
             </div>
         </div>
