@@ -54,6 +54,7 @@ export interface LocationRecord {
 export interface CustomerRecord {
   customerId: string;
   customerName: string;
+  locationId: string;
   arr?: number;
   status?: string;
   isKeyAccount?: boolean;
