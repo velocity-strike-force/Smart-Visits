@@ -1,6 +1,7 @@
 version = 0.1
 [default.local_start_api.parameters]
 warm_containers = "EAGER"
+env_vars = "env.local.json"
 
 [smart_visits_dev.deploy.parameters]
 stack_name = "smart-visits"

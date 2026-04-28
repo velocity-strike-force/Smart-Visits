@@ -1,6 +1,9 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResult } from "aws-lambda";
 import { ApiGatewayLambdaHandler } from "./ApiGatewayLambdaHandler";
 import { Dynamo } from "../database/Dynamo";
+import { FeedbackData } from "../database/schema/Feedback";
+import auditLogger from "../services/AuditLoggerService";
+import { AuditLogData } from "../database/schema/AuditLog";
 
 export class FeedbackHandler extends ApiGatewayLambdaHandler {
     private readonly db: Dynamo;
@@ -8,6 +11,17 @@ export class FeedbackHandler extends ApiGatewayLambdaHandler {
     constructor() {
         super();
         this.db = new Dynamo({});
+    }
+
+    private async logAudit(
+        entry: Omit<AuditLogData, "timestamp">
+    ): Promise<void> {
+        try {
+            auditLogger.log(entry);
+            await auditLogger.flush();
+        } catch (error) {
+            console.error("Failed to flush audit log entry", error);
+        }
     }
 
     async handleFeedbackEndpoint(
@@ -22,64 +36,79 @@ export class FeedbackHandler extends ApiGatewayLambdaHandler {
     private async getFeedback(
         event: APIGatewayProxyEventV2
     ): Promise<APIGatewayProxyResult> {
-        const visitId = event.queryStringParameters?.visitId;
+        try {
+            const visitId = event.queryStringParameters?.visitId;
 
-        if (!visitId) {
-            return this.createErrorResponse(400, {
+            if (!visitId) {
+                return this.createErrorResponse(400, {
+                    success: false,
+                    message: "visitId is required",
+                });
+            }
+
+            const feedback = await this.db.getFeedbackForVisit(visitId);
+            return this.createSuccessResponse({
+                success: true,
+                visitId,
+                feedback,
+            });
+        } catch (error) {
+            return this.createErrorResponse(500, {
                 success: false,
-                message: "visitId is required",
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
             });
         }
-
-        // TODO: replace mock with real DynamoDB call — this.db.getFeedbackForVisit(visitId)
-        return this.createSuccessResponse({
-            success: true,
-            visitId,
-            feedback: [
-                {
-                    visitId,
-                    userId: "user-002",
-                    userName: "Alice Williams",
-                    role: "visitor",
-                    feedbackNotes: "Great visit — learned a lot about their warehouse operations.",
-                    keyAreasOfFocus: [],
-                    detractors: "",
-                    delighters: "",
-                    submittedAt: "2026-05-17T10:00:00Z",
-                },
-                {
-                    visitId,
-                    userId: "rep-001",
-                    userName: "Jane Smith",
-                    role: "salesRep",
-                    feedbackNotes: "Customer is very happy with the product.",
-                    keyAreasOfFocus: ["Inventory accuracy", "Cycle counting"],
-                    detractors: "Minor UI complaints about reporting.",
-                    delighters: "Speed of implementation impressed the team.",
-                    submittedAt: "2026-05-17T11:30:00Z",
-                },
-            ],
-        });
     }
 
     private async submitFeedback(
         event: APIGatewayProxyEventV2
     ): Promise<APIGatewayProxyResult> {
-        const body = JSON.parse(event.body ?? "{}");
-        const { visitId, userId } = body;
+        try {
+            const body = JSON.parse(event.body ?? "{}") as Partial<FeedbackData>;
+            const { visitId, userId } = body;
 
-        if (!visitId || !userId) {
-            return this.createErrorResponse(400, {
+            if (!visitId || !userId) {
+                return this.createErrorResponse(400, {
+                    success: false,
+                    message: "visitId and userId are required",
+                });
+            }
+
+            const feedbackData: FeedbackData = {
+                visitId,
+                userId,
+                userName: body.userName ?? "",
+                role: body.role === "salesRep" ? "salesRep" : "visitor",
+                feedbackNotes: body.feedbackNotes ?? "",
+                keyAreasOfFocus: body.keyAreasOfFocus ?? [],
+                detractors: body.detractors ?? "",
+                delighters: body.delighters ?? "",
+                submittedAt: body.submittedAt ?? new Date().toISOString(),
+            };
+
+            await this.db.putFeedback(feedbackData);
+            await this.logAudit({
+                entityId: `${visitId}#${userId}`,
+                action: "FEEDBACK_SUBMITTED",
+                actorUserId: userId,
+                metadata: { visitId, userId },
+            });
+
+            return this.createSuccessResponse({
+                success: true,
+                message: "Feedback submitted successfully",
+            });
+        } catch (error) {
+            return this.createErrorResponse(500, {
                 success: false,
-                message: "visitId and userId are required",
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
             });
         }
-
-        // TODO: replace mock with real DynamoDB call — this.db.putFeedback(body)
-
-        return this.createSuccessResponse({
-            success: true,
-            message: "Feedback submitted successfully",
-        });
     }
 }

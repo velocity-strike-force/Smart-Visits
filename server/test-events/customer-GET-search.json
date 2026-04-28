@@ -1,0 +1,29 @@
+{
+  "version": "2.0",
+  "routeKey": "GET /api/customer",
+  "rawPath": "/api/customer",
+  "rawQueryString": "q=Acme",
+  "queryStringParameters": {
+    "q": "Acme"
+  },
+  "headers": {
+    "content-type": "application/json"
+  },
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "test",
+    "http": {
+      "method": "GET",
+      "path": "/api/customer",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "test"
+    },
+    "requestId": "test-customer-get",
+    "routeKey": "GET /api/customer",
+    "stage": "$default",
+    "time": "28/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777521600000
+  },
+  "isBase64Encoded": false
+}

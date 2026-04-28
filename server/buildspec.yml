@@ -8,6 +8,7 @@ phases:
   build:
     commands:
       - npm run test
+      - npm run build
       - rm -rf __tests__
       - npm prune --production
       - aws cloudformation package
