@@ -9,6 +9,7 @@ import {
     Star,
     X,
     ExternalLink,
+    CheckCircle2,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -37,6 +38,7 @@ interface Visit {
     domain: string;
     isKeyAccount?: boolean;
     isDraft?: boolean;
+    postVisitRecordCount?: number;
     capacity: number;
     currentAttendees: number;
 }
@@ -53,6 +55,7 @@ const mockVisits: Visit[] = [
         salesRep: "John Smith",
         domain: "Manufacturing",
         isKeyAccount: true,
+        postVisitRecordCount: 2,
         capacity: 10,
         currentAttendees: 3,
     },
@@ -110,6 +113,7 @@ const mockVisits: Visit[] = [
         salesRep: "Mike Johnson",
         domain: "Manufacturing",
         isKeyAccount: true,
+        postVisitRecordCount: 1,
         capacity: 5,
         currentAttendees: 5,
     },
@@ -138,8 +142,334 @@ const mockVisits: Visit[] = [
         salesRep: "Chris Morgan",
         domain: "Outbound",
         isKeyAccount: true,
+        postVisitRecordCount: 1,
         capacity: 10,
         currentAttendees: 2,
+    },
+    {
+        id: "8",
+        title: "Demand Planning Strategy Session",
+        customer: "Summit Brands",
+        date: new Date(2026, 3, 17),
+        productLine: "Demand Planning",
+        location: "Atlanta, GA",
+        arr: 360000,
+        salesRep: "Priya Patel",
+        domain: "Counting",
+        isKeyAccount: true,
+        postVisitRecordCount: 1,
+        capacity: 9,
+        currentAttendees: 5,
+    },
+    {
+        id: "9",
+        title: "Warehouse Mobility Deep Dive",
+        customer: "Vertex Distribution",
+        date: new Date(2026, 3, 17),
+        productLine: "AX",
+        location: "Dallas, TX",
+        arr: 210000,
+        salesRep: "Alex Rivera",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 7,
+        currentAttendees: 3,
+    },
+    {
+        id: "10",
+        title: "Outbound Throughput Workshop",
+        customer: "Globex Industries",
+        date: new Date(2026, 3, 22),
+        productLine: "TMS",
+        location: "Tampa, FL",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 8,
+        currentAttendees: 6,
+    },
+    {
+        id: "11",
+        title: "Counting Process Calibration",
+        customer: "Metro Retail Group",
+        date: new Date(2026, 3, 28),
+        productLine: "Shipping",
+        location: "Charlotte, NC",
+        arr: 195000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        capacity: 10,
+        currentAttendees: 4,
+    },
+    {
+        id: "12",
+        title: "May Launch Planning",
+        customer: "Harbor Wholesale",
+        date: new Date(2026, 4, 6),
+        productLine: "Oracle Cloud",
+        location: "Savannah, GA",
+        arr: 205000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 8,
+        currentAttendees: 3,
+    },
+    {
+        id: "13",
+        title: "Factory Floor Alignment",
+        customer: "Acme Corp",
+        date: new Date(2026, 4, 14),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        capacity: 10,
+        currentAttendees: 7,
+    },
+    {
+        id: "14",
+        title: "Outbound Routing Roundtable",
+        customer: "Globex Industries",
+        date: new Date(2026, 4, 28),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 9,
+        currentAttendees: 6,
+    },
+    {
+        id: "15",
+        title: "June Forecast Workshop",
+        customer: "Summit Brands",
+        date: new Date(2026, 5, 4),
+        productLine: "Demand Planning",
+        location: "Atlanta, GA",
+        arr: 365000,
+        salesRep: "Priya Patel",
+        domain: "Counting",
+        isKeyAccount: true,
+        capacity: 9,
+        currentAttendees: 4,
+    },
+    {
+        id: "16",
+        title: "Warehouse Mobility Review",
+        customer: "Vertex Distribution",
+        date: new Date(2026, 5, 19),
+        productLine: "AX",
+        location: "Dallas, TX",
+        arr: 215000,
+        salesRep: "Alex Rivera",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        currentAttendees: 2,
+    },
+    {
+        id: "17",
+        title: "Late-April Customer Readout",
+        customer: "Bluewave Energy",
+        date: new Date(2026, 3, 29),
+        productLine: "NetSuite",
+        location: "Houston, TX",
+        arr: 240000,
+        salesRep: "Alex Rivera",
+        domain: "Manufacturing",
+        isKeyAccount: false,
+        capacity: 8,
+        currentAttendees: 3,
+    },
+    {
+        id: "18",
+        title: "May Throughput Assessment",
+        customer: "Metro Retail Group",
+        date: new Date(2026, 4, 21),
+        productLine: "Shipping",
+        location: "Charlotte, NC",
+        arr: 195000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        postVisitRecordCount: 1,
+        capacity: 10,
+        currentAttendees: 5,
+    },
+    {
+        id: "19",
+        title: "June Operations Roundtable",
+        customer: "Globex Industries",
+        date: new Date(2026, 5, 24),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 9,
+        currentAttendees: 6,
+    },
+    {
+        id: "20",
+        title: "May Integration Design Review",
+        customer: "Northstar Foods",
+        date: new Date(2026, 4, 5),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 275000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        currentAttendees: 3,
+    },
+    {
+        id: "21",
+        title: "May Site Expansion Debrief",
+        customer: "Bluewave Energy",
+        date: new Date(2026, 4, 12),
+        productLine: "NetSuite",
+        location: "Houston, TX",
+        arr: 240000,
+        salesRep: "Alex Rivera",
+        domain: "Manufacturing",
+        isKeyAccount: false,
+        capacity: 7,
+        currentAttendees: 4,
+    },
+    {
+        id: "22",
+        title: "May Forecast Validation",
+        customer: "Summit Brands",
+        date: new Date(2026, 4, 20),
+        productLine: "Demand Planning",
+        location: "Atlanta, GA",
+        arr: 365000,
+        salesRep: "Priya Patel",
+        domain: "Counting",
+        isKeyAccount: true,
+        capacity: 9,
+        currentAttendees: 6,
+    },
+    {
+        id: "23",
+        title: "May Distribution Workflow Audit",
+        customer: "Vertex Distribution",
+        date: new Date(2026, 4, 26),
+        productLine: "AX",
+        location: "Dallas, TX",
+        arr: 215000,
+        salesRep: "Alex Rivera",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        currentAttendees: 5,
+    },
+    {
+        id: "24",
+        title: "June Kickoff Planning Session",
+        customer: "Harbor Wholesale",
+        date: new Date(2026, 5, 2),
+        productLine: "Oracle Cloud",
+        location: "Savannah, GA",
+        arr: 205000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        currentAttendees: 4,
+    },
+    {
+        id: "25",
+        title: "June Factory Readiness Workshop",
+        customer: "Acme Corp",
+        date: new Date(2026, 5, 9),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 320000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        capacity: 10,
+        currentAttendees: 7,
+    },
+    {
+        id: "26",
+        title: "June Mid-Month Throughput Check",
+        customer: "Metro Retail Group",
+        date: new Date(2026, 5, 18),
+        productLine: "Shipping",
+        location: "Charlotte, NC",
+        arr: 195000,
+        salesRep: "Sarah Williams",
+        domain: "Counting",
+        isKeyAccount: false,
+        capacity: 10,
+        currentAttendees: 5,
+    },
+    {
+        id: "27",
+        title: "June Route Optimization Review",
+        customer: "Globex Industries",
+        date: new Date(2026, 5, 25),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 460000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 9,
+        currentAttendees: 7,
+    },
+    {
+        id: "28",
+        title: "April Go-Live Readiness Check",
+        customer: "Acme Corp",
+        date: new Date(2026, 3, 1),
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        arr: 315000,
+        salesRep: "John Smith",
+        domain: "Manufacturing",
+        isKeyAccount: true,
+        capacity: 10,
+        currentAttendees: 6,
+    },
+    {
+        id: "29",
+        title: "April Inventory Alignment Session",
+        customer: "Northstar Foods",
+        date: new Date(2026, 3, 2),
+        productLine: "Oracle Cloud",
+        location: "Nashville, TN",
+        arr: 278000,
+        salesRep: "Jane Doe",
+        domain: "Inbound",
+        isKeyAccount: false,
+        capacity: 8,
+        currentAttendees: 4,
+    },
+    {
+        id: "30",
+        title: "April Network Planning Kickoff",
+        customer: "Globex Industries",
+        date: new Date(2026, 3, 6),
+        productLine: "TMS",
+        location: "Atlanta, GA",
+        arr: 462000,
+        salesRep: "Mike Johnson",
+        domain: "Outbound",
+        isKeyAccount: true,
+        capacity: 9,
+        currentAttendees: 5,
     },
 ];
 
@@ -175,6 +505,22 @@ const getProductLineTheme = (productLine: string) => {
             calendarCard: "bg-amber-100 text-amber-800",
             badge: "bg-amber-100 text-amber-800",
             subtleText: "text-amber-700",
+        };
+    }
+
+    if (normalized.includes("demand")) {
+        return {
+            calendarCard: "bg-fuchsia-100 text-fuchsia-800",
+            badge: "bg-fuchsia-100 text-fuchsia-800",
+            subtleText: "text-fuchsia-700",
+        };
+    }
+
+    if (normalized.includes("ax")) {
+        return {
+            calendarCard: "bg-cyan-100 text-cyan-800",
+            badge: "bg-cyan-100 text-cyan-800",
+            subtleText: "text-cyan-700",
         };
     }
 
@@ -257,6 +603,9 @@ export default function Dashboard() {
     const getVisitsForDay = (day: Date) => {
         return filteredVisits.filter((visit) => isSameDay(visit.date, day));
     };
+
+    const hasPostVisitRecord = (visit: Visit) =>
+        (visit.postVisitRecordCount ?? 0) > 0;
 
     const selectedDayVisits = selectedDay ? getVisitsForDay(selectedDay) : [];
 
@@ -486,6 +835,11 @@ export default function Dashboard() {
                                                                     {
                                                                         visit.customer
                                                                     }
+                                                                    {hasPostVisitRecord(
+                                                                        visit,
+                                                                    ) && (
+                                                                        <CheckCircle2 className="inline-block w-3 h-3 text-green-700 ml-1" />
+                                                                    )}
                                                                 </div>
 
                                                                 <div className="text-[10px] mt-1 flex items-center justify-between">
@@ -650,6 +1004,14 @@ export default function Dashboard() {
                                                             <Star className="inline-block w-4 h-4 text-amber-500 fill-amber-400 mr-1" />
                                                         )}
                                                         {visit.customer}
+                                                        {hasPostVisitRecord(
+                                                            visit,
+                                                        ) && (
+                                                            <span className="ml-2 inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                                                <CheckCircle2 className="w-3 h-3" />
+                                                                Done
+                                                            </span>
+                                                        )}
                                                     </td>
                                                     <td className="px-6 py-4">
                                                         {visit.location}
@@ -770,6 +1132,12 @@ export default function Dashboard() {
                                         "MMMM dd, yyyy",
                                     )}
                                 </p>
+                                {hasPostVisitRecord(selectedVisit) && (
+                                    <span className="mt-2 inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                        <CheckCircle2 className="w-3 h-3" />
+                                        Done ({selectedVisit.postVisitRecordCount} post-visit record{selectedVisit.postVisitRecordCount === 1 ? "" : "s"})
+                                    </span>
+                                )}
                             </div>
 
                             <button
@@ -968,6 +1336,12 @@ export default function Dashboard() {
                                                     )}
                                                     {visit.customer}
                                                 </div>
+                                                {hasPostVisitRecord(visit) && (
+                                                    <div className="mt-1 inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
+                                                        <CheckCircle2 className="w-3 h-3" />
+                                                        Done
+                                                    </div>
+                                                )}
                                                 <div className="text-xs text-gray-500 mt-1">
                                                     {visit.location}
                                                 </div>

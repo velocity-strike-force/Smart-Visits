@@ -7,6 +7,7 @@ import {
     MapPin,
     Calendar,
     DollarSign,
+    CheckCircle2,
 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -44,6 +45,7 @@ export default function VisitDetail() {
     const isSignedUp = visit.attendees.includes(user.name);
     const canVisitorJoin =
         isVisitor && !isSignedUp && visit.attendees.length < visit.capacity;
+    const hasPostVisitRecord = (visit.postVisitRecordCount ?? 0) > 0;
 
     const handleSignUp = () => {
         if (!isVisitor) {
@@ -139,6 +141,12 @@ export default function VisitDetail() {
                                 <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm flex items-center gap-1">
                                     <span className="text-green-600">✓</span>{" "}
                                     You're Attending
+                                </span>
+                            )}
+                            {hasPostVisitRecord && (
+                                <span className="px-3 py-1 bg-green-100 text-green-800 rounded text-sm flex items-center gap-1">
+                                    <CheckCircle2 className="w-4 h-4" />
+                                    Done ({visit.postVisitRecordCount} post-visit record{visit.postVisitRecordCount === 1 ? "" : "s"})
                                 </span>
                             )}
                         </div>
