@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /api/profile",
+  "rawPath": "/api/profile",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "queryStringParameters": null,
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/api/profile",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "curl/7.68.0"
+    },
+    "requestId": "test-request-id",
+    "routeKey": "POST /api/profile",
+    "stage": "$default",
+    "time": "27/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777492800000
+  },
+  "body": "{\"userId\":\"user-001\",\"name\":\"Sam Developer\",\"email\":\"sam@example.com\",\"productLines\":[\"NetSuite\",\"Oracle Cloud\"],\"city\":\"Jacksonville\",\"state\":\"FL\",\"emailNotifications\":true,\"slackNotifications\":false,\"proximityAlerts\":true,\"proximityDistanceMiles\":50}",
+  "isBase64Encoded": false
+}

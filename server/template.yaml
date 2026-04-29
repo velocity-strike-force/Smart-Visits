@@ -127,6 +127,49 @@ Resources:
         - AttributeName: timestamp
           KeyType: RANGE
 
+  RolesTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Roles"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: roleId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: roleId
+          KeyType: HASH
+
+  ProductLinesTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-ProductLines"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: productLineId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: productLineId
+          KeyType: HASH
+
+  UserProductLinesTable:
+    Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-UserProductLines"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: productLineId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: productLineId
+          KeyType: RANGE
+
   # ── Visit ────────────────────────────────────────────────
   HandleVisitFunction:
     Type: AWS::Serverless::Function

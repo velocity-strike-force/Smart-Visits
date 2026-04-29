@@ -6,6 +6,7 @@ import {
     GetCommand,
     PutCommand,
     ScanCommand,
+    UpdateCommand,
 } from "@aws-sdk/lib-dynamodb";
 import { VisitHandler } from "../../src/handlers/VisitHandler";
 
@@ -104,6 +105,17 @@ describe("VisitHandler", () => {
         expect(body.visit.visitId).toBe("visit-001");
     });
 
+    it("GET /api/visit?visitId=visit-404 returns 404 when not found", async () => {
+        ddbMock.on(GetCommand).resolves({});
+        const handler = new VisitHandler();
+        const event = makeEvent("GET", { visitId: "visit-404" });
+        const result = await handler.handleVisitEndpoint(event);
+
+        expect(result.statusCode).toBe(404);
+        const body = JSON.parse(result.body);
+        expect(body.success).toBe(false);
+    });
+
     it("POST /api/visit creates a visit and returns an id", async () => {
         ddbMock.on(PutCommand).resolves({});
         const handler = new VisitHandler();
@@ -123,6 +135,43 @@ describe("VisitHandler", () => {
         const body = JSON.parse(result.body);
         expect(body.success).toBe(true);
         expect(body.visitId).toBe("visit-123");
+    });
+
+    it("PUT /api/visit updates an existing visit", async () => {
+        ddbMock.on(GetCommand).resolves({ Item: makeVisit("visit-123") });
+        ddbMock.on(UpdateCommand).resolves({});
+        ddbMock.on(PutCommand).resolves({});
+        const handler = new VisitHandler();
+        const event = makeEvent(
+            "PUT",
+            undefined,
+            JSON.stringify({
+                visitId: "visit-123",
+                capacity: 10,
+                purposeForVisit: "Updated purpose",
+            })
+        );
+        const result = await handler.handleVisitEndpoint(event);
+
+        expect(result.statusCode).toBe(200);
+        const body = JSON.parse(result.body);
+        expect(body.success).toBe(true);
+        expect(body.visitId).toBe("visit-123");
+    });
+
+    it("PUT /api/visit without visitId returns 400", async () => {
+        const handler = new VisitHandler();
+        const event = makeEvent(
+            "PUT",
+            undefined,
+            JSON.stringify({
+                purposeForVisit: "Missing id update",
+            })
+        );
+        const result = await handler.handleVisitEndpoint(event);
+
+        expect(result.statusCode).toBe(400);
+        expect(JSON.parse(result.body).success).toBe(false);
     });
 
     it("DELETE /api/visit without visitId returns 400", async () => {

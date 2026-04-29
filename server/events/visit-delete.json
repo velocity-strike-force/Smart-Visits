@@ -1,0 +1,28 @@
+{
+  "version": "2.0",
+  "routeKey": "DELETE /api/visit",
+  "rawPath": "/api/visit",
+  "rawQueryString": "visitId=visit-001",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "queryStringParameters": {
+    "visitId": "visit-001"
+  },
+  "requestContext": {
+    "http": {
+      "method": "DELETE",
+      "path": "/api/visit",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "curl/7.68.0"
+    },
+    "requestId": "test-request-id",
+    "routeKey": "DELETE /api/visit",
+    "stage": "$default",
+    "time": "27/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777492800000
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

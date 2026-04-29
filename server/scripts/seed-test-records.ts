@@ -12,15 +12,15 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { smartVisitsTables } from "../src/database/schema";
-import type { VisitData } from "../src/database/models/Visit";
-import type { UserData } from "../src/database/models/User";
-import type { SignupData } from "../src/database/models/Signup";
-import type { FeedbackData } from "../src/database/models/Feedback";
-import type { CustomerData } from "../src/database/models/Customer";
-import type { AuditLogData } from "../src/database/models/AuditLog";
-import type { RoleData } from "../src/database/models/Role";
-import type { ProductLineData } from "../src/database/models/ProductLine";
-import type { UserProductLineData } from "../src/database/models/UserProductLine";
+import type { VisitData } from "../src/database/schema/Visit";
+import type { UserData } from "../src/database/schema/User";
+import type { SignupData } from "../src/database/schema/Signup";
+import type { FeedbackData } from "../src/database/schema/Feedback";
+import type { CustomerData } from "../src/database/schema/Customer";
+import type { AuditLogData } from "../src/database/schema/AuditLog";
+import type { RoleData } from "../src/database/schema/Role";
+import type { ProductLineData } from "../src/database/schema/ProductLine";
+import type { UserProductLineData } from "../src/database/schema/UserProductLine";
 
 const STAGE = process.env.STAGE || "dev";
 const COUNT = 10;
@@ -174,11 +174,13 @@ async function main(): Promise<void> {
       entityId: `visit-seed-${p}`,
       timestamp: iso(new Date(Date.UTC(2026, 4, 1, 10 + i, 0, 0, i * 17))),
       action: ["CREATE", "UPDATE", "DELETE"][i % 3] as AuditLogData["action"],
-      entityType: "Visit",
-      userId: `user-seed-${pad(i % 3)}`,
-      userName: `Seed User ${i % 3}`,
-      before: i % 3 === 1 ? { status: "draft" } : null,
-      after: { visitId: `visit-seed-${p}`, note: `seed audit ${i}` },
+      actorUserId: `user-seed-${pad(i % 3)}`,
+      metadata: {
+        entityType: "Visit",
+        userName: `Seed User ${i % 3}`,
+        before: i % 3 === 1 ? { status: "draft" } : null,
+        after: { visitId: `visit-seed-${p}`, note: `seed audit ${i}` },
+      },
     });
 
     userProductLines.push(
