@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { ChevronDown, X } from "lucide-react";
+import RequiredLabel from "./RequiredLabel";
 
 export interface TypeaheadProps {
     label: string;
@@ -7,6 +8,7 @@ export interface TypeaheadProps {
     options: string[];
     value: string;
     onChange: (value: string) => void;
+    required?: boolean;
     /** Optional extra class on the wrapper div */
     className?: string;
 }
@@ -17,6 +19,7 @@ export default function Typeahead({
     options,
     value,
     onChange,
+    required,
     className,
 }: TypeaheadProps) {
     const [query, setQuery] = useState(value);
@@ -61,7 +64,9 @@ export default function Typeahead({
 
     return (
         <div className={className}>
-            <label className="block mb-2 text-sm">{label}</label>
+            <RequiredLabel className="block mb-2 text-sm" required={required}>
+                {label}
+            </RequiredLabel>
             <div ref={containerRef} className="relative">
                 {/* Ghost overlay — typed text invisible + gray completion */}
                 {ghostSuffix && (

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 import Typeahead from "./Typeahead";
+import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
 
 interface AccountSettingsModalProps {
@@ -111,9 +112,9 @@ export default function AccountSettingsModal({
                         <h3 className="mb-4">Profile</h3>
                         <div className="space-y-4">
                             <div>
-                                <label className="block mb-2 text-sm">
+                                <RequiredLabel className="block mb-2 text-sm">
                                     Name
-                                </label>
+                                </RequiredLabel>
                                 <input
                                     type="text"
                                     value="Sonny Antunes"
@@ -122,9 +123,9 @@ export default function AccountSettingsModal({
                                 />
                             </div>
                             <div>
-                                <label className="block mb-2 text-sm">
+                                <RequiredLabel className="block mb-2 text-sm">
                                     Email
-                                </label>
+                                </RequiredLabel>
                                 <input
                                     type="email"
                                     value="sonny.antunes@rfsmart.com"
@@ -141,7 +142,7 @@ export default function AccountSettingsModal({
                             {productLineOptions.map((line) => (
                                 <label
                                     key={line}
-                                    className="flex items-center justify-between gap-3 text-sm"
+                                    className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
                                 >
                                     <span>{line}</span>
                                     <Switch
@@ -161,9 +162,9 @@ export default function AccountSettingsModal({
                         <h3 className="mb-4">Location</h3>
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block mb-2 text-sm">
+                                <RequiredLabel className="block mb-2 text-sm">
                                     City
-                                </label>
+                                </RequiredLabel>
                                 <input
                                     type="text"
                                     value={settings.city}
