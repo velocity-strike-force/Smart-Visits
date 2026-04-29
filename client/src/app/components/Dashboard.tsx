@@ -1,67 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Calendar, List, Filter, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
 import FilterPanel from './FilterPanel';
 import { useUser } from './UserContext';
-import { getVisits } from '../lib/api';
-
-interface Visit {
-  id: string;
-  title: string;
-  customer: string;
-  date: Date;
-  productLine: string;
-  location: string;
-  arr: number;
-  salesRep: string;
-  domain: string;
-  isDraft?: boolean;
-  capacity: number;
-  currentAttendees: number;
-}
+import { useVisits } from './VisitsContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useUser();
+  const { visits, visitsLoading, visitsError } = useVisits();
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showFilters, setShowFilters] = useState(false);
-  const [visits, setVisits] = useState<Visit[]>([]);
-  const [isLoadingVisits, setIsLoadingVisits] = useState(true);
-  const [visitsError, setVisitsError] = useState('');
-
-  useEffect(() => {
-    async function loadVisits() {
-      try {
-        setIsLoadingVisits(true);
-        setVisitsError('');
-
-        const apiVisits = await getVisits();
-        setVisits(apiVisits.map(visit => ({
-          id: visit.id ?? visit.visitId ?? '',
-          title: visit.title ?? '',
-          customer: visit.customer ?? visit.customerName ?? '',
-          date: new Date(visit.date ?? visit.startDate ?? ''),
-          productLine: visit.productLine ?? '',
-          location: visit.location ?? '',
-          arr: visit.arr ?? visit.customerARR ?? 0,
-          salesRep: visit.salesRep ?? visit.salesRepName ?? '',
-          domain: visit.domain ?? '',
-          isDraft: visit.isDraft ?? false,
-          capacity: visit.capacity ?? 0,
-          currentAttendees: visit.currentAttendees ?? visit.invitees?.length ?? 0,
-        })).filter(visit => visit.id && !Number.isNaN(visit.date.getTime())));
-      } catch (error) {
-        console.error('Failed to load visits:', error);
-        setVisitsError(error instanceof Error ? error.message : 'Failed to load visits');
-      } finally {
-        setIsLoadingVisits(false);
-      }
-    }
-
-    loadVisits();
-  }, []);
 
   const filteredVisits = user.role === 'visitor'
     ? visits.filter(v => !v.isDraft)
@@ -86,6 +37,14 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
       <div className="bg-white border-b px-8 py-6">
+        {visitsError && (
+          <div className="mb-4 rounded-lg bg-red-50 text-red-800 px-4 py-2 text-sm border border-red-100">
+            {visitsError}
+          </div>
+        )}
+        {visitsLoading && (
+          <div className="mb-4 text-gray-600 text-sm">Loading visits…</div>
+        )}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="flex gap-2">
@@ -152,18 +111,6 @@ export default function Dashboard() {
         )}
 
         <div className="p-8">
-          {isLoadingVisits && (
-            <div className="mb-4 rounded-lg border bg-white px-4 py-3 text-gray-600">
-              Loading visits...
-            </div>
-          )}
-
-          {visitsError && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-              {visitsError}
-            </div>
-          )}
-
           {viewMode === 'calendar' ? (
             <div className="bg-white rounded-lg border overflow-hidden">
               <div className="grid grid-cols-7 border-b">
@@ -187,7 +134,7 @@ export default function Dashboard() {
                       </div>
                       <div className="space-y-1">
                         {dayVisits.map(visit => {
-                          const isFull = visit.currentAttendees >= visit.capacity;
+                          const isFull = visit.attendees.length >= visit.capacity;
                           return (
                             <div
                               key={visit.id}
@@ -203,7 +150,7 @@ export default function Dashboard() {
                               <div className={`text-[10px] mt-1 flex items-center justify-between`}>
                                 <span>{visit.location}</span>
                                 <span className={isFull ? 'text-red-600 font-medium' : ''}>
-                                  {visit.currentAttendees}/{visit.capacity}
+                                  {visit.attendees.length}/{visit.capacity}
                                 </span>
                               </div>
                               {visit.isDraft && user.role === 'sales_rep' && (
@@ -264,8 +211,8 @@ export default function Dashboard() {
                   {filteredVisits
                     .filter(visit => isSameMonth(visit.date, currentDate))
                     .map(visit => {
-                      const isFull = visit.currentAttendees >= visit.capacity;
-                      const spotsLeft = visit.capacity - visit.currentAttendees;
+                      const isFull = visit.attendees.length >= visit.capacity;
+                      const spotsLeft = visit.capacity - visit.attendees.length;
                       return (
                         <tr
                           key={visit.id}
@@ -284,7 +231,7 @@ export default function Dashboard() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <span className={isFull ? 'text-red-600 font-medium' : ''}>
-                                {visit.currentAttendees} / {visit.capacity}
+                                {visit.attendees.length} / {visit.capacity}
                               </span>
                               {isFull ? (
                                 <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">Full</span>

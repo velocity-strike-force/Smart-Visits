@@ -6,13 +6,10 @@ Parameters:
   STAGE:
     Type: String
     Default: dev
-  DYNAMODB_ENDPOINT:
+  DynamodbEndpoint:
     Type: String
     Default: ""
     Description: "DynamoDB endpoint override (set for local dev, leave empty for AWS)."
-
-Conditions:
-  IsLocalStage: !Equals [!Ref STAGE, "local"]
 
 Globals:
   Function:
@@ -28,7 +25,7 @@ Globals:
     Environment:
       Variables:
         STAGE: !Ref STAGE
-        DYNAMODB_ENDPOINT: !Ref DYNAMODB_ENDPOINT
+        DYNAMODB_ENDPOINT: !Ref DynamodbEndpoint
   Api:
     Cors:
       AllowHeaders: "'*'"
@@ -39,7 +36,6 @@ Globals:
 Resources:
   VisitsTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-Visits"
       BillingMode: PAY_PER_REQUEST
@@ -52,7 +48,6 @@ Resources:
 
   UsersTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-Users"
       BillingMode: PAY_PER_REQUEST
@@ -65,7 +60,6 @@ Resources:
 
   SignupsTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-Signups"
       BillingMode: PAY_PER_REQUEST
@@ -82,7 +76,6 @@ Resources:
 
   FeedbackTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-Feedback"
       BillingMode: PAY_PER_REQUEST
@@ -99,7 +92,6 @@ Resources:
 
   CustomersTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-Customers"
       BillingMode: PAY_PER_REQUEST
@@ -112,7 +104,6 @@ Resources:
 
   AuditLogTable:
     Type: AWS::DynamoDB::Table
-    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-AuditLog"
       BillingMode: PAY_PER_REQUEST
@@ -125,6 +116,46 @@ Resources:
         - AttributeName: entityId
           KeyType: HASH
         - AttributeName: timestamp
+          KeyType: RANGE
+
+  RolesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-Roles"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: roleId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: roleId
+          KeyType: HASH
+
+  ProductLinesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-ProductLines"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: productLineId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: productLineId
+          KeyType: HASH
+
+  UserProductLinesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-UserProductLines"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+        - AttributeName: productLineId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+        - AttributeName: productLineId
           KeyType: RANGE
 
   # ── Visit ────────────────────────────────────────────────
@@ -147,6 +178,12 @@ Resources:
             TableName: !Ref CustomersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref AuditLogTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProductLinesTable
       Events:
         GetApi:
           Type: HttpApi
@@ -199,6 +236,12 @@ Resources:
             TableName: !Ref CustomersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref AuditLogTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProductLinesTable
       Events:
         GetApi:
           Type: HttpApi
@@ -246,6 +289,12 @@ Resources:
             TableName: !Ref CustomersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref AuditLogTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProductLinesTable
       Events:
         GetApi:
           Type: HttpApi
@@ -288,6 +337,12 @@ Resources:
             TableName: !Ref CustomersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref AuditLogTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProductLinesTable
       Events:
         GetApi:
           Type: HttpApi
@@ -330,6 +385,12 @@ Resources:
             TableName: !Ref CustomersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref AuditLogTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProductLinesTable
       Events:
         GetApi:
           Type: HttpApi
@@ -367,6 +428,12 @@ Resources:
             TableName: !Ref CustomersTable
         - DynamoDBCrudPolicy:
             TableName: !Ref AuditLogTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UserProductLinesTable
       Events:
         GetApi:
           Type: HttpApi

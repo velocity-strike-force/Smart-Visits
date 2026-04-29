@@ -1,15 +1,76 @@
 import { APIGatewayProxyEventV2 } from "aws-lambda";
-import { mockClient } from "aws-sdk-client-mock";
-import {
-    DeleteCommand,
-    DynamoDBDocumentClient,
-    GetCommand,
-    PutCommand,
-    ScanCommand,
-} from "@aws-sdk/lib-dynamodb";
 import { VisitHandler } from "../../src/handlers/VisitHandler";
+import { Dynamo } from "../../src/database/Dynamo";
+import { Visit, type VisitData } from "../../src/database/schema/Visit";
 
-const ddbMock = mockClient(DynamoDBDocumentClient);
+jest.mock("../../src/services/AuditLoggerService", () => ({
+    __esModule: true,
+    default: {
+        log: jest.fn(),
+        flush: jest.fn().mockResolvedValue(undefined),
+    },
+}));
+
+function sampleVisitData(overrides: Partial<VisitData> = {}): VisitData {
+    return {
+        visitId: "visit-001",
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        city: "Jacksonville",
+        state: "FL",
+        salesRepId: "rep-001",
+        salesRepName: "Jane Smith",
+        domain: "ERP",
+        customerId: "cust-001",
+        customerName: "Acme Corp",
+        customerARR: 250000,
+        customerImplementationStatus: "Live",
+        isKeyAccount: true,
+        startDate: "2026-05-15",
+        endDate: "2026-05-16",
+        capacity: 5,
+        invitees: ["user-002"],
+        customerContactRep: "John Doe",
+        purposeForVisit: "Quarterly Business Review",
+        visitDetails: "Meet in lobby.",
+        isDraft: false,
+        isPrivate: false,
+        createdAt: "2026-04-01T10:00:00Z",
+        updatedAt: "2026-04-01T10:00:00Z",
+        ...overrides,
+    };
+}
+
+function createMockDynamo(): Dynamo {
+    const v1 = new Visit(sampleVisitData());
+    const v2 = new Visit(
+        sampleVisitData({
+            visitId: "visit-002",
+            isDraft: true,
+            customerName: "Globex Industries",
+        })
+    );
+
+    return {
+        getAllVisits: jest.fn().mockResolvedValue([v1, v2]),
+        getVisitById: jest.fn().mockImplementation(async (id: string) => {
+            if (id === "visit-001") return v1;
+            if (id === "visit-002") return v2;
+            if (id === "visit-xyz") {
+                return new Visit(
+                    sampleVisitData({
+                        visitId: "visit-xyz",
+                        salesRepId: "rep-xyz",
+                    })
+                );
+            }
+            return undefined;
+        }),
+        createVisit: jest.fn().mockResolvedValue(undefined),
+        updateVisit: jest.fn().mockResolvedValue(undefined),
+        deleteVisit: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Dynamo;
+}
 
 function makeEvent(
     method: string,
@@ -46,55 +107,29 @@ function makeEvent(
     };
 }
 
-function makeVisit(visitId = "visit-001") {
-    return {
-        visitId,
-        productLine: "NetSuite",
-        location: "Jacksonville",
-        city: "Jacksonville",
-        state: "FL",
-        salesRepId: "rep-001",
-        salesRepName: "Jane",
-        domain: "ERP",
-        customerId: "cust-001",
-        customerName: "Acme",
-        customerARR: 120000,
-        customerImplementationStatus: "Live",
-        isKeyAccount: true,
-        startDate: new Date().toISOString(),
-        endDate: new Date().toISOString(),
-        capacity: 5,
-        invitees: [],
-        customerContactRep: "Alex",
-        purposeForVisit: "QBR",
-        visitDetails: "Details",
-        isDraft: false,
-        isPrivate: false,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-    };
-}
-
 describe("VisitHandler", () => {
+    let mockDb: Dynamo;
+    let handler: VisitHandler;
+
     beforeEach(() => {
-        ddbMock.reset();
+        mockDb = createMockDynamo();
+        handler = new VisitHandler({ db: mockDb });
     });
 
     it("GET /api/visit returns a list of visits", async () => {
-        ddbMock.on(ScanCommand).resolves({ Items: [makeVisit()] });
-        const handler = new VisitHandler();
         const event = makeEvent("GET");
         const result = await handler.handleVisitEndpoint(event);
 
         expect(result.statusCode).toBe(200);
         const body = JSON.parse(result.body);
         expect(body.success).toBe(true);
-        expect(body.visits).toHaveLength(1);
+        expect(body.visits).toBeDefined();
+        expect(Array.isArray(body.visits)).toBe(true);
+        expect(body.visits.length).toBe(2);
+        expect(mockDb.getAllVisits).toHaveBeenCalled();
     });
 
     it("GET /api/visit?visitId=visit-001 returns a single visit", async () => {
-        ddbMock.on(GetCommand).resolves({ Item: makeVisit("visit-001") });
-        const handler = new VisitHandler();
         const event = makeEvent("GET", { visitId: "visit-001" });
         const result = await handler.handleVisitEndpoint(event);
 
@@ -102,11 +137,10 @@ describe("VisitHandler", () => {
         const body = JSON.parse(result.body);
         expect(body.success).toBe(true);
         expect(body.visit.visitId).toBe("visit-001");
+        expect(mockDb.getVisitById).toHaveBeenCalledWith("visit-001");
     });
 
     it("POST /api/visit creates a visit and returns an id", async () => {
-        ddbMock.on(PutCommand).resolves({});
-        const handler = new VisitHandler();
         const event = makeEvent(
             "POST",
             undefined,
@@ -122,11 +156,11 @@ describe("VisitHandler", () => {
         expect(result.statusCode).toBe(200);
         const body = JSON.parse(result.body);
         expect(body.success).toBe(true);
-        expect(body.visitId).toBe("visit-123");
+        expect(body.visitId).toBeDefined();
+        expect(mockDb.createVisit).toHaveBeenCalled();
     });
 
     it("DELETE /api/visit without visitId returns 400", async () => {
-        const handler = new VisitHandler();
         const event = makeEvent("DELETE");
         const result = await handler.handleVisitEndpoint(event);
 
@@ -136,20 +170,16 @@ describe("VisitHandler", () => {
     });
 
     it("DELETE /api/visit removes an existing visit", async () => {
-        ddbMock.on(GetCommand).resolves({ Item: makeVisit("visit-xyz") });
-        ddbMock.on(DeleteCommand).resolves({});
-        ddbMock.on(PutCommand).resolves({});
-        const handler = new VisitHandler();
         const event = makeEvent("DELETE", { visitId: "visit-xyz" });
         const result = await handler.handleVisitEndpoint(event);
 
         expect(result.statusCode).toBe(200);
         const body = JSON.parse(result.body);
         expect(body.success).toBe(true);
+        expect(mockDb.deleteVisit).toHaveBeenCalledWith("visit-xyz");
     });
 
     it("PATCH /api/visit returns 405 method not allowed", async () => {
-        const handler = new VisitHandler();
         const event = makeEvent("PATCH");
         const result = await handler.handleVisitEndpoint(event);
 

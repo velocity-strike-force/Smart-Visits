@@ -5,6 +5,7 @@
     "allowJs": true,
     "strict": true,
     "baseUrl": ".",
+    "rootDir": "./src",
     "outDir": "./dist",
     "moduleResolution": "node",
     "esModuleInterop": true,
@@ -13,6 +14,6 @@
     "sourceMap": true,
     "resolveJsonModule": true
   },
-  "exclude": ["node_modules"],
-  "include": ["**/*.ts", "**/*.d.ts", "**/*.json"]
+  "exclude": ["node_modules", "dist"],
+  "include": ["src/**/*.ts"]
 }
