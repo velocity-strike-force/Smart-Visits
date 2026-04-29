@@ -38,6 +38,8 @@ const defaultFilters: FilterState = {
     keyAccounts: false,
 };
 
+const EMPTY_PRODUCT_LINE_LABEL = "Unspecified";
+
 interface FilterPanelProps {
     visits: Visit[];
     filters?: FilterState;
@@ -127,14 +129,16 @@ export default function FilterPanel({
                     <RequiredLabel className="block mb-2">
                         Product Line
                     </RequiredLabel>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {productLineOptions.length > 0 ? (
                             productLineOptions.map((line) => (
                                 <label
                                     key={line}
-                                    className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
+                                    className="flex items-center justify-between gap-3 rounded-lg p-2 text-sm"
                                 >
-                                    <span>{line}</span>
+                                    <span>
+                                        {line || EMPTY_PRODUCT_LINE_LABEL}
+                                    </span>
                                     <Switch
                                         checked={filters.productLines.includes(
                                             line,
@@ -251,7 +255,7 @@ export default function FilterPanel({
                         className="w-full px-3 py-2 border rounded-lg"
                     />
 
-                    <RequiredLabel className="mt-4 flex items-center justify-between gap-3 rounded-lg border p-3 text-sm">
+                    <RequiredLabel className="mt-4 flex items-center justify-between gap-3 rounded-lg p-3 text-sm">
                         <span>Key Accounts Only</span>
                         <Switch
                             checked={filters.keyAccounts}

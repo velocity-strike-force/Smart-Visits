@@ -151,7 +151,7 @@ export default function Dashboard() {
                     <div className="flex items-center justify-center gap-3">
                         <button
                             onClick={previousMonth}
-                            className="h-9 w-9 rounded-full border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50"
+                            className="h-9 w-9 rounded-lg border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50"
                             aria-label="Previous month"
                         >
                             <ChevronLeft className="w-4 h-4" />
@@ -161,7 +161,7 @@ export default function Dashboard() {
                         </h2>
                         <button
                             onClick={nextMonth}
-                            className="h-9 w-9 rounded-full border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50"
+                            className="h-9 w-9 rounded-lg border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50"
                             aria-label="Next month"
                         >
                             <ChevronRight className="w-4 h-4" />
