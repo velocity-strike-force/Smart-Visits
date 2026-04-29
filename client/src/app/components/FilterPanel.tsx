@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { Slider } from "./ui/slider";
 import RequiredLabel from "./RequiredLabel";
+import { Switch } from "./ui/switch";
 
 interface Visit {
     id: string;
@@ -126,24 +127,22 @@ export default function FilterPanel({
                     <RequiredLabel className="block mb-2">
                         Product Line
                     </RequiredLabel>
-                    <div className="space-y-2 max-h-48 overflow-auto">
+                    <div className="space-y-2">
                         {productLineOptions.length > 0 ? (
                             productLineOptions.map((line) => (
                                 <label
                                     key={line}
-                                    className="flex items-center gap-2 text-sm"
+                                    className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
                                 >
-                                    <input
-                                        type="checkbox"
+                                    <span>{line}</span>
+                                    <Switch
                                         checked={filters.productLines.includes(
                                             line,
                                         )}
-                                        onChange={() =>
+                                        onCheckedChange={() =>
                                             handleProductLineToggle(line)
                                         }
-                                        className="rounded"
                                     />
-                                    {line}
                                 </label>
                             ))
                         ) : (
@@ -252,19 +251,17 @@ export default function FilterPanel({
                         className="w-full px-3 py-2 border rounded-lg"
                     />
 
-                    <RequiredLabel className="flex items-center gap-2 mt-4 text-sm">
-                        <input
-                            type="checkbox"
+                    <RequiredLabel className="mt-4 flex items-center justify-between gap-3 rounded-lg border p-3 text-sm">
+                        <span>Key Accounts Only</span>
+                        <Switch
                             checked={filters.keyAccounts}
-                            onChange={(e) =>
+                            onCheckedChange={(checked) =>
                                 setFilters({
                                     ...filters,
-                                    keyAccounts: e.target.checked,
+                                    keyAccounts: checked,
                                 })
                             }
-                            className="rounded"
                         />
-                        Key Accounts Only
                     </RequiredLabel>
                 </div>
             </div>
@@ -275,9 +272,6 @@ export default function FilterPanel({
                     className="px-4 py-2 border rounded-lg hover:bg-gray-50"
                 >
                     Clear Filters
-                </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    Apply Filters
                 </button>
             </div>
         </div>

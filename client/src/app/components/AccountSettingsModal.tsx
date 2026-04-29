@@ -142,7 +142,7 @@ export default function AccountSettingsModal({
                             {productLineOptions.map((line) => (
                                 <label
                                     key={line}
-                                    className="flex items-center justify-between gap-3 text-sm"
+                                    className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm"
                                 >
                                     <span>{line}</span>
                                     <Switch
