@@ -1,0 +1,420 @@
+{
+  "info": {
+    "name": "Smart Visits API",
+    "_postman_id": "a9f8f3b0-2f0f-4eb5-b9df-7ca76a726001",
+    "description": "Collection for testing Smart Visits Lambda HTTP API endpoints.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Visit",
+      "item": [
+        {
+          "name": "POST /api/visit - Create",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"productLine\": \"NetSuite\",\n  \"location\": \"Jacksonville, FL\",\n  \"city\": \"Jacksonville\",\n  \"state\": \"FL\",\n  \"salesRepId\": \"rep-001\",\n  \"salesRepName\": \"Jane Smith\",\n  \"domain\": \"ERP\",\n  \"customerId\": \"cust-001\",\n  \"customerName\": \"Acme Corp\",\n  \"customerARR\": 250000,\n  \"customerImplementationStatus\": \"Live\",\n  \"isKeyAccount\": true,\n  \"startDate\": \"2026-06-10T14:00:00.000Z\",\n  \"endDate\": \"2026-06-10T18:00:00.000Z\",\n  \"capacity\": 10,\n  \"invitees\": [\"bob@acme.com\", \"alice@acme.com\"],\n  \"customerContactRep\": \"John Doe\",\n  \"purposeForVisit\": \"Quarterly Business Review\",\n  \"visitDetails\": \"Closed-toed shoes required.\",\n  \"isDraft\": false,\n  \"isPrivate\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/visit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "visit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json && json.visitId) {",
+                  "  pm.environment.set('visitId', json.visitId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /api/visit - List All",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/visit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "visit"
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/visit - By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/visit?visitId={{visitId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "visit"
+              ],
+              "query": [
+                {
+                  "key": "visitId",
+                  "value": "{{visitId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "PUT /api/visit - Update",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitId\": \"{{visitId}}\",\n  \"capacity\": 15,\n  \"purposeForVisit\": \"Updated: Executive Review\",\n  \"isDraft\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/visit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "visit"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/visit",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/visit?visitId={{visitId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "visit"
+              ],
+              "query": [
+                {
+                  "key": "visitId",
+                  "value": "{{visitId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Signup",
+      "item": [
+        {
+          "name": "GET /api/signup",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/signup?visitId={{visitId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "signup"
+              ],
+              "query": [
+                {
+                  "key": "visitId",
+                  "value": "{{visitId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /api/signup",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitId\": \"{{visitId}}\",\n  \"userId\": \"{{userId}}\",\n  \"userName\": \"Sam Developer\",\n  \"userEmail\": \"sam@example.com\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/signup",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "signup"
+              ]
+            }
+          }
+        },
+        {
+          "name": "DELETE /api/signup",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/signup?visitId={{visitId}}&userId={{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "signup"
+              ],
+              "query": [
+                {
+                  "key": "visitId",
+                  "value": "{{visitId}}"
+                },
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "item": [
+        {
+          "name": "GET /api/feedback",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback?visitId={{visitId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ],
+              "query": [
+                {
+                  "key": "visitId",
+                  "value": "{{visitId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /api/feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"visitId\": \"{{visitId}}\",\n  \"userId\": \"{{userId}}\",\n  \"userName\": \"Sam Developer\",\n  \"role\": \"visitor\",\n  \"feedbackNotes\": \"Great visit, learned a lot about the roadmap.\",\n  \"keyAreasOfFocus\": [\"Roadmap\", \"Support\", \"Expansion\"],\n  \"detractors\": \"Timeline on feature X\",\n  \"delighters\": \"Team collaboration was excellent\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "feedback"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "GET /api/profile",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/profile?userId={{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "POST /api/profile",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"name\": \"Sam Developer\",\n  \"email\": \"sam@example.com\",\n  \"productLines\": [\"NetSuite\", \"Oracle Cloud\"],\n  \"city\": \"Jacksonville\",\n  \"state\": \"FL\",\n  \"emailNotifications\": true,\n  \"slackNotifications\": false,\n  \"proximityAlerts\": true,\n  \"proximityDistanceMiles\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics",
+      "item": [
+        {
+          "name": "GET /api/analytics",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/analytics?report=summary",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "analytics"
+              ],
+              "query": [
+                {
+                  "key": "report",
+                  "value": "summary"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "GET /api/customer - By Id",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/customer?customerId={{customerId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "customer"
+              ],
+              "query": [
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "GET /api/customer - Search",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/customer?q=Acme",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "customer"
+              ],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "Acme"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://your-api-id.execute-api.us-east-1.amazonaws.com"
+    },
+    {
+      "key": "visitId",
+      "value": "visit-001"
+    },
+    {
+      "key": "userId",
+      "value": "user-001"
+    },
+    {
+      "key": "customerId",
+      "value": "cust-001"
+    }
+  ]
+}
