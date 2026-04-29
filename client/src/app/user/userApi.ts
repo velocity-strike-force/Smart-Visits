@@ -46,7 +46,7 @@ function profileUserId(): string {
 export async function loadUserFromApi(): Promise<User> {
   const userId = profileUserId();
   const res = await fetch(
-    apiUrl(`/api/profile?userId=${encodeURIComponent(userId)}`)
+    apiUrl(`/dev/profile?userId=${encodeURIComponent(userId)}`)
   );
   if (!res.ok) {
     throw new Error(`Profile request failed (${res.status})`);
