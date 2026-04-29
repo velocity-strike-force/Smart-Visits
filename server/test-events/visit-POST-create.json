@@ -1,0 +1,27 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /api/visit",
+  "rawPath": "/api/visit",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "body": "{\"productLine\":\"Widget Pro\",\"location\":\"HQ Office\",\"city\":\"New York\",\"state\":\"NY\",\"salesRepId\":\"rep-001\",\"salesRepName\":\"Jane Doe\",\"domain\":\"widgets\",\"customerId\":\"cust-001\",\"customerName\":\"Acme Corp\",\"customerARR\":50000,\"customerImplementationStatus\":\"active\",\"isKeyAccount\":true,\"startDate\":\"2026-05-15T09:00:00.000Z\",\"endDate\":\"2026-05-15T17:00:00.000Z\",\"capacity\":10,\"invitees\":[],\"customerContactRep\":\"John Smith\",\"purposeForVisit\":\"Quarterly review\",\"visitDetails\":\"Product demo and roadmap discussion\",\"isDraft\":false,\"isPrivate\":false}",
+  "requestContext": {
+    "accountId": "123456789012",
+    "apiId": "test",
+    "http": {
+      "method": "POST",
+      "path": "/api/visit",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "test"
+    },
+    "requestId": "test-visit-post",
+    "routeKey": "POST /api/visit",
+    "stage": "$default",
+    "time": "28/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777521600000
+  },
+  "isBase64Encoded": false
+}

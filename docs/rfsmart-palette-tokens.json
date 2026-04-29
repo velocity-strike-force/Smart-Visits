@@ -3,12 +3,12 @@
     "brand": {
       "orange":      { "value": "#F15A24", "description": "Primary CTA / logo accent" },
       "navy":        { "value": "#1B2A4A", "description": "Dark navy — headers, hero backgrounds" },
-      "blue":        { "value": "#0072CE", "description": "Interactive blue — links, CTAs" }
+      "red":        { "value": "#0072CE", "description": "Interactive red — links, CTAs" }
     },
     "secondary": {
-      "lightBlue":   { "value": "#E8F4FC", "description": "Light blue tint for section backgrounds" },
+      "lightred":   { "value": "#E8F4FC", "description": "Light red tint for section backgrounds" },
       "darkNavy":    { "value": "#0F1E36", "description": "Deeper navy — footer background" },
-      "midBlue":     { "value": "#1A4480", "description": "Mid blue — alternate section backgrounds" }
+      "midred":     { "value": "#1A4480", "description": "Mid red — alternate section backgrounds" }
     },
     "neutral": {
       "white":       { "value": "#FFFFFF" },

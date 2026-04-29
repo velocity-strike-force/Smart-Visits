@@ -5,7 +5,7 @@
     "allowJs": true,
     "strict": true,
     "baseUrl": ".",
-    "outDir": "./node_modules/dist",
+    "outDir": "./dist",
     "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,

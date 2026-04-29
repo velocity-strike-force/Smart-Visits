@@ -1,4 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResult } from "aws-lambda";
+import { randomUUID } from "crypto";
 import { ApiGatewayLambdaHandler } from "./ApiGatewayLambdaHandler";
 import { Dynamo } from "../database/Dynamo";
 import { Visit, type VisitData } from "../database/models/Visit";
@@ -10,6 +11,17 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
     constructor(options?: { db?: Dynamo }) {
         super();
         this.db = options?.db ?? new Dynamo({});
+    }
+
+    private async logAudit(
+        entry: Omit<AuditLogData, "timestamp">
+    ): Promise<void> {
+        try {
+            auditLogger.log(entry);
+            await auditLogger.flush();
+        } catch (error) {
+            console.error("Failed to flush audit log entry", error);
+        }
     }
 
     async handleVisitEndpoint(
@@ -239,7 +251,10 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
         if (!visitId || typeof visitId !== "string") {
             return this.createErrorResponse(400, {
                 success: false,
-                message: "visitId is required",
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
             });
         }
 
@@ -267,13 +282,44 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
     private async deleteVisit(
         event: APIGatewayProxyEventV2
     ): Promise<APIGatewayProxyResult> {
-        const params = event.queryStringParameters;
-        const visitId = params?.visitId;
+        try {
+            const params = event.queryStringParameters;
+            const visitId = params?.visitId;
 
-        if (!visitId) {
-            return this.createErrorResponse(400, {
+            if (!visitId) {
+                return this.createErrorResponse(400, {
+                    success: false,
+                    message: "visitId is required",
+                });
+            }
+
+            const existingVisit = await this.db.getVisitById(visitId);
+            if (!existingVisit) {
+                return this.createErrorResponse(404, {
+                    success: false,
+                    message: "Visit not found",
+                });
+            }
+
+            await this.db.deleteVisit(visitId);
+            await this.logAudit({
+                entityId: visitId,
+                action: "VISIT_DELETED",
+                actorUserId: existingVisit.salesRepId,
+                metadata: { visitId },
+            });
+
+            return this.createSuccessResponse({
+                success: true,
+                message: "Visit deleted successfully",
+            });
+        } catch (error) {
+            return this.createErrorResponse(500, {
                 success: false,
-                message: "visitId is required",
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
             });
         }
 

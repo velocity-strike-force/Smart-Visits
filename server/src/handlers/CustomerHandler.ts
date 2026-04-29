@@ -21,51 +21,40 @@ export class CustomerHandler extends ApiGatewayLambdaHandler {
     private async searchCustomers(
         event: APIGatewayProxyEventV2
     ): Promise<APIGatewayProxyResult> {
-        const query = event.queryStringParameters?.q ?? "";
+        try {
+            const params = event.queryStringParameters;
+            const customerId = params?.customerId;
 
-        // TODO: replace mock with real DynamoDB call — this.db.searchCustomers(query)
-        const allMockCustomers = [
-            {
-                customerId: "cust-001",
-                customerName: "Acme Corp",
-                arr: 250000,
-                implementationStatus: "Live",
-                isKeyAccount: true,
-                domain: "Manufacturing",
-                primaryContactName: "John Doe",
-                primaryContactEmail: "john.doe@acme.com",
-            },
-            {
-                customerId: "cust-002",
-                customerName: "Globex Industries",
-                arr: 180000,
-                implementationStatus: "Implementing",
-                isKeyAccount: false,
-                domain: "Distribution",
-                primaryContactName: "Hank Scorpio",
-                primaryContactEmail: "hank@globex.com",
-            },
-            {
-                customerId: "cust-003",
-                customerName: "Initech",
-                arr: 95000,
-                implementationStatus: "Live",
-                isKeyAccount: false,
-                domain: "Retail",
-                primaryContactName: "Bill Lumbergh",
-                primaryContactEmail: "bill@initech.com",
-            },
-        ];
+            if (customerId) {
+                const customer = await this.db.getCustomerById(customerId);
+                if (!customer) {
+                    return this.createErrorResponse(404, {
+                        success: false,
+                        message: "Customer not found",
+                    });
+                }
 
-        const filtered = query
-            ? allMockCustomers.filter((c) =>
-                  c.customerName.toLowerCase().includes(query.toLowerCase())
-              )
-            : allMockCustomers;
+                return this.createSuccessResponse({
+                    success: true,
+                    customer,
+                });
+            }
 
-        return this.createSuccessResponse({
-            success: true,
-            customers: filtered,
-        });
+            const query = params?.q ?? "";
+            const customers = await this.db.searchCustomers(query);
+
+            return this.createSuccessResponse({
+                success: true,
+                customers,
+            });
+        } catch (error) {
+            return this.createErrorResponse(500, {
+                success: false,
+                message:
+                    error instanceof Error
+                        ? error.message
+                        : "Internal server error",
+            });
+        }
     }
 }

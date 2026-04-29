@@ -65,15 +65,18 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
     };
   }, [isApi]);
 
-  const addAttendee = (visitId: string, attendeeName: string) => {
-    setVisits(prevVisits =>
-      prevVisits.map(visit =>
-        visit.id === visitId && visit.attendees.length < visit.capacity
-          ? { ...visit, attendees: [...visit.attendees, attendeeName] }
-          : visit
-      )
-    );
-  };
+    const addAttendee = (visitId: string, attendeeName: string) => {
+        setVisits((prevVisits) =>
+            prevVisits.map((visit) =>
+                visit.id === visitId && visit.attendees.length < visit.capacity
+                    ? {
+                          ...visit,
+                          attendees: [...visit.attendees, attendeeName],
+                      }
+                    : visit,
+            ),
+        );
+    };
 
   const removeAttendee = (visitId: string, attendeeName: string) => {
     setVisits(prevVisits =>
@@ -107,9 +110,9 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
 }
 
 export function useVisits() {
-  const context = useContext(VisitsContext);
-  if (context === undefined) {
-    throw new Error('useVisits must be used within a VisitsProvider');
-  }
-  return context;
+    const context = useContext(VisitsContext);
+    if (context === undefined) {
+        throw new Error("useVisits must be used within a VisitsProvider");
+    }
+    return context;
 }

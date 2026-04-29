@@ -14,21 +14,46 @@ interface Visit {
   isDraft?: boolean;
 }
 
-interface FilterPanelProps {
-  visits: Visit[];
+export interface FilterState {
+  productLines: string[];
+  location: string;
+  arrMin: string;
+  arrMax: string;
+  salesRep: string;
+  domain: string;
+  customer: string;
+  keyAccounts: boolean;
 }
 
-export default function FilterPanel({ visits }: FilterPanelProps) {
-  const [filters, setFilters] = useState({
-    productLines: [] as string[],
-    location: '',
-    arrMin: '',
-    arrMax: '',
-    salesRep: '',
-    domain: '',
-    customer: '',
-    keyAccounts: false,
-  });
+const defaultFilters: FilterState = {
+  productLines: [],
+  location: '',
+  arrMin: '',
+  arrMax: '',
+  salesRep: '',
+  domain: '',
+  customer: '',
+  keyAccounts: false,
+};
+
+interface FilterPanelProps {
+  visits: Visit[];
+  filters?: FilterState;
+  onChange?: (filters: FilterState) => void;
+}
+
+export default function FilterPanel({ visits, filters: controlledFilters, onChange }: FilterPanelProps) {
+  const [internalFilters, setInternalFilters] = useState<FilterState>(defaultFilters);
+  const filters = controlledFilters ?? internalFilters;
+
+  const setFilters = (nextFilters: FilterState) => {
+    if (onChange) {
+      onChange(nextFilters);
+      return;
+    }
+
+    setInternalFilters(nextFilters);
+  };
 
   const formatCurrency = (value: number) =>
     new Intl.NumberFormat('en-US', {
@@ -37,7 +62,6 @@ export default function FilterPanel({ visits }: FilterPanelProps) {
       maximumFractionDigits: 0,
     }).format(value);
 
-  // Extract unique values from existing visits
   const productLineOptions = useMemo(() =>
     [...new Set(visits.map(v => v.productLine))].sort(),
     [visits]
@@ -79,12 +103,12 @@ export default function FilterPanel({ visits }: FilterPanelProps) {
   ];
 
   const handleProductLineToggle = (line: string) => {
-    setFilters(prev => ({
-      ...prev,
-      productLines: prev.productLines.includes(line)
-        ? prev.productLines.filter(l => l !== line)
-        : [...prev.productLines, line],
-    }));
+    setFilters({
+      ...filters,
+      productLines: filters.productLines.includes(line)
+        ? filters.productLines.filter(l => l !== line)
+        : [...filters.productLines, line],
+    });
   };
 
   return (
@@ -197,16 +221,7 @@ export default function FilterPanel({ visits }: FilterPanelProps) {
 
       <div className="flex gap-2 pt-4 border-t">
         <button
-          onClick={() => setFilters({
-            productLines: [],
-            location: '',
-            arrMin: '',
-            arrMax: '',
-            salesRep: '',
-            domain: '',
-            customer: '',
-            keyAccounts: false,
-          })}
+          onClick={() => setFilters(defaultFilters)}
           className="px-4 py-2 border rounded-lg hover:bg-gray-50"
         >
           Clear Filters

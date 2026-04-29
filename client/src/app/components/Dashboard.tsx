@@ -1,10 +1,25 @@
-import { useState } from 'react';
-import { Calendar, List, Filter, Plus, ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Calendar, List, Filter, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSameDay } from 'date-fns';
 import FilterPanel from './FilterPanel';
 import { useUser } from './UserContext';
-import { useVisits } from './VisitsContext';
+import { getVisits } from '../lib/api';
+
+interface Visit {
+  id: string;
+  title: string;
+  customer: string;
+  date: Date;
+  productLine: string;
+  location: string;
+  arr: number;
+  salesRep: string;
+  domain: string;
+  isDraft?: boolean;
+  capacity: number;
+  currentAttendees: number;
+}
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -13,8 +28,42 @@ export default function Dashboard() {
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showFilters, setShowFilters] = useState(false);
+  const [visits, setVisits] = useState<Visit[]>([]);
+  const [isLoadingVisits, setIsLoadingVisits] = useState(true);
+  const [visitsError, setVisitsError] = useState('');
 
-  // Filter out draft visits for visitors
+  useEffect(() => {
+    async function loadVisits() {
+      try {
+        setIsLoadingVisits(true);
+        setVisitsError('');
+
+        const apiVisits = await getVisits();
+        setVisits(apiVisits.map(visit => ({
+          id: visit.id ?? visit.visitId ?? '',
+          title: visit.title ?? '',
+          customer: visit.customer ?? visit.customerName ?? '',
+          date: new Date(visit.date ?? visit.startDate ?? ''),
+          productLine: visit.productLine ?? '',
+          location: visit.location ?? '',
+          arr: visit.arr ?? visit.customerARR ?? 0,
+          salesRep: visit.salesRep ?? visit.salesRepName ?? '',
+          domain: visit.domain ?? '',
+          isDraft: visit.isDraft ?? false,
+          capacity: visit.capacity ?? 0,
+          currentAttendees: visit.currentAttendees ?? visit.invitees?.length ?? 0,
+        })).filter(visit => visit.id && !Number.isNaN(visit.date.getTime())));
+      } catch (error) {
+        console.error('Failed to load visits:', error);
+        setVisitsError(error instanceof Error ? error.message : 'Failed to load visits');
+      } finally {
+        setIsLoadingVisits(false);
+      }
+    }
+
+    loadVisits();
+  }, []);
+
   const filteredVisits = user.role === 'visitor'
     ? visits.filter(v => !v.isDraft)
     : visits;
@@ -112,6 +161,18 @@ export default function Dashboard() {
         )}
 
         <div className="p-8">
+          {isLoadingVisits && (
+            <div className="mb-4 rounded-lg border bg-white px-4 py-3 text-gray-600">
+              Loading visits...
+            </div>
+          )}
+
+          {visitsError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-red-700">
+              {visitsError}
+            </div>
+          )}
+
           {viewMode === 'calendar' ? (
             <div className="bg-white rounded-lg border overflow-hidden">
               <div className="grid grid-cols-7 border-b">
@@ -128,19 +189,14 @@ export default function Dashboard() {
                     <div
                       key={idx}
                       className="min-h-[120px] border-r border-b last:border-r-0 p-2 hover:bg-gray-50 cursor-pointer"
-                      onClick={() => {
-                        if (user.role === 'sales_rep') {
-                          navigate(`/post-visit?date=${day.toISOString()}`);
-                        }
-                      }}
+                      onClick={() => navigate(`/post-visit?date=${day.toISOString()}`)}
                     >
                       <div className={`mb-2 ${!isSameMonth(day, currentDate) ? 'text-gray-400' : ''}`}>
                         {format(day, 'd')}
                       </div>
                       <div className="space-y-1">
                         {dayVisits.map(visit => {
-                          const isFull = visit.attendees.length >= visit.capacity;
-                          const isUserSignedUp = visit.attendees.includes(user.name);
+                          const isFull = visit.currentAttendees >= visit.capacity;
                           return (
                             <div
                               key={visit.id}
@@ -149,19 +205,14 @@ export default function Dashboard() {
                                 navigate(`/visit/${visit.id}`);
                               }}
                               className={`text-xs p-2 rounded hover:opacity-90 relative cursor-pointer ${
-                                isFull ? 'bg-gray-100 text-gray-600' :
-                                isUserSignedUp ? 'bg-green-100 text-green-800 border border-green-300' :
-                                'bg-blue-100 text-blue-800'
+                                isFull ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-800'
                               }`}
                             >
-                              <div className="truncate flex items-center gap-1">
-                                {isUserSignedUp && <CheckCircle className="w-3 h-3 text-green-600" />}
-                                {visit.customer}
-                              </div>
+                              <div className="truncate">{visit.customer}</div>
                               <div className={`text-[10px] mt-1 flex items-center justify-between`}>
-                                <span className="truncate flex-1">{visit.location}</span>
+                                <span>{visit.location}</span>
                                 <span className={isFull ? 'text-red-600 font-medium' : ''}>
-                                  {visit.attendees.length}/{visit.capacity}
+                                  {visit.currentAttendees}/{visit.capacity}
                                 </span>
                               </div>
                               {visit.isDraft && user.role === 'sales_rep' && (
@@ -169,14 +220,9 @@ export default function Dashboard() {
                                   Draft
                                 </span>
                               )}
-                              {isFull && !isUserSignedUp && (
+                              {isFull && (
                                 <span className="absolute top-0 right-0 px-1 text-[10px] bg-red-500 text-white rounded-bl">
                                   Full
-                                </span>
-                              )}
-                              {isUserSignedUp && (
-                                <span className="absolute top-0 right-0 px-1 text-[10px] bg-green-600 text-white rounded-bl">
-                                  Signed Up
                                 </span>
                               )}
                             </div>
@@ -227,21 +273,15 @@ export default function Dashboard() {
                   {filteredVisits
                     .filter(visit => isSameMonth(visit.date, currentDate))
                     .map(visit => {
-                      const isFull = visit.attendees.length >= visit.capacity;
-                      const spotsLeft = visit.capacity - visit.attendees.length;
-                      const isUserSignedUp = visit.attendees.includes(user.name);
+                      const isFull = visit.currentAttendees >= visit.capacity;
+                      const spotsLeft = visit.capacity - visit.currentAttendees;
                       return (
                         <tr
                           key={visit.id}
-                          className={`border-b hover:bg-gray-50 ${isUserSignedUp ? 'bg-green-50' : ''}`}
+                          className="border-b hover:bg-gray-50"
                         >
                           <td className="px-6 py-4">{format(visit.date, 'MMM dd, yyyy')}</td>
-                          <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {isUserSignedUp && <CheckCircle className="w-4 h-4 text-green-600" />}
-                              {visit.customer}
-                            </div>
-                          </td>
+                          <td className="px-6 py-4">{visit.customer}</td>
                           <td className="px-6 py-4">{visit.location}</td>
                           <td className="px-6 py-4">
                             <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
@@ -253,11 +293,11 @@ export default function Dashboard() {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               <span className={isFull ? 'text-red-600 font-medium' : ''}>
-                                {visit.attendees.length} / {visit.capacity}
+                                {visit.currentAttendees} / {visit.capacity}
                               </span>
                               {isFull ? (
                                 <span className="px-2 py-1 bg-red-100 text-red-700 rounded text-xs">Full</span>
-                              ) : spotsLeft <= 3 && spotsLeft > 0 && (
+                              ) : spotsLeft <= 3 && (
                                 <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded text-xs">
                                   {spotsLeft} left
                                 </span>
@@ -275,28 +315,17 @@ export default function Dashboard() {
                           )}
                           {user.role === 'visitor' && (
                             <td className="px-6 py-4">
-                              {isUserSignedUp ? (
-                                <button
-                                  onClick={() => navigate(`/visit/${visit.id}`)}
-                                  className="px-4 py-2 bg-green-100 text-green-800 rounded-lg hover:bg-green-200 text-sm font-medium border border-green-300"
-                                >
-                                  View Visit
-                                </button>
-                              ) : isFull ? (
-                                <button
-                                  disabled
-                                  className="px-4 py-2 bg-gray-200 text-gray-500 rounded-lg text-sm cursor-not-allowed"
-                                >
-                                  Visit Full
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => navigate(`/visit/${visit.id}`)}
-                                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-                                >
-                                  Sign Up
-                                </button>
-                              )}
+                              <button
+                                onClick={() => navigate(`/visit/${visit.id}`)}
+                                disabled={isFull}
+                                className={`px-4 py-2 rounded-lg text-sm ${
+                                  isFull
+                                    ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                                }`}
+                              >
+                                {isFull ? 'Full' : 'Join Visit'}
+                              </button>
                             </td>
                           )}
                         </tr>
