@@ -11,7 +11,7 @@
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
-import { smartVisitsTables } from "../src/database/schema";
+import { smartVisitsTables, DOMAINS } from "../src/database/schema";
 import type { VisitData } from "../src/database/schema/Visit";
 import type { UserData } from "../src/database/schema/User";
 import type { SignupData } from "../src/database/schema/Signup";
@@ -21,6 +21,7 @@ import type { AuditLogData } from "../src/database/schema/AuditLog";
 import type { RoleData } from "../src/database/schema/Role";
 import type { ProductLineData } from "../src/database/schema/ProductLine";
 import type { UserProductLineData } from "../src/database/schema/UserProductLine";
+import type { DomainData } from "../src/database/schema/Domain";
 
 const STAGE = process.env.STAGE || "dev";
 const COUNT = 10;
@@ -56,6 +57,13 @@ async function main(): Promise<void> {
   const signups: SignupData[] = [];
   const feedback: FeedbackData[] = [];
   const audits: AuditLogData[] = [];
+  const domains: DomainData[] = DOMAINS.map((d) => ({
+    domainId: d.domainId,
+    name: d.name,
+    description: d.description,
+    sortOrder: d.sortOrder,
+    createdAt: base,
+  }));
 
   const productLineCatalog = [
     "Oracle Cloud",
@@ -215,6 +223,7 @@ async function main(): Promise<void> {
 
   await putAll("Roles", tables.roles, roles);
   await putAll("ProductLines", tables.productLines, productLines);
+  await putAll("ReferenceData", tables.referenceData, domains);
   await putAll("Customers", tables.customers, customers);
   await putAll("Users", tables.users, users);
   await putAll("UserProductLines", tables.userProductLines, userProductLines);

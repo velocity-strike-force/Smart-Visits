@@ -15,7 +15,8 @@ export type SmartVisitsLogicalTable =
   | "AuditLog"
   | "Roles"
   | "ProductLines"
-  | "UserProductLines";
+  | "UserProductLines"
+  | "ReferenceData";
 
 export function smartVisitsTableName(
   env: DeploymentEnv,
@@ -36,5 +37,6 @@ export function smartVisitsTables(env: DeploymentEnv) {
     roles: smartVisitsTableName(env, "Roles"),
     productLines: smartVisitsTableName(env, "ProductLines"),
     userProductLines: smartVisitsTableName(env, "UserProductLines"),
+    referenceData: smartVisitsTableName(env, "ReferenceData"),
   } as const;
 }

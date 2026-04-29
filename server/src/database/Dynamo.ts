@@ -18,6 +18,7 @@ import { AuditLog, type AuditLogData } from "./schema/AuditLog";
 import { Role, type RoleData } from "./schema/Role";
 import { ProductLine, type ProductLineData } from "./schema/ProductLine";
 import { UserProductLine, type UserProductLineData } from "./schema/UserProductLine";
+import { Domain, type DomainData } from "./schema/Domain";
 
 export class Dynamo {
     private readonly client: DynamoDBDocumentClient;
@@ -199,6 +200,43 @@ export class Dynamo {
         );
     }
 
+    async getAllRoles(): Promise<Role[]> {
+        const items = await this.scanTable(this.tables.roles);
+        return items.map((i) => new Role(i as unknown as RoleData));
+    }
+
+    async getAllProductLines(): Promise<ProductLine[]> {
+        const items = await this.scanTable(this.tables.productLines);
+        return items.map(
+            (i) => new ProductLine(i as unknown as ProductLineData)
+        );
+    }
+
+    async getAllDomains(): Promise<Domain[]> {
+        const items = await this.scanTable(this.tables.referenceData);
+        return items.map((i) => new Domain(i as unknown as DomainData));
+    }
+
+    async getDomainById(domainId: string): Promise<Domain | undefined> {
+        const command = new GetCommand({
+            TableName: this.tables.referenceData,
+            Key: { domainId },
+        });
+        const result = await this.client.send(command);
+        return result.Item
+            ? new Domain(result.Item as DomainData)
+            : undefined;
+    }
+
+    async putDomain(data: DomainData): Promise<void> {
+        await this.client.send(
+            new PutCommand({
+                TableName: this.tables.referenceData,
+                Item: data,
+            })
+        );
+    }
+
     // ── User ↔ product line (junction) ──────────────────────
 
     async getUserProductLines(userId: string): Promise<UserProductLine[]> {
@@ -311,6 +349,11 @@ export class Dynamo {
             : undefined;
     }
 
+    async getAllCustomers(): Promise<Customer[]> {
+        const items = await this.scanTable(this.tables.customers);
+        return items.map((i) => new Customer(i as unknown as CustomerData));
+    }
+
     // ── Audit Log ───────────────────────────────────────────
 
     async putAuditLog(data: AuditLogData): Promise<void> {
@@ -331,5 +374,26 @@ export class Dynamo {
         return (result.Items ?? []).map(
             (i) => new AuditLog(i as AuditLogData)
         );
+    }
+
+    private async scanTable(
+        tableName: string
+    ): Promise<Record<string, unknown>[]> {
+        let items: Record<string, unknown>[] = [];
+        let startKey: Record<string, unknown> | undefined;
+        do {
+            const command = new ScanCommand({
+                TableName: tableName,
+                ExclusiveStartKey: startKey,
+            });
+            const result = await this.client.send(command);
+            if (result.Items) {
+                items.push(...(result.Items as Record<string, unknown>[]));
+            }
+            startKey = result.LastEvaluatedKey as
+                | Record<string, unknown>
+                | undefined;
+        } while (startKey);
+        return items;
     }
 }

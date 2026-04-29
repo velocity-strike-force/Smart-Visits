@@ -79,7 +79,7 @@ export type ProductLineRecord = (typeof PRODUCT_LINES)[number];
 
 /**
  * Canonical business domains / verticals — hardcoded like {@link UserRole},
- * not read from a Dynamo Domains table.
+ * not read from a Dynamo ReferenceData table (domain rows use the same IDs when seeded).
  */
 export const DOMAINS = [
   {

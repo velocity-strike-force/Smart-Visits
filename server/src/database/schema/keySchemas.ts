@@ -19,6 +19,7 @@ export const SMART_VISITS_KEY_SCHEMAS: Record<
   Roles: { partitionKey: "roleId" },
   ProductLines: { partitionKey: "productLineId" },
   UserProductLines: { partitionKey: "userId", sortKey: "productLineId" },
+  ReferenceData: { partitionKey: "domainId" },
 };
 
 export function getKeySchema(logical: SmartVisitsLogicalTable): TableKeySchema {
