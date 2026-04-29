@@ -19,6 +19,7 @@ import {
 import FilterPanel from "./FilterPanel";
 import { useUser } from "./UserContext";
 import { useVisits } from "./VisitsContext";
+import { createDefaultVisitFilters, type VisitFilters } from "./visitFilters";
 
 export default function Dashboard() {
     const navigate = useNavigate();
@@ -27,9 +28,54 @@ export default function Dashboard() {
     const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
     const [currentDate, setCurrentDate] = useState(new Date());
     const [showFilters, setShowFilters] = useState(false);
+    const [appliedFilters, setAppliedFilters] = useState<VisitFilters>(
+        createDefaultVisitFilters(),
+    );
 
-    const filteredVisits =
+    const baseVisits =
         user.role === "visitor" ? visits.filter((v) => !v.isDraft) : visits;
+
+    const filteredVisits = baseVisits.filter((visit) => {
+        const minArr =
+            appliedFilters.arrMin === ""
+                ? Number.NEGATIVE_INFINITY
+                : Number(appliedFilters.arrMin);
+        const maxArr =
+            appliedFilters.arrMax === ""
+                ? Number.POSITIVE_INFINITY
+                : Number(appliedFilters.arrMax);
+
+        const matchesProductLine =
+            appliedFilters.productLines.length === 0 ||
+            appliedFilters.productLines.includes(visit.productLine);
+        const matchesLocation =
+            appliedFilters.location === "" ||
+            visit.location === appliedFilters.location;
+        const matchesDomain =
+            appliedFilters.domain === "" ||
+            visit.domain === appliedFilters.domain;
+        const matchesSalesRep =
+            appliedFilters.salesRep === "" ||
+            visit.salesRep === appliedFilters.salesRep;
+        const matchesCustomer =
+            appliedFilters.customer.trim() === "" ||
+            visit.customer
+                .toLowerCase()
+                .includes(appliedFilters.customer.toLowerCase().trim());
+        const matchesArr = visit.arr >= minArr && visit.arr <= maxArr;
+        const matchesKeyAccount =
+            !appliedFilters.keyAccounts || Boolean(visit.isKeyAccount);
+
+        return (
+            matchesProductLine &&
+            matchesLocation &&
+            matchesDomain &&
+            matchesSalesRep &&
+            matchesCustomer &&
+            matchesArr &&
+            matchesKeyAccount
+        );
+    });
 
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(currentDate);
@@ -102,24 +148,24 @@ export default function Dashboard() {
                 </div>
 
                 {viewMode === "calendar" && (
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-xl">
+                    <div className="flex items-center justify-center gap-3">
+                        <button
+                            onClick={previousMonth}
+                            className="h-9 w-9 rounded-full border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50"
+                            aria-label="Previous month"
+                        >
+                            <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <h2 className="min-w-[180px] text-center text-xl">
                             {format(currentDate, "MMMM yyyy")}
                         </h2>
-                        <div className="flex gap-2">
-                            <button
-                                onClick={previousMonth}
-                                className="px-3 py-1 border rounded hover:bg-gray-50"
-                            >
-                                Previous
-                            </button>
-                            <button
-                                onClick={nextMonth}
-                                className="px-3 py-1 border rounded hover:bg-gray-50"
-                            >
-                                Next
-                            </button>
-                        </div>
+                        <button
+                            onClick={nextMonth}
+                            className="h-9 w-9 rounded-full border border-gray-300 text-gray-700 flex items-center justify-center hover:bg-gray-50"
+                            aria-label="Next month"
+                        >
+                            <ChevronRight className="w-4 h-4" />
+                        </button>
                     </div>
                 )}
             </div>
@@ -127,7 +173,11 @@ export default function Dashboard() {
             <div className="flex-1 overflow-auto">
                 {showFilters && (
                     <div className="bg-white border-b p-6">
-                        <FilterPanel visits={filteredVisits} />
+                        <FilterPanel
+                            visits={baseVisits}
+                            filters={appliedFilters}
+                            onChange={setAppliedFilters}
+                        />
                     </div>
                 )}
 

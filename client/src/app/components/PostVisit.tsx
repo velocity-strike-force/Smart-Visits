@@ -571,7 +571,6 @@ export default function PostVisit() {
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
                                     <MessagesSquare className="w-4 h-4" />
-                                    <MessagesSquare className="w-4 h-4" />
                                 </div>
 
                                 <div>
