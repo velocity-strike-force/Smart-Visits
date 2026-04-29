@@ -41,5 +41,6 @@ export function buildSmartVisitsTableDefinitions(
     def(env, "Roles"),
     def(env, "ProductLines"),
     def(env, "UserProductLines"),
+    def(env, "ReferenceData"),
   ];
 }

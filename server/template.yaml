@@ -10,6 +10,11 @@ Parameters:
     Type: String
     Default: ""
     Description: "DynamoDB endpoint override (set for local dev, leave empty for AWS)."
+  SlackWebhookUrl:
+    Type: String
+    Default: ""
+    NoEcho: true
+    Description: "Slack Incoming Webhook URL for signup notifications (optional)."
 
 Globals:
   Function:
@@ -160,6 +165,18 @@ Resources:
           KeyType: HASH
         - AttributeName: productLineId
           KeyType: RANGE
+
+  ReferenceDataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-ReferenceData"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: domainId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: domainId
+          KeyType: HASH
 
   # ── Visit ────────────────────────────────────────────────
   HandleVisitFunction:
@@ -451,5 +468,38 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - src/handlers/customer.ts
+        External:
+          - "@aws-sdk/*"
+
+  # ── Reference data (customers, roles, product lines, domains) ─
+  HandleReferenceDataFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-reference-data
+      CodeUri: ./
+      Handler: referenceData.handleReferenceDataEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CustomersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref RolesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ReferenceDataTable
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/reference-data
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/referenceData.ts
         External:
           - "@aws-sdk/*"
