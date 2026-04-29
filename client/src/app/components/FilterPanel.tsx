@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Slider } from "./ui/slider";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
+import Typeahead from "./Typeahead";
 
 interface Visit {
     id: string;
@@ -129,12 +130,12 @@ export default function FilterPanel({
                     <RequiredLabel className="block mb-2">
                         Product Line
                     </RequiredLabel>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                         {productLineOptions.length > 0 ? (
                             productLineOptions.map((line) => (
                                 <label
                                     key={line}
-                                    className="flex items-center justify-between gap-3 rounded-lg p-2 text-sm"
+                                    className="flex items-center justify-between gap-3 rounded-lg p-1 text-sm"
                                 >
                                     <span>
                                         {line || EMPTY_PRODUCT_LINE_LABEL}
@@ -158,41 +159,26 @@ export default function FilterPanel({
                 </div>
 
                 <div>
-                    <RequiredLabel className="block mb-2">
-                        Location
-                    </RequiredLabel>
-                    <select
+                    <Typeahead
+                        label="Location"
+                        placeholder="All locations"
+                        options={locationOptions}
                         value={filters.location}
-                        onChange={(e) =>
-                            setFilters({ ...filters, location: e.target.value })
+                        onChange={(value) =>
+                            setFilters({ ...filters, location: value })
                         }
-                        className="w-full px-3 py-2 border rounded-lg"
-                    >
-                        <option value="">All Locations</option>
-                        {locationOptions.map((location) => (
-                            <option key={location} value={location}>
-                                {location}
-                            </option>
-                        ))}
-                    </select>
+                    />
 
-                    <RequiredLabel className="block mb-2 mt-4">
-                        Domain
-                    </RequiredLabel>
-                    <select
+                    <Typeahead
+                        label="Domain"
+                        placeholder="All domains"
+                        options={domainOptions}
                         value={filters.domain}
-                        onChange={(e) =>
-                            setFilters({ ...filters, domain: e.target.value })
+                        onChange={(value) =>
+                            setFilters({ ...filters, domain: value })
                         }
-                        className="w-full px-3 py-2 border rounded-lg"
-                    >
-                        <option value="">All Domains</option>
-                        {domainOptions.map((domain) => (
-                            <option key={domain} value={domain}>
-                                {domain}
-                            </option>
-                        ))}
-                    </select>
+                        className="mt-4"
+                    />
                 </div>
 
                 <div>
@@ -224,23 +210,15 @@ export default function FilterPanel({
                 </div>
 
                 <div>
-                    <RequiredLabel className="block mb-2">
-                        Sales Rep
-                    </RequiredLabel>
-                    <select
+                    <Typeahead
+                        label="Sales Rep"
+                        placeholder="All sales reps"
+                        options={salesRepOptions}
                         value={filters.salesRep}
-                        onChange={(e) =>
-                            setFilters({ ...filters, salesRep: e.target.value })
+                        onChange={(value) =>
+                            setFilters({ ...filters, salesRep: value })
                         }
-                        className="w-full px-3 py-2 border rounded-lg"
-                    >
-                        <option value="">All Sales Reps</option>
-                        {salesRepOptions.map((rep) => (
-                            <option key={rep} value={rep}>
-                                {rep}
-                            </option>
-                        ))}
-                    </select>
+                    />
 
                     <RequiredLabel className="block mb-2 mt-4">
                         Customer
