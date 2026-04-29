@@ -7,7 +7,7 @@ import Typeahead from "./Typeahead";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
 import { createVisit } from "../lib/api";
-import mockCustomers from "../../mockapi/postVisitCustomers.json";
+import { useReferenceData } from "../referenceData/ReferenceDataContext";
 
 interface PostVisitFormValues {
     productLine: string;
@@ -30,6 +30,8 @@ interface PostVisitFormValues {
 export default function PostVisit() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const { customerOptions, productLineOptions, domainOptions } =
+        useReferenceData();
     const initialDate = searchParams.get("date")
         ? new Date(searchParams.get("date")!)
         : new Date();
@@ -87,21 +89,6 @@ export default function PostVisit() {
         });
     }, [register]);
 
-    const productLineOptions = [
-        "Oracle Cloud",
-        "NetSuite",
-        "Shipping",
-        "TMS",
-        "Demand Planning",
-        "AX",
-    ];
-    const domainOptions = [
-        "Manufacturing",
-        "Technology",
-        "Logistics",
-        "Retail",
-        "Healthcare",
-    ];
     const purposeOptions = [
         "Quarterly Review",
         "Product Demo",
@@ -110,12 +97,23 @@ export default function PostVisit() {
         "Contract Renewal",
         "Other",
     ];
+    const customerNameOptions = [
+        ...new Set(customerOptions.map((customer) => customer.customerName)),
+    ];
 
-    const handleCustomerSelect = (customerName: string) => {
-        const customer = mockCustomers.find((c) => c.name === customerName);
+    const handleCustomerChange = (customerName: string) => {
+        const customer = customerOptions.find(
+            (c) => c.customerName === customerName,
+        );
         setValue("customer", customerName, { shouldValidate: true });
         if (customer) {
-            setCustomerMetadata(customer);
+            setCustomerMetadata({
+                arr: customer.arr,
+                status: customer.implementationStatus,
+                isKeyAccount: customer.isKeyAccount,
+            });
+        } else {
+            setCustomerMetadata(null);
         }
     };
 
@@ -194,12 +192,6 @@ export default function PostVisit() {
             setIsSubmitting(false);
         }
     };
-
-    const filteredCustomers = customerSearch
-        ? mockCustomers.filter((c) =>
-              c.name.toLowerCase().includes(customerSearch.toLowerCase()),
-          )
-        : [];
 
     return (
         <div className="flex-1 bg-gray-50 overflow-auto">
@@ -297,46 +289,20 @@ export default function PostVisit() {
                         )}
                     </div>
 
-                    <div className="relative">
-                        <RequiredLabel className="block mb-2 text-sm" required>
-                            Customer
-                        </RequiredLabel>
-                        <input
-                            type="text"
-                            placeholder="Search for customer"
+                    <div>
+                        <Typeahead
+                            label="Customer"
+                            required
+                            placeholder="Search for customer…"
+                            options={customerNameOptions}
                             value={customerSearch}
-                            onChange={(e) => {
-                                setValue("customer", e.target.value, {
-                                    shouldValidate: true,
-                                });
-                                setCustomerMetadata(null);
-                            }}
-                            className="w-full px-3 py-2 border rounded-lg"
+                            onChange={handleCustomerChange}
                         />
                         {errors.customer && (
                             <p className="text-sm text-red-600 mt-1">
                                 {errors.customer.message}
                             </p>
                         )}
-                        {customerSearch &&
-                            filteredCustomers.length > 0 &&
-                            !customerMetadata && (
-                                <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto">
-                                    {filteredCustomers.map((customer) => (
-                                        <button
-                                            key={customer.name}
-                                            onClick={() =>
-                                                handleCustomerSelect(
-                                                    customer.name,
-                                                )
-                                            }
-                                            className="w-full px-4 py-2 text-left hover:bg-gray-50"
-                                        >
-                                            {customer.name}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
                         {customerMetadata && (
                             <div className="flex gap-2 mt-2">
                                 <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">

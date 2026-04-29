@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useUser } from "./UserContext";
 import Typeahead from "./Typeahead";
 import RequiredLabel from "./RequiredLabel";
+import { useReferenceData } from "../referenceData/ReferenceDataContext";
 
 interface RequestVisitFormValues {
     customer: string;
@@ -15,17 +16,10 @@ interface RequestVisitFormValues {
     notes: string;
 }
 
-const productLineOptions = [
-    "NetSuite",
-    "Oracle Cloud",
-    "TMS",
-    "Shipping",
-    "Other",
-];
-
 export default function RequestVisit() {
     const navigate = useNavigate();
     const { user } = useUser();
+    const { customerOptions, productLineOptions } = useReferenceData();
 
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -114,9 +108,18 @@ export default function RequestVisit() {
                             {...register("customer", {
                                 required: "Customer is required",
                             })}
+                            list="request-visit-customers"
                             placeholder="Example: Acme Corp"
                             className="w-full px-3 py-2 border rounded-lg"
                         />
+                        <datalist id="request-visit-customers">
+                            {customerOptions.map((customer) => (
+                                <option
+                                    key={customer.customerId}
+                                    value={customer.customerName}
+                                />
+                            ))}
+                        </datalist>
                         {errors.customer && (
                             <p className="text-sm text-red-600 mt-1">
                                 {errors.customer.message}

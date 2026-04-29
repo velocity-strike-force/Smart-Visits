@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { Slider } from "./ui/slider";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
+import { useReferenceData } from "../referenceData/ReferenceDataContext";
 
 interface Visit {
     id: string;
@@ -49,6 +50,10 @@ export default function FilterPanel({
     filters: controlledFilters,
     onChange,
 }: FilterPanelProps) {
+    const {
+        productLineOptions: referenceProductLineOptions,
+        domainOptions: referenceDomainOptions,
+    } = useReferenceData();
     const [internalFilters, setInternalFilters] =
         useState<FilterState>(defaultFilters);
     const filters = controlledFilters ?? internalFilters;
@@ -70,13 +75,25 @@ export default function FilterPanel({
         }).format(value);
 
     const productLineOptions = useMemo(
-        () => [...new Set(visits.map((v) => v.productLine))].sort(),
-        [visits],
+        () =>
+            [
+                ...new Set([
+                    ...referenceProductLineOptions,
+                    ...visits.map((v) => v.productLine).filter(Boolean),
+                ]),
+            ].sort(),
+        [referenceProductLineOptions, visits],
     );
 
     const domainOptions = useMemo(
-        () => [...new Set(visits.map((v) => v.domain).filter(Boolean))].sort(),
-        [visits],
+        () =>
+            [
+                ...new Set([
+                    ...referenceDomainOptions,
+                    ...visits.map((v) => v.domain).filter(Boolean),
+                ]),
+            ].sort(),
+        [referenceDomainOptions, visits],
     );
 
     const locationOptions = useMemo(
