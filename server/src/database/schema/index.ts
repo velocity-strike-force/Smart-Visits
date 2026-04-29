@@ -19,11 +19,21 @@ export type {
   VisitSignupRecord,
   PostVisitFeedbackRecord,
   CustomerRecord,
+  LocationRecord,
+  DomainRecord,
+  PurposeRecord,
   AuditLogRecord,
   UserRole,
   RoleRecord,
   ProductLineRecord,
   UserProductLineRecord,
+} from "./entities";
+export {
+    PRODUCT_LINES,
+    CUSTOMERS,
+    LOCATIONS,
+    DOMAINS,
+    PURPOSES,
 } from "./entities";
 export { Visit, type VisitData } from "./Visit";
 export { User, type UserData } from "./User";

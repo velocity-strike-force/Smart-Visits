@@ -17,104 +17,131 @@ import VisitorSignUpCard from "./VisitorSignUpCard";
 import { Switch } from "./ui/switch";
 
 export default function VisitDetail() {
-    const navigate = useNavigate();
-    const { id } = useParams();
-    const { user } = useUser();
-    const { getVisit, addAttendee, removeAttendee } = useVisits();
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const { user } = useUser();
+  const { getVisit, addAttendee, removeAttendee, visitsLoading, visitsError } =
+    useVisits();
 
-    const visit = getVisit(id || "");
+  const visit = getVisit(id || "");
 
-    if (!visit) {
-        return (
-            <div className="flex-1 bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <h2 className="text-2xl mb-4">Visit not found</h2>
-                    <button
-                        onClick={() => navigate("/")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                    >
-                        Back to Dashboard
-                    </button>
-                </div>
-            </div>
-        );
+  if (visitsLoading) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Loading visit…</p>
+      </div>
+    );
+  }
+
+  if (visitsError) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <h2 className="text-xl mb-2 text-red-700">Could not load visits</h2>
+          <p className="text-gray-600 mb-4">{visitsError}</p>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!visit) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl mb-4">Visit not found</h2>
+          <button
+            onClick={() => navigate('/')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const isCreator = user.email === visit.creatorEmail;
+  const isVisitor = user.role === "visitor";
+  const canManageVisit = user.role === "sales_rep" && isCreator;
+  const isSignedUp = visit.attendees.includes(user.name);
+  const canVisitorJoin =
+    isVisitor && !isSignedUp && visit.attendees.length < visit.capacity;
+  const hasPostVisitRecord = (visit.postVisitRecordCount ?? 0) > 0;
+
+  const handleSignUp = () => {
+    if (!isVisitor) {
+      toast.error("Only visitors can join as attendees");
+      return;
     }
 
-    const isCreator = user.email === visit.creatorEmail;
-    const isVisitor = user.role === "visitor";
-    const canManageVisit = user.role === "sales_rep" && isCreator;
-    const isSignedUp = visit.attendees.includes(user.name);
-    const canVisitorJoin =
-        isVisitor && !isSignedUp && visit.attendees.length < visit.capacity;
-    const hasPostVisitRecord = (visit.postVisitRecordCount ?? 0) > 0;
+    if (visit.attendees.length >= visit.capacity) {
+      toast.error("This visit is full");
+      return;
+    }
+    addAttendee(visit.id, user.name);
+    toast.success("Successfully signed up for visit!");
+  };
 
-    const handleSignUp = () => {
-        if (!isVisitor) {
-            toast.error("Only visitors can join as attendees");
-            return;
-        }
+  const handleCancelSignUp = () => {
+    if (!isVisitor) {
+      toast.error("Only visitors can leave attendee sign-up");
+      return;
+    }
 
-        if (visit.attendees.length >= visit.capacity) {
-            toast.error("This visit is full");
-            return;
-        }
-        addAttendee(visit.id, user.name);
-        toast.success("Successfully signed up for visit!");
-    };
+    removeAttendee(visit.id, user.name);
+    toast.success("You have left the visit");
+  };
 
-    const handleCancelSignUp = () => {
-        if (!isVisitor) {
-            toast.error("Only visitors can leave attendee sign-up");
-            return;
-        }
+  const handleRemoveAttendee = (attendee: string) => {
+    if (!canManageVisit) {
+      toast.error("Only sales reps can remove attendees");
+      return;
+    }
 
-        removeAttendee(visit.id, user.name);
-        toast.success("You have left the visit");
-    };
+    removeAttendee(visit.id, attendee);
+    toast.success(`Removed ${attendee} from visit`);
+  };
 
-    const handleRemoveAttendee = (attendee: string) => {
-        if (!canManageVisit) {
-            toast.error("Only sales reps can remove attendees");
-            return;
-        }
+  const handleDelete = () => {
+    if (!canManageVisit) {
+      toast.error("Only sales reps can delete visits");
+      return;
+    }
 
-        removeAttendee(visit.id, attendee);
-        toast.success(`Removed ${attendee} from visit`);
-    };
+    if (
+      confirm(
+        "Are you sure you want to delete this visit? All invitees will be notified.",
+      )
+    ) {
+      toast.success("Visit deleted and notifications sent");
+      navigate("/");
+    }
+  };
 
-    const handleDelete = () => {
-        if (!canManageVisit) {
-            toast.error("Only sales reps can delete visits");
-            return;
-        }
+  const handleCancel = () => {
+    if (!canManageVisit) {
+      toast.error("Only sales reps can cancel visits");
+      return;
+    }
 
-        if (
-            confirm(
-                "Are you sure you want to delete this visit? All invitees will be notified.",
-            )
-        ) {
-            toast.success("Visit deleted and notifications sent");
-            navigate("/");
-        }
-    };
+    if (
+      confirm(
+        "Are you sure you want to cancel this event? All invitees will be notified.",
+      )
+    ) {
+      toast.success("Event cancelled and notifications sent");
+      navigate("/");
+    }
+  };
 
-    const handleCancel = () => {
-        if (!canManageVisit) {
-            toast.error("Only sales reps can cancel visits");
-            return;
-        }
-
-        if (
-            confirm(
-                "Are you sure you want to cancel this event? All invitees will be notified.",
-            )
-        ) {
-            toast.success("Event cancelled and notifications sent");
-            navigate("/");
-        }
-    };
-
-    return (
+  return (
         <div className="flex-1 bg-gray-50 overflow-auto">
             <div className="bg-white border-b px-8 py-6">
                 <button

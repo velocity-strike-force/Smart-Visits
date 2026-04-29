@@ -116,7 +116,7 @@ export default function AccountSettingsModal({
                                 </label>
                                 <input
                                     type="text"
-                                    value="John Smith"
+                                    value="Sonny Antunes"
                                     disabled
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                                 />
@@ -127,7 +127,7 @@ export default function AccountSettingsModal({
                                 </label>
                                 <input
                                     type="email"
-                                    value="john.smith@rfsmart.com"
+                                    value="sonny.antunes@rfsmart.com"
                                     disabled
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                                 />
@@ -187,54 +187,6 @@ export default function AccountSettingsModal({
                                     }
                                 />
                             </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h3 className="mb-4">Notification Preferences</h3>
-                        <div className="space-y-3">
-                            <label className="flex items-center justify-between">
-                                <span className="text-sm">
-                                    Email notifications
-                                </span>
-                                <Switch
-                                    checked={settings.emailNotifications}
-                                    onCheckedChange={(checked) =>
-                                        setSettings({
-                                            ...settings,
-                                            emailNotifications: checked,
-                                        })
-                                    }
-                                />
-                            </label>
-                            <label className="flex items-center justify-between">
-                                <span className="text-sm">
-                                    Slack DM notifications
-                                </span>
-                                <Switch
-                                    checked={settings.slackNotifications}
-                                    onCheckedChange={(checked) =>
-                                        setSettings({
-                                            ...settings,
-                                            slackNotifications: checked,
-                                        })
-                                    }
-                                />
-                            </label>
-                            <label className="flex items-center justify-between">
-                                <span className="text-sm">
-                                    Distance from location alerts
-                                </span>
-                                <Switch
-                                    checked={settings.distanceAlerts}
-                                    onCheckedChange={(checked) =>
-                                        setSettings({
-                                            ...settings,
-                                            distanceAlerts: checked,
-                                        })
-                                    }
-                                />
-                            </label>
                         </div>
                     </div>
                 </div>
