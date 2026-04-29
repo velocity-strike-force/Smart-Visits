@@ -30,14 +30,34 @@ import type { Visit } from "./VisitsContext";
 const getProductLineTheme = (productLine: string) => {
     const normalized = productLine.toLowerCase();
     if (normalized.includes("netsuite"))
-        return { calendarCard: "bg-emerald-100 text-emerald-800", badge: "bg-emerald-100 text-emerald-800", subtleText: "text-emerald-700" };
+        return {
+            calendarCard: "bg-emerald-100 text-emerald-800",
+            badge: "bg-emerald-100 text-emerald-800",
+            subtleText: "text-emerald-700",
+        };
     if (normalized.includes("oracle"))
-        return { calendarCard: "bg-indigo-100 text-indigo-800", badge: "bg-indigo-100 text-indigo-800", subtleText: "text-indigo-700" };
+        return {
+            calendarCard: "bg-indigo-100 text-indigo-800",
+            badge: "bg-indigo-100 text-indigo-800",
+            subtleText: "text-indigo-700",
+        };
     if (normalized.includes("tms"))
-        return { calendarCard: "bg-teal-100 text-teal-800", badge: "bg-teal-100 text-teal-800", subtleText: "text-teal-700" };
+        return {
+            calendarCard: "bg-teal-100 text-teal-800",
+            badge: "bg-teal-100 text-teal-800",
+            subtleText: "text-teal-700",
+        };
     if (normalized.includes("shipping"))
-        return { calendarCard: "bg-amber-100 text-amber-800", badge: "bg-amber-100 text-amber-800", subtleText: "text-amber-700" };
-    return { calendarCard: "bg-blue-100 text-blue-800", badge: "bg-blue-100 text-blue-800", subtleText: "text-blue-700" };
+        return {
+            calendarCard: "bg-amber-100 text-amber-800",
+            badge: "bg-amber-100 text-amber-800",
+            subtleText: "text-amber-700",
+        };
+    return {
+        calendarCard: "bg-blue-100 text-blue-800",
+        badge: "bg-blue-100 text-blue-800",
+        subtleText: "text-blue-700",
+    };
 };
 
 export default function Dashboard() {
@@ -104,7 +124,10 @@ export default function Dashboard() {
     const monthEnd = endOfMonth(currentDate);
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
-    const daysInMonth = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
+    const daysInMonth = eachDayOfInterval({
+        start: calendarStart,
+        end: calendarEnd,
+    });
 
     const getVisitsForDay = (day: Date) => {
         return filteredVisits.filter((visit) => isSameDay(visit.date, day));
@@ -116,7 +139,10 @@ export default function Dashboard() {
         if (!selectedVisit && !selectedDay) return;
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key !== "Escape") return;
-            if (selectedVisit) { setSelectedVisit(null); return; }
+            if (selectedVisit) {
+                setSelectedVisit(null);
+                return;
+            }
             if (selectedDay) setSelectedDay(null);
         };
         window.addEventListener("keydown", onKeyDown);
@@ -254,14 +280,21 @@ export default function Dashboard() {
                             <div className="grid grid-cols-7">
                                 {daysInMonth.map((day, idx) => {
                                     const dayVisits = getVisitsForDay(day);
-                                    const visibleDayVisits = dayVisits.slice(0, 2);
-                                    const hiddenVisitCount = dayVisits.length - visibleDayVisits.length;
+                                    const visibleDayVisits = dayVisits.slice(
+                                        0,
+                                        2,
+                                    );
+                                    const hiddenVisitCount =
+                                        dayVisits.length -
+                                        visibleDayVisits.length;
                                     return (
                                         <div
                                             key={idx}
                                             className="min-h-[120px] border-r border-b last:border-r-0 p-2 hover:bg-gray-50 cursor-pointer"
                                             onClick={() =>
-                                                navigate(`/post-visit?date=${day.toISOString()}`)
+                                                navigate(
+                                                    `/post-visit?date=${day.toISOString()}`,
+                                                )
                                             }
                                         >
                                             <div
@@ -270,53 +303,89 @@ export default function Dashboard() {
                                                 {format(day, "d")}
                                             </div>
                                             <div className="space-y-1">
-                                                {visibleDayVisits.map((visit) => {
-                                                    const isFull = visit.attendees.length >= visit.capacity;
-                                                    const theme = getProductLineTheme(visit.productLine);
-                                                    return (
-                                                        <div
-                                                            key={visit.id}
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                setSelectedVisit(visit);
-                                                            }}
-                                                            className={`text-xs p-2 rounded hover:opacity-90 relative cursor-pointer ${
-                                                                isFull
-                                                                    ? "bg-gray-100 text-gray-600 border border-gray-200"
-                                                                    : theme.calendarCard
-                                                            }`}
-                                                        >
-                                                            <div className="truncate">
-                                                                {visit.isKeyAccount && (
-                                                                    <Star className="inline-block w-3 h-3 text-amber-500 fill-amber-400 mr-1" />
+                                                {visibleDayVisits.map(
+                                                    (visit) => {
+                                                        const isFull =
+                                                            visit.attendees
+                                                                .length >=
+                                                            visit.capacity;
+                                                        const theme =
+                                                            getProductLineTheme(
+                                                                visit.productLine,
+                                                            );
+                                                        return (
+                                                            <div
+                                                                key={visit.id}
+                                                                onClick={(
+                                                                    e,
+                                                                ) => {
+                                                                    e.stopPropagation();
+                                                                    setSelectedVisit(
+                                                                        visit,
+                                                                    );
+                                                                }}
+                                                                className={`text-xs p-2 rounded hover:opacity-90 relative cursor-pointer ${
+                                                                    isFull
+                                                                        ? "bg-gray-100 text-gray-600 border border-gray-200"
+                                                                        : theme.calendarCard
+                                                                }`}
+                                                            >
+                                                                <div className="truncate">
+                                                                    {visit.isKeyAccount && (
+                                                                        <Star className="inline-block w-3 h-3 text-amber-500 fill-amber-400 mr-1" />
+                                                                    )}
+                                                                    {
+                                                                        visit.customer
+                                                                    }
+                                                                </div>
+                                                                <div className="text-[10px] mt-1 flex items-center justify-between">
+                                                                    <span>
+                                                                        {
+                                                                            visit.location
+                                                                        }
+                                                                    </span>
+                                                                    <span
+                                                                        className={
+                                                                            isFull
+                                                                                ? "text-red-600 font-medium"
+                                                                                : ""
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            visit
+                                                                                .attendees
+                                                                                .length
+                                                                        }
+                                                                        /
+                                                                        {
+                                                                            visit.capacity
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                {visit.isDraft &&
+                                                                    user.role ===
+                                                                        "sales_rep" && (
+                                                                        <span className="absolute top-0 right-0 px-1 text-[10px] bg-gray-400 text-white rounded-bl">
+                                                                            Draft
+                                                                        </span>
+                                                                    )}
+                                                                {isFull && (
+                                                                    <span className="absolute top-0 right-0 px-1 text-[10px] bg-red-500 text-white rounded-bl">
+                                                                        Full
+                                                                    </span>
                                                                 )}
-                                                                {visit.customer}
                                                             </div>
-                                                            <div className="text-[10px] mt-1 flex items-center justify-between">
-                                                                <span>{visit.location}</span>
-                                                                <span className={isFull ? "text-red-600 font-medium" : ""}>
-                                                                    {visit.attendees.length}/{visit.capacity}
-                                                                </span>
-                                                            </div>
-                                                            {visit.isDraft && user.role === "sales_rep" && (
-                                                                <span className="absolute top-0 right-0 px-1 text-[10px] bg-gray-400 text-white rounded-bl">
-                                                                    Draft
-                                                                </span>
-                                                            )}
-                                                            {isFull && (
-                                                                <span className="absolute top-0 right-0 px-1 text-[10px] bg-red-500 text-white rounded-bl">
-                                                                    Full
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    );
-                                                })}
+                                                        );
+                                                    },
+                                                )}
                                                 {hiddenVisitCount > 0 && (
                                                     <button
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedDay(day);
-                                                            setDayModalFocusIndex(0);
+                                                            setDayModalFocusIndex(
+                                                                0,
+                                                            );
                                                         }}
                                                         className="w-full text-left px-2 py-1 text-[11px] text-blue-700 bg-blue-50 rounded font-medium hover:bg-blue-100"
                                                     >
@@ -524,7 +593,10 @@ export default function Dashboard() {
                                     {selectedVisit.customer}
                                 </h2>
                                 <p className="text-sm text-gray-500">
-                                    {format(selectedVisit.date, "MMMM dd, yyyy")}
+                                    {format(
+                                        selectedVisit.date,
+                                        "MMMM dd, yyyy",
+                                    )}
                                 </p>
                             </div>
                             <button
@@ -536,22 +608,35 @@ export default function Dashboard() {
                         </div>
                         <div className="space-y-4">
                             <div>
-                                <div className="text-sm text-gray-500">Location</div>
+                                <div className="text-sm text-gray-500">
+                                    Location
+                                </div>
                                 <div>{selectedVisit.location}</div>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-500">Product Line</div>
-                                <span className={`inline-block mt-1 px-2 py-1 rounded text-xs ${getProductLineTheme(selectedVisit.productLine).badge}`}>
+                                <div className="text-sm text-gray-500">
+                                    Product Line
+                                </div>
+                                <span
+                                    className={`inline-block mt-1 px-2 py-1 rounded text-xs ${getProductLineTheme(selectedVisit.productLine).badge}`}
+                                >
                                     {selectedVisit.productLine}
                                 </span>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-500">Sales Rep</div>
+                                <div className="text-sm text-gray-500">
+                                    Sales Rep
+                                </div>
                                 <div>{selectedVisit.salesRep}</div>
                             </div>
                             <div>
-                                <div className="text-sm text-gray-500">Capacity</div>
-                                <div>{selectedVisit.attendees.length} / {selectedVisit.capacity}</div>
+                                <div className="text-sm text-gray-500">
+                                    Capacity
+                                </div>
+                                <div>
+                                    {selectedVisit.attendees.length} /{" "}
+                                    {selectedVisit.capacity}
+                                </div>
                             </div>
                         </div>
                         <div className="flex justify-end gap-2 mt-6 pt-4 border-t">
@@ -562,7 +647,9 @@ export default function Dashboard() {
                                 Close
                             </button>
                             <button
-                                onClick={() => navigate(`/visit/${selectedVisit.id}`)}
+                                onClick={() =>
+                                    navigate(`/visit/${selectedVisit.id}`)
+                                }
                                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
                             >
                                 <ExternalLink className="w-4 h-4" />
@@ -583,12 +670,36 @@ export default function Dashboard() {
                         onClick={(e) => e.stopPropagation()}
                         onKeyDown={(e) => {
                             if (selectedDayVisits.length === 0) return;
-                            if (e.key === "ArrowDown") { e.preventDefault(); setDayModalFocusIndex((i) => Math.min(i + 1, selectedDayVisits.length - 1)); }
-                            if (e.key === "ArrowUp") { e.preventDefault(); setDayModalFocusIndex((i) => Math.max(i - 1, 0)); }
-                            if (e.key === "Home") { e.preventDefault(); setDayModalFocusIndex(0); }
-                            if (e.key === "End") { e.preventDefault(); setDayModalFocusIndex(selectedDayVisits.length - 1); }
+                            if (e.key === "ArrowDown") {
+                                e.preventDefault();
+                                setDayModalFocusIndex((i) =>
+                                    Math.min(
+                                        i + 1,
+                                        selectedDayVisits.length - 1,
+                                    ),
+                                );
+                            }
+                            if (e.key === "ArrowUp") {
+                                e.preventDefault();
+                                setDayModalFocusIndex((i) =>
+                                    Math.max(i - 1, 0),
+                                );
+                            }
+                            if (e.key === "Home") {
+                                e.preventDefault();
+                                setDayModalFocusIndex(0);
+                            }
+                            if (e.key === "End") {
+                                e.preventDefault();
+                                setDayModalFocusIndex(
+                                    selectedDayVisits.length - 1,
+                                );
+                            }
                             if (e.key === "Enter" || e.key === " ") {
-                                const target = dayModalVisitRefs.current[dayModalFocusIndex];
+                                const target =
+                                    dayModalVisitRefs.current[
+                                        dayModalFocusIndex
+                                    ];
                                 if (!target) return;
                                 e.preventDefault();
                                 target.click();
@@ -598,8 +709,12 @@ export default function Dashboard() {
                     >
                         <div className="flex items-start justify-between mb-4">
                             <div>
-                                <h2 className="text-xl">{format(selectedDay, "EEEE, MMMM dd, yyyy")}</h2>
-                                <p className="text-sm text-gray-500">{selectedDayVisits.length} visits</p>
+                                <h2 className="text-xl">
+                                    {format(selectedDay, "EEEE, MMMM dd, yyyy")}
+                                </h2>
+                                <p className="text-sm text-gray-500">
+                                    {selectedDayVisits.length} visits
+                                </p>
                             </div>
                             <button
                                 onClick={() => setSelectedDay(null)}
@@ -610,13 +725,22 @@ export default function Dashboard() {
                         </div>
                         <div className="space-y-3">
                             {selectedDayVisits.map((visit, index) => {
-                                const isFull = visit.attendees.length >= visit.capacity;
-                                const theme = getProductLineTheme(visit.productLine);
+                                const isFull =
+                                    visit.attendees.length >= visit.capacity;
+                                const theme = getProductLineTheme(
+                                    visit.productLine,
+                                );
                                 return (
                                     <button
                                         key={visit.id}
-                                        ref={(node) => { dayModalVisitRefs.current[index] = node; }}
-                                        onClick={() => { setSelectedDay(null); setSelectedVisit(visit); }}
+                                        ref={(node) => {
+                                            dayModalVisitRefs.current[index] =
+                                                node;
+                                        }}
+                                        onClick={() => {
+                                            setSelectedDay(null);
+                                            setSelectedVisit(visit);
+                                        }}
                                         className="w-full text-left p-3 rounded-lg border hover:bg-gray-50"
                                     >
                                         <div className="flex items-start justify-between gap-3">
@@ -627,13 +751,26 @@ export default function Dashboard() {
                                                     )}
                                                     {visit.customer}
                                                 </div>
-                                                <div className="text-xs text-gray-500 mt-1">{visit.location}</div>
+                                                <div className="text-xs text-gray-500 mt-1">
+                                                    {visit.location}
+                                                </div>
                                             </div>
                                             <div className="text-xs text-right">
-                                                <div className={isFull ? "text-red-600 font-medium" : "text-gray-700"}>
-                                                    {visit.attendees.length}/{visit.capacity}
+                                                <div
+                                                    className={
+                                                        isFull
+                                                            ? "text-red-600 font-medium"
+                                                            : "text-gray-700"
+                                                    }
+                                                >
+                                                    {visit.attendees.length}/
+                                                    {visit.capacity}
                                                 </div>
-                                                <div className={`mt-1 ${theme.subtleText}`}>{visit.productLine}</div>
+                                                <div
+                                                    className={`mt-1 ${theme.subtleText}`}
+                                                >
+                                                    {visit.productLine}
+                                                </div>
                                             </div>
                                         </div>
                                     </button>
