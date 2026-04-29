@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Mail, Slack } from "lucide-react";
+import { ArrowLeft, Mail, MessagesSquare } from "lucide-react";
 import { toast } from "sonner";
 import Typeahead from "./Typeahead";
 import { Switch } from "./ui/switch";
+import { getVisitApiBaseUrl } from "../visits/visitSourceConfig";
+
+function apiUrl(path: string): string {
+    const base = getVisitApiBaseUrl();
+    return base ? `${base}${path}` : path;
+}
 
 export default function PostVisit() {
     const navigate = useNavigate();
@@ -27,7 +33,7 @@ export default function PostVisit() {
         details: "",
         isPrivate: false,
         notifyEmail: true,
-        notifySlack: false,
+        notifySlack: true,
     });
 
     const [inviteeInput, setInviteeInput] = useState("");
@@ -118,22 +124,62 @@ export default function PostVisit() {
         });
     };
 
-    const handleSubmit = (isDraft: boolean) => {
+    const handleSubmit = async (isDraft: boolean) => {
         if (isDraft) {
             toast.success("Visit saved as draft");
-        } else {
-            const notificationChannels = [
-                formData.notifyEmail ? "email" : null,
-                formData.notifySlack ? "Slack" : null,
-            ].filter(Boolean);
-
-            const notificationMessage =
-                notificationChannels.length > 0
-                    ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
-                    : "";
-
-            toast.success(`Visit posted successfully!${notificationMessage}`);
+            navigate("/");
+            return;
         }
+
+        const notificationChannels = [
+            formData.notifyEmail ? "email" : null,
+            formData.notifySlack ? "Slack" : null,
+        ].filter(Boolean);
+
+        const notificationMessage =
+            notificationChannels.length > 0
+                ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
+                : "";
+
+        toast.success(`Visit posted successfully!${notificationMessage}`);
+
+        if (formData.notifySlack) {
+            try {
+                const res = await fetch(
+                    apiUrl("/api/notify/slack/post-visit"),
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            customer: formData.customer,
+                            productLine: formData.productLine,
+                            location: formData.location,
+                            startDate: formData.startDate,
+                            endDate: formData.endDate,
+                            salesRep: formData.salesRep,
+                            domain: formData.domain,
+                            purpose: formData.purpose,
+                            details: formData.details,
+                            capacity: formData.capacity,
+                            inviteeCount: formData.invitees.length,
+                            isPrivate: formData.isPrivate,
+                        }),
+                    },
+                );
+                if (!res.ok) {
+                    const data = (await res.json().catch(() => ({}))) as {
+                        message?: string;
+                    };
+                    console.warn(
+                        "Slack post-visit notification failed:",
+                        data.message ?? res.status,
+                    );
+                }
+            } catch (e) {
+                console.warn("Slack post-visit notification failed:", e);
+            }
+        }
+
         navigate("/");
     };
 
@@ -447,7 +493,7 @@ export default function PostVisit() {
                         <label className="flex items-center justify-between rounded-lg border p-3 gap-3">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
-                                    <Slack className="w-4 h-4" />
+                                    <MessagesSquare className="w-4 h-4" />
                                 </div>
 
                                 <div>

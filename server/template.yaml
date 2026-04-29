@@ -500,3 +500,30 @@ Resources:
           - src/handlers/referenceData.ts
         External:
           - "@aws-sdk/*"
+
+  # ── Slack: post-visit notification (Incoming Webhook URL from deploy parameter)
+  HandleSlackPostVisitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-notify-slack-post-visit
+      CodeUri: ./
+      Handler: slackPostVisit.handleSlackPostVisitEndpoint
+      Environment:
+        Variables:
+          SLACK_WEBHOOK_URL: !Ref SlackWebhookUrl
+      Events:
+        PostApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/notify/slack/post-visit
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/slackPostVisit.ts
+        External:
+          - "@aws-sdk/*"
