@@ -6,6 +6,7 @@ dist/
 !src/**/*.d.ts
 .env
 .env.*
+env.local.json
 docs/
 scripts/*
 !scripts/seed-test-records.ts

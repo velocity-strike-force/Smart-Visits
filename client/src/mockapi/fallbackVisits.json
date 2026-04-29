@@ -1,0 +1,41 @@
+[
+    {
+        "id": "fallback-1",
+        "title": "Executive Discovery",
+        "purpose": "Quarterly Review",
+        "customer": "Acme Corp",
+        "date": "2026-04-30",
+        "endDate": "2026-04-30",
+        "productLine": "NetSuite",
+        "location": "Jacksonville, FL",
+        "arr": 250000,
+        "salesRep": "Kevin Reiter",
+        "domain": "Manufacturing",
+        "isKeyAccount": true,
+        "postVisitRecordCount": 1,
+        "capacity": 8,
+        "attendees": ["Sarah Williams", "Emily Davis"],
+        "creatorEmail": "kevin.reiter@rfsmart.com",
+        "customerContact": "Bob Anderson",
+        "details": "Front desk check-in at 9:00 AM.",
+        "isPrivate": false,
+        "isDraft": false
+    },
+    {
+        "id": "fallback-2",
+        "title": "Operations Alignment",
+        "purpose": "Implementation Review",
+        "customer": "Global Logistics",
+        "date": "2026-05-07",
+        "productLine": "TMS",
+        "location": "Atlanta, GA",
+        "arr": 410000,
+        "salesRep": "Mike Johnson",
+        "domain": "Outbound",
+        "isKeyAccount": true,
+        "capacity": 10,
+        "attendees": ["Kevin Reiter", "Lisa Anderson", "Robert Taylor"],
+        "creatorEmail": "mike.johnson@rfsmart.com",
+        "isDraft": false
+    }
+]

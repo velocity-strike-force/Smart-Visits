@@ -108,7 +108,7 @@ export function mapListRowToVisit(row: VisitListRow): Visit {
 }
 
 async function fetchVisitsList(): Promise<VisitListRow[]> {
-  const res = await fetch(apiUrl('/api/visit'));
+  const res = await fetch(apiUrl('/dev/visit'));
   if (!res.ok) throw new Error(`Visits request failed (${res.status})`);
   const body = (await res.json()) as { success?: boolean; visits?: VisitListRow[] };
   if (!body.success || !Array.isArray(body.visits)) {
@@ -119,7 +119,7 @@ async function fetchVisitsList(): Promise<VisitListRow[]> {
 
 async function fetchVisitById(visitId: string): Promise<VisitFullApi | null> {
   const res = await fetch(
-    apiUrl(`/api/visit?visitId=${encodeURIComponent(visitId)}`)
+    apiUrl(`/dev/visit?visitId=${encodeURIComponent(visitId)}`)
   );
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Visit request failed (${res.status})`);

@@ -1,9 +1,19 @@
 import { useState } from "react";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Send } from "lucide-react";
 import { toast } from "sonner";
 import { useUser } from "./UserContext";
 import Typeahead from "./Typeahead";
+import RequiredLabel from "./RequiredLabel";
+
+interface RequestVisitFormValues {
+    customer: string;
+    productLine: string;
+    preferredTiming: string;
+    notes: string;
+}
 
 const productLineOptions = [
     "NetSuite",
@@ -17,11 +27,29 @@ export default function RequestVisit() {
     const navigate = useNavigate();
     const { user } = useUser();
 
-    const [customer, setCustomer] = useState("");
-    const [productLine, setProductLine] = useState("");
-    const [preferredTiming, setPreferredTiming] = useState("");
-    const [notes, setNotes] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        reset,
+        formState: { errors },
+    } = useForm<RequestVisitFormValues>({
+        defaultValues: {
+            customer: "",
+            productLine: "",
+            preferredTiming: "",
+            notes: "",
+        },
+    });
+
+    useEffect(() => {
+        register("productLine", {
+            required: "Product line is required",
+        });
+    }, [register]);
 
     if (user.role !== "visitor") {
         return (
@@ -42,24 +70,12 @@ export default function RequestVisit() {
         );
     }
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        if (!customer.trim() || !productLine || !preferredTiming.trim()) {
-            toast.error(
-                "Please fill customer, product line, and preferred timing.",
-            );
-            return;
-        }
-
+    const submitRequest = (values: RequestVisitFormValues) => {
         setIsSubmitting(true);
 
         setTimeout(() => {
             toast.success("Request sent to the sales team.");
-            setCustomer("");
-            setProductLine("");
-            setPreferredTiming("");
-            setNotes("");
+            reset();
             setIsSubmitting(false);
         }, 350);
     };
@@ -83,57 +99,93 @@ export default function RequestVisit() {
 
             <div className="max-w-3xl mx-auto p-8">
                 <form
-                    onSubmit={handleSubmit}
+                    onSubmit={handleSubmit(submitRequest)}
                     className="bg-white border rounded-lg p-6 space-y-5"
                 >
                     <div>
-                        <label className="block text-sm text-gray-600 mb-2">
+                        <RequiredLabel
+                            className="block text-sm text-gray-600 mb-2"
+                            required
+                        >
                             Customer Interested In
-                        </label>
+                        </RequiredLabel>
                         <input
                             type="text"
-                            value={customer}
-                            onChange={(e) => setCustomer(e.target.value)}
+                            {...register("customer", {
+                                required: "Customer is required",
+                            })}
                             placeholder="Example: Acme Corp"
                             className="w-full px-3 py-2 border rounded-lg"
-                            required
                         />
+                        {errors.customer && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.customer.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
                         <Typeahead
                             label="Product Line"
+                            required
                             placeholder="Search product line…"
                             options={productLineOptions}
-                            value={productLine}
-                            onChange={setProductLine}
+                            value={watch("productLine")}
+                            onChange={(value) =>
+                                setValue("productLine", value, {
+                                    shouldValidate: true,
+                                })
+                            }
                         />
+                        {errors.productLine && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.productLine.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label className="block text-sm text-gray-600 mb-2">
+                        <RequiredLabel
+                            className="block text-sm text-gray-600 mb-2"
+                            required
+                        >
                             Preferred Timing
-                        </label>
+                        </RequiredLabel>
                         <input
                             type="text"
-                            value={preferredTiming}
-                            onChange={(e) => setPreferredTiming(e.target.value)}
+                            {...register("preferredTiming", {
+                                required: "Preferred timing is required",
+                            })}
                             placeholder="Example: Early May, weekday mornings"
                             className="w-full px-3 py-2 border rounded-lg"
-                            required
                         />
+                        {errors.preferredTiming && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.preferredTiming.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label className="block text-sm text-gray-600 mb-2">
+                        <RequiredLabel className="block text-sm text-gray-600 mb-2">
                             Additional Notes
-                        </label>
+                        </RequiredLabel>
                         <textarea
-                            value={notes}
-                            onChange={(e) => setNotes(e.target.value)}
+                            {...register("notes", {
+                                maxLength: {
+                                    value: 500,
+                                    message:
+                                        "Additional notes must be 500 characters or less",
+                                },
+                            })}
                             placeholder="Share any specific topics, goals, or context for the visit request."
                             className="w-full px-3 py-2 border rounded-lg min-h-[140px]"
                         />
+                        {errors.notes && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.notes.message}
+                            </p>
+                        )}
                     </div>
 
                     <div className="flex justify-end pt-2">

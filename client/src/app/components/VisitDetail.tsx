@@ -15,185 +15,142 @@ import { toast } from "sonner";
 import { useUser } from "./UserContext";
 import { useVisits } from "./VisitsContext";
 import VisitorSignUpCard from "./VisitorSignUpCard";
+import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
 
 export default function VisitDetail() {
-  const navigate = useNavigate();
-  const { id } = useParams();
-  const { user } = useUser();
-  const {
-    getVisit,
-    addAttendee,
-    removeAttendee,
-    refreshVisit,
-    visitsLoading,
-    visitsError,
-  } =
-    useVisits();
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const { user } = useUser();
+    const {
+        getVisit,
+        addAttendee,
+        removeAttendee,
+        visitsLoading,
+        visitsError,
+    } = useVisits();
 
-  const visit = getVisit(id || "");
+    const visit = getVisit(id || "");
 
-  if (visitsLoading) {
-    return (
-      <div className="flex-1 bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">Loading visit…</p>
-      </div>
-    );
-  }
-
-  if (visitsError) {
-    return (
-      <div className="flex-1 bg-gray-50 flex items-center justify-center">
-        <div className="text-center max-w-md px-4">
-          <h2 className="text-xl mb-2 text-red-700">Could not load visits</h2>
-          <p className="text-gray-600 mb-4">{visitsError}</p>
-          <button
-            type="button"
-            onClick={() => navigate('/')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!visit) {
-    return (
-      <div className="flex-1 bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl mb-4">Visit not found</h2>
-          <button
-            onClick={() => navigate('/')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const isCreator = user.email === visit.creatorEmail;
-  const isVisitor = user.role === "visitor";
-  const canManageVisit = user.role === "sales_rep" && isCreator;
-  const isSignedUp =
-    (visit.attendeeUserIds ?? []).includes(user.userId) ||
-    visit.attendees.includes(user.name);
-  const canVisitorJoin =
-    isVisitor && !isSignedUp && visit.attendees.length < visit.capacity;
-  const hasPostVisitRecord = (visit.postVisitRecordCount ?? 0) > 0;
-
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-    refreshVisit(id).catch((error) => {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to refresh visit details"
-      );
-    });
-  }, [id, refreshVisit]);
-
-  const handleSignUp = async () => {
-    if (!isVisitor) {
-      toast.error("Only visitors can join as attendees");
-      return;
-    }
-
-    if (visit.attendees.length >= visit.capacity) {
-      toast.error("This visit is full");
-      return;
-    }
-    try {
-      await addAttendee(visit.id, {
-        userId: user.userId,
-        name: user.name,
-        email: user.email,
-      });
-      toast.success("Successfully signed up for visit!");
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Signup failed");
-    }
-  };
-
-  const handleCancelSignUp = async () => {
-    if (!isVisitor) {
-      toast.error("Only visitors can leave attendee sign-up");
-      return;
-    }
-
-    try {
-      await removeAttendee(visit.id, { userId: user.userId, name: user.name });
-      toast.success("You have left the visit");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to cancel signup"
-      );
-    }
-  };
-
-  const handleRemoveAttendee = (attendee: string) => {
-    if (!canManageVisit) {
-      toast.error("Only sales reps can remove attendees");
-      return;
-    }
-
-    const attendeeIndex = visit.attendees.indexOf(attendee);
-    const attendeeUserId =
-      attendeeIndex >= 0 ? visit.attendeeUserIds?.[attendeeIndex] : undefined;
-    if (!attendeeUserId) {
-      toast.error("Attendee user id is missing");
-      return;
-    }
-
-    removeAttendee(visit.id, { userId: attendeeUserId, name: attendee })
-      .then(() => {
-        toast.success(`Removed ${attendee} from visit`);
-      })
-      .catch((error) => {
-        toast.error(
-          error instanceof Error ? error.message : "Failed to remove attendee"
+    if (visitsLoading) {
+        return (
+            <div className="flex-1 bg-gray-50 flex items-center justify-center">
+                <p className="text-gray-600">Loading visit…</p>
+            </div>
         );
-      });
-  };
-
-  const handleDelete = () => {
-    if (!canManageVisit) {
-      toast.error("Only sales reps can delete visits");
-      return;
     }
 
-    if (
-      confirm(
-        "Are you sure you want to delete this visit? All invitees will be notified.",
-      )
-    ) {
-      toast.success("Visit deleted and notifications sent");
-      navigate("/");
+    if (visitsError) {
+        return (
+            <div className="flex-1 bg-gray-50 flex items-center justify-center">
+                <div className="text-center max-w-md px-4">
+                    <h2 className="text-xl mb-2 text-red-700">
+                        Could not load visits
+                    </h2>
+                    <p className="text-gray-600 mb-4">{visitsError}</p>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/")}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        );
     }
-  };
 
-  const handleCancel = () => {
-    if (!canManageVisit) {
-      toast.error("Only sales reps can cancel visits");
-      return;
+    if (!visit) {
+        return (
+            <div className="flex-1 bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl mb-4">Visit not found</h2>
+                    <button
+                        onClick={() => navigate("/")}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        );
     }
 
-    if (
-      confirm(
-        "Are you sure you want to cancel this event? All invitees will be notified.",
-      )
-    ) {
-      toast.success("Event cancelled and notifications sent");
-      navigate("/");
-    }
-  };
+    const isCreator = user.email === visit.creatorEmail;
+    const isVisitor = user.role === "visitor";
+    const canManageVisit = user.role === "sales_rep" && isCreator;
+    const isSignedUp = visit.attendees.includes(user.name);
+    const canVisitorJoin =
+        isVisitor && !isSignedUp && visit.attendees.length < visit.capacity;
+    const hasPostVisitRecord = (visit.postVisitRecordCount ?? 0) > 0;
 
-  return (
+    const handleSignUp = () => {
+        if (!isVisitor) {
+            toast.error("Only visitors can join as attendees");
+            return;
+        }
+
+        if (visit.attendees.length >= visit.capacity) {
+            toast.error("This visit is full");
+            return;
+        }
+        addAttendee(visit.id, user.name);
+        toast.success("Successfully signed up for visit!");
+    };
+
+    const handleCancelSignUp = () => {
+        if (!isVisitor) {
+            toast.error("Only visitors can leave attendee sign-up");
+            return;
+        }
+
+        removeAttendee(visit.id, user.name);
+        toast.success("You have left the visit");
+    };
+
+    const handleRemoveAttendee = (attendee: string) => {
+        if (!canManageVisit) {
+            toast.error("Only sales reps can remove attendees");
+            return;
+        }
+
+        removeAttendee(visit.id, attendee);
+        toast.success(`Removed ${attendee} from visit`);
+    };
+
+    const handleDelete = () => {
+        if (!canManageVisit) {
+            toast.error("Only sales reps can delete visits");
+            return;
+        }
+
+        if (
+            confirm(
+                "Are you sure you want to delete this visit? All invitees will be notified.",
+            )
+        ) {
+            toast.success("Visit deleted and notifications sent");
+            navigate("/");
+        }
+    };
+
+    const handleCancel = () => {
+        if (!canManageVisit) {
+            toast.error("Only sales reps can cancel visits");
+            return;
+        }
+
+        if (
+            confirm(
+                "Are you sure you want to cancel this event? All invitees will be notified.",
+            )
+        ) {
+            toast.success("Event cancelled and notifications sent");
+            navigate("/");
+        }
+    };
+
+    return (
         <div className="flex-1 bg-gray-50 overflow-auto">
             <div className="bg-white border-b px-8 py-6">
                 <button
@@ -470,12 +427,12 @@ export default function VisitDetail() {
                     {canManageVisit && (
                         <div className="border-t pt-6">
                             <h3 className="mb-3">Visitor Restrictions</h3>
-                            <label className="flex items-center justify-between gap-3">
+                            <RequiredLabel className="flex items-center justify-between gap-3 rounded-lg border p-3">
                                 <span className="text-sm">
                                     Restrict by Product Line
                                 </span>
                                 <Switch />
-                            </label>
+                            </RequiredLabel>
                         </div>
                     )}
                 </div>
