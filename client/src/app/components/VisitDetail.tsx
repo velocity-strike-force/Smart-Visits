@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
     ArrowLeft,
@@ -20,7 +21,14 @@ export default function VisitDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
-  const { getVisit, addAttendee, removeAttendee, visitsLoading, visitsError } =
+  const {
+    getVisit,
+    addAttendee,
+    removeAttendee,
+    refreshVisit,
+    visitsLoading,
+    visitsError,
+  } =
     useVisits();
 
   const visit = getVisit(id || "");
@@ -70,12 +78,27 @@ export default function VisitDetail() {
   const isCreator = user.email === visit.creatorEmail;
   const isVisitor = user.role === "visitor";
   const canManageVisit = user.role === "sales_rep" && isCreator;
-  const isSignedUp = visit.attendees.includes(user.name);
+  const isSignedUp =
+    (visit.attendeeUserIds ?? []).includes(user.userId) ||
+    visit.attendees.includes(user.name);
   const canVisitorJoin =
     isVisitor && !isSignedUp && visit.attendees.length < visit.capacity;
   const hasPostVisitRecord = (visit.postVisitRecordCount ?? 0) > 0;
 
-  const handleSignUp = () => {
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
+    refreshVisit(id).catch((error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to refresh visit details"
+      );
+    });
+  }, [id, refreshVisit]);
+
+  const handleSignUp = async () => {
     if (!isVisitor) {
       toast.error("Only visitors can join as attendees");
       return;
@@ -85,18 +108,32 @@ export default function VisitDetail() {
       toast.error("This visit is full");
       return;
     }
-    addAttendee(visit.id, user.name);
-    toast.success("Successfully signed up for visit!");
+    try {
+      await addAttendee(visit.id, {
+        userId: user.userId,
+        name: user.name,
+        email: user.email,
+      });
+      toast.success("Successfully signed up for visit!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Signup failed");
+    }
   };
 
-  const handleCancelSignUp = () => {
+  const handleCancelSignUp = async () => {
     if (!isVisitor) {
       toast.error("Only visitors can leave attendee sign-up");
       return;
     }
 
-    removeAttendee(visit.id, user.name);
-    toast.success("You have left the visit");
+    try {
+      await removeAttendee(visit.id, { userId: user.userId, name: user.name });
+      toast.success("You have left the visit");
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to cancel signup"
+      );
+    }
   };
 
   const handleRemoveAttendee = (attendee: string) => {
@@ -105,8 +142,23 @@ export default function VisitDetail() {
       return;
     }
 
-    removeAttendee(visit.id, attendee);
-    toast.success(`Removed ${attendee} from visit`);
+    const attendeeIndex = visit.attendees.indexOf(attendee);
+    const attendeeUserId =
+      attendeeIndex >= 0 ? visit.attendeeUserIds?.[attendeeIndex] : undefined;
+    if (!attendeeUserId) {
+      toast.error("Attendee user id is missing");
+      return;
+    }
+
+    removeAttendee(visit.id, { userId: attendeeUserId, name: attendee })
+      .then(() => {
+        toast.success(`Removed ${attendee} from visit`);
+      })
+      .catch((error) => {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to remove attendee"
+        );
+      });
   };
 
   const handleDelete = () => {

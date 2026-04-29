@@ -42,5 +42,7 @@ export function buildSmartVisitsTableDefinitions(
     def(env, "ProductLines"),
     def(env, "UserProductLines"),
     def(env, "ReferenceData"),
+    def(env, "OutlookIntegrations"),
+    def(env, "CalendarEventLinks"),
   ];
 }

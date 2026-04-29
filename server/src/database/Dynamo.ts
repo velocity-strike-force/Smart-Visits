@@ -19,6 +19,14 @@ import { Role, type RoleData } from "./schema/Role";
 import { ProductLine, type ProductLineData } from "./schema/ProductLine";
 import { UserProductLine, type UserProductLineData } from "./schema/UserProductLine";
 import { Domain, type DomainData } from "./schema/Domain";
+import {
+    CalendarEventLink,
+    type CalendarEventLinkData,
+} from "./schema/CalendarEventLink";
+import {
+    OutlookIntegration,
+    type OutlookIntegrationData,
+} from "./schema/OutlookIntegration";
 
 export class Dynamo {
     private readonly client: DynamoDBDocumentClient;
@@ -154,6 +162,31 @@ export class Dynamo {
             Item: data,
         });
         await this.client.send(command);
+    }
+
+    async getAllUsersWithEmailNotifications(): Promise<User[]> {
+        let items: Array<Record<string, unknown>> = [];
+        let startKey: Record<string, unknown> | undefined;
+
+        do {
+            const command = new ScanCommand({
+                TableName: this.tables.users,
+                FilterExpression: "emailNotifications = :enabled",
+                ExpressionAttributeValues: {
+                    ":enabled": true,
+                },
+                ExclusiveStartKey: startKey,
+            });
+            const result = await this.client.send(command);
+            if (result.Items) {
+                items.push(...(result.Items as Record<string, unknown>[]));
+            }
+            startKey = result.LastEvaluatedKey as
+                | Record<string, unknown>
+                | undefined;
+        } while (startKey);
+
+        return items.map((item) => new User(item as unknown as UserData));
     }
 
     // ── Roles ───────────────────────────────────────────────
@@ -295,6 +328,114 @@ export class Dynamo {
     async deleteSignup(visitId: string, userId: string): Promise<void> {
         const command = new DeleteCommand({
             TableName: this.tables.signups,
+            Key: { visitId, userId },
+        });
+        await this.client.send(command);
+    }
+
+    // ── Outlook integrations ────────────────────────────────
+
+    async getOutlookIntegrationByUserId(
+        userId: string
+    ): Promise<OutlookIntegration | undefined> {
+        const command = new GetCommand({
+            TableName: this.tables.outlookIntegrations,
+            Key: { userId },
+        });
+        const result = await this.client.send(command);
+        return result.Item
+            ? new OutlookIntegration(result.Item as OutlookIntegrationData)
+            : undefined;
+    }
+
+    async putOutlookIntegration(data: OutlookIntegrationData): Promise<void> {
+        const command = new PutCommand({
+            TableName: this.tables.outlookIntegrations,
+            Item: data,
+        });
+        await this.client.send(command);
+    }
+
+    async deleteOutlookIntegration(userId: string): Promise<void> {
+        const command = new DeleteCommand({
+            TableName: this.tables.outlookIntegrations,
+            Key: { userId },
+        });
+        await this.client.send(command);
+    }
+
+    // ── Calendar event links ────────────────────────────────
+
+    async getCalendarEventLink(
+        visitId: string,
+        userId: string
+    ): Promise<CalendarEventLink | undefined> {
+        const command = new GetCommand({
+            TableName: this.tables.calendarEventLinks,
+            Key: { visitId, userId },
+        });
+        const result = await this.client.send(command);
+        return result.Item
+            ? new CalendarEventLink(result.Item as CalendarEventLinkData)
+            : undefined;
+    }
+
+    async getCalendarEventLinksForVisit(
+        visitId: string
+    ): Promise<CalendarEventLink[]> {
+        const command = new QueryCommand({
+            TableName: this.tables.calendarEventLinks,
+            KeyConditionExpression: "visitId = :visitId",
+            ExpressionAttributeValues: {
+                ":visitId": visitId,
+            },
+        });
+        const result = await this.client.send(command);
+        return (result.Items ?? []).map(
+            (item) => new CalendarEventLink(item as CalendarEventLinkData)
+        );
+    }
+
+    async getCalendarEventLinksForUser(
+        userId: string
+    ): Promise<CalendarEventLink[]> {
+        let items: Record<string, unknown>[] = [];
+        let startKey: Record<string, unknown> | undefined;
+
+        do {
+            const command = new ScanCommand({
+                TableName: this.tables.calendarEventLinks,
+                FilterExpression: "userId = :userId",
+                ExpressionAttributeValues: {
+                    ":userId": userId,
+                },
+                ExclusiveStartKey: startKey,
+            });
+            const result = await this.client.send(command);
+            if (result.Items) {
+                items.push(...(result.Items as Record<string, unknown>[]));
+            }
+            startKey = result.LastEvaluatedKey as
+                | Record<string, unknown>
+                | undefined;
+        } while (startKey);
+
+        return items.map(
+            (item) => new CalendarEventLink(item as unknown as CalendarEventLinkData)
+        );
+    }
+
+    async putCalendarEventLink(data: CalendarEventLinkData): Promise<void> {
+        const command = new PutCommand({
+            TableName: this.tables.calendarEventLinks,
+            Item: data,
+        });
+        await this.client.send(command);
+    }
+
+    async deleteCalendarEventLink(visitId: string, userId: string): Promise<void> {
+        const command = new DeleteCommand({
+            TableName: this.tables.calendarEventLinks,
             Key: { visitId, userId },
         });
         await this.client.send(command);

@@ -1,7 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { toast } from "sonner";
 import Typeahead from "./Typeahead";
 import { Switch } from "./ui/switch";
+import { useUser } from "./UserContext";
+import { getVisitsDataSourceMode } from "../visits/visitSourceConfig";
+import {
+    disconnectOutlookIntegration,
+    getOutlookIntegrationStatus,
+    loadProfileFromApi,
+    profileUserId,
+    startOutlookIntegration,
+    updateProfileFromApi,
+} from "../user/userApi";
 
 interface AccountSettingsModalProps {
     isOpen: boolean;
@@ -12,6 +23,8 @@ export default function AccountSettingsModal({
     isOpen,
     onClose,
 }: AccountSettingsModalProps) {
+    const { user } = useUser();
+    const isApi = getVisitsDataSourceMode() === "api";
     const [settings, setSettings] = useState({
         productLines: ["NetSuite", "Oracle Cloud"] as string[],
         city: "Jacksonville",
@@ -19,6 +32,17 @@ export default function AccountSettingsModal({
         emailNotifications: true,
         slackNotifications: true,
         distanceAlerts: false,
+        proximityDistanceMiles: 25,
+    });
+    const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [outlookConnected, setOutlookConnected] = useState(false);
+    const [outlookEmail, setOutlookEmail] = useState("");
+    const [outlookLoading, setOutlookLoading] = useState(false);
+    const [outlookError, setOutlookError] = useState<string | null>(null);
+    const [profileIdentity, setProfileIdentity] = useState({
+        name: user.name,
+        email: user.email,
     });
 
     const productLineOptions = [
@@ -91,6 +115,137 @@ export default function AccountSettingsModal({
         }));
     };
 
+    useEffect(() => {
+        if (!isOpen || !isApi) {
+            return;
+        }
+
+        let cancelled = false;
+        const userId = user.userId || profileUserId();
+        setLoading(true);
+        setOutlookLoading(true);
+        setOutlookError(null);
+
+        Promise.all([
+            loadProfileFromApi(userId),
+            getOutlookIntegrationStatus(userId).catch(() => ({
+                connected: false,
+                userId,
+                outlookUserEmail: "",
+                connectedAt: "",
+            })),
+        ])
+            .then(([profile, outlookStatus]) => {
+                if (cancelled) {
+                    return;
+                }
+                setProfileIdentity({
+                    name: profile.name,
+                    email: profile.email,
+                });
+                setSettings({
+                    productLines: profile.productLines ?? [],
+                    city: profile.city ?? "",
+                    state: profile.state ?? "",
+                    emailNotifications: Boolean(profile.emailNotifications),
+                    slackNotifications: Boolean(profile.slackNotifications),
+                    distanceAlerts: Boolean(profile.proximityAlerts),
+                    proximityDistanceMiles: profile.proximityDistanceMiles ?? 25,
+                });
+                setOutlookConnected(Boolean(outlookStatus.connected));
+                setOutlookEmail(outlookStatus.outlookUserEmail || "");
+            })
+            .catch((error) => {
+                if (cancelled) {
+                    return;
+                }
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to load profile settings";
+                toast.error(message);
+                setOutlookError(message);
+            })
+            .finally(() => {
+                if (cancelled) {
+                    return;
+                }
+                setLoading(false);
+                setOutlookLoading(false);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, [isOpen, isApi, user.userId]);
+
+    const handleSave = async () => {
+        if (!isApi) {
+            onClose();
+            return;
+        }
+
+        const userId = user.userId || profileUserId();
+        setSaving(true);
+        try {
+            await updateProfileFromApi({
+                userId,
+                productLines: settings.productLines,
+                city: settings.city,
+                state: settings.state,
+                emailNotifications: settings.emailNotifications,
+                slackNotifications: settings.slackNotifications,
+                proximityAlerts: settings.distanceAlerts,
+                proximityDistanceMiles: settings.proximityDistanceMiles,
+            });
+            toast.success("Preferences updated");
+            onClose();
+        } catch (error) {
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : "Failed to save preferences"
+            );
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleConnectOutlook = async () => {
+        const userId = user.userId || profileUserId();
+        setOutlookLoading(true);
+        setOutlookError(null);
+        try {
+            const { authUrl } = await startOutlookIntegration(userId);
+            window.location.assign(authUrl);
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Failed to start Outlook OAuth";
+            setOutlookError(message);
+            toast.error(message);
+            setOutlookLoading(false);
+        }
+    };
+
+    const handleDisconnectOutlook = async () => {
+        const userId = user.userId || profileUserId();
+        setOutlookLoading(true);
+        setOutlookError(null);
+        try {
+            await disconnectOutlookIntegration(userId);
+            setOutlookConnected(false);
+            setOutlookEmail("");
+            toast.success("Outlook calendar disconnected");
+        } catch (error) {
+            const message =
+                error instanceof Error ? error.message : "Failed to disconnect Outlook";
+            setOutlookError(message);
+            toast.error(message);
+        } finally {
+            setOutlookLoading(false);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -116,7 +271,7 @@ export default function AccountSettingsModal({
                                 </label>
                                 <input
                                     type="text"
-                                    value="Sonny Antunes"
+                                    value={profileIdentity.name}
                                     disabled
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                                 />
@@ -127,7 +282,7 @@ export default function AccountSettingsModal({
                                 </label>
                                 <input
                                     type="email"
-                                    value="sonny.antunes@rfsmart.com"
+                                    value={profileIdentity.email}
                                     disabled
                                     className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                                 />
@@ -189,6 +344,110 @@ export default function AccountSettingsModal({
                             </div>
                         </div>
                     </div>
+
+                    <div>
+                        <h3 className="mb-4">Notifications</h3>
+                        <div className="space-y-3">
+                            <label className="flex items-center justify-between gap-3 text-sm">
+                                <span>Email notifications</span>
+                                <Switch
+                                    checked={settings.emailNotifications}
+                                    onCheckedChange={(value) =>
+                                        setSettings({
+                                            ...settings,
+                                            emailNotifications: value,
+                                        })
+                                    }
+                                />
+                            </label>
+                            <label className="flex items-center justify-between gap-3 text-sm">
+                                <span>Slack notifications</span>
+                                <Switch
+                                    checked={settings.slackNotifications}
+                                    onCheckedChange={(value) =>
+                                        setSettings({
+                                            ...settings,
+                                            slackNotifications: value,
+                                        })
+                                    }
+                                />
+                            </label>
+                            <label className="flex items-center justify-between gap-3 text-sm">
+                                <span>Proximity alerts</span>
+                                <Switch
+                                    checked={settings.distanceAlerts}
+                                    onCheckedChange={(value) =>
+                                        setSettings({
+                                            ...settings,
+                                            distanceAlerts: value,
+                                        })
+                                    }
+                                />
+                            </label>
+                            {settings.distanceAlerts && (
+                                <div>
+                                    <label className="block mb-2 text-sm">
+                                        Distance miles
+                                    </label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        max={500}
+                                        value={settings.proximityDistanceMiles}
+                                        onChange={(e) =>
+                                            setSettings({
+                                                ...settings,
+                                                proximityDistanceMiles: Math.max(
+                                                    1,
+                                                    Number(e.target.value) || 1
+                                                ),
+                                            })
+                                        }
+                                        className="w-full px-3 py-2 border rounded-lg"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="mb-4">Outlook Calendar</h3>
+                        <div className="rounded-lg border p-4 space-y-3">
+                            <p className="text-sm text-gray-700">
+                                {outlookConnected
+                                    ? `Connected as ${outlookEmail || "your Outlook account"}.`
+                                    : "Not connected. Connect to auto-create calendar events for visits."}
+                            </p>
+                            {outlookError && (
+                                <p className="text-sm text-red-600">{outlookError}</p>
+                            )}
+                            <div className="flex gap-3">
+                                {!outlookConnected ? (
+                                    <button
+                                        type="button"
+                                        onClick={handleConnectOutlook}
+                                        disabled={outlookLoading || loading}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        {outlookLoading
+                                            ? "Connecting..."
+                                            : "Connect Outlook"}
+                                    </button>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={handleDisconnectOutlook}
+                                        disabled={outlookLoading || loading}
+                                        className="px-4 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                                    >
+                                        {outlookLoading
+                                            ? "Disconnecting..."
+                                            : "Disconnect Outlook"}
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="flex gap-3 px-6 py-4 border-t">
@@ -199,10 +458,11 @@ export default function AccountSettingsModal({
                         Cancel
                     </button>
                     <button
-                        onClick={onClose}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                     >
-                        Save Changes
+                        {saving ? "Saving..." : "Save Changes"}
                     </button>
                 </div>
             </div>

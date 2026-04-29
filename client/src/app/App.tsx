@@ -10,6 +10,7 @@ import Feedback from "./components/Feedback";
 import Analytics from "./components/Analytics";
 import RequestVisit from "./components/RequestVisit";
 import VisitRequests from "./components/VisitRequests";
+import OutlookCallback from "./components/OutlookCallback";
 
 export default function App() {
     return (
@@ -44,6 +45,10 @@ export default function App() {
                                 <Route
                                     path="visit-requests"
                                     element={<VisitRequests />}
+                                />
+                                <Route
+                                    path="outlook/callback"
+                                    element={<OutlookCallback />}
                                 />
                             </Route>
                         </Routes>

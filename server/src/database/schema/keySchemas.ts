@@ -20,6 +20,8 @@ export const SMART_VISITS_KEY_SCHEMAS: Record<
   ProductLines: { partitionKey: "productLineId" },
   UserProductLines: { partitionKey: "userId", sortKey: "productLineId" },
   ReferenceData: { partitionKey: "domainId" },
+  OutlookIntegrations: { partitionKey: "userId" },
+  CalendarEventLinks: { partitionKey: "visitId", sortKey: "userId" },
 };
 
 export function getKeySchema(logical: SmartVisitsLogicalTable): TableKeySchema {

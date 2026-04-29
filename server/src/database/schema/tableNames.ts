@@ -16,7 +16,9 @@ export type SmartVisitsLogicalTable =
   | "Roles"
   | "ProductLines"
   | "UserProductLines"
-  | "ReferenceData";
+  | "ReferenceData"
+  | "OutlookIntegrations"
+  | "CalendarEventLinks";
 
 export function smartVisitsTableName(
   env: DeploymentEnv,
@@ -38,5 +40,7 @@ export function smartVisitsTables(env: DeploymentEnv) {
     productLines: smartVisitsTableName(env, "ProductLines"),
     userProductLines: smartVisitsTableName(env, "UserProductLines"),
     referenceData: smartVisitsTableName(env, "ReferenceData"),
+    outlookIntegrations: smartVisitsTableName(env, "OutlookIntegrations"),
+    calendarEventLinks: smartVisitsTableName(env, "CalendarEventLinks"),
   } as const;
 }
