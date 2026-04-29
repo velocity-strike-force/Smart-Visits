@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Mail, MessagesSquare } from "lucide-react";
 import { toast } from "sonner";
@@ -29,6 +30,7 @@ interface PostVisitFormValues {
 
 export default function PostVisit() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [searchParams] = useSearchParams();
     const initialDate = searchParams.get("date")
         ? new Date(searchParams.get("date")!)
@@ -158,6 +160,7 @@ export default function PostVisit() {
         setIsSubmitting(true);
         try {
             await createVisit(buildPayload(values, true));
+            await queryClient.invalidateQueries({ queryKey: ["visits"] });
             toast.success("Visit saved as draft");
             navigate("/");
         } catch (err) {
@@ -173,6 +176,7 @@ export default function PostVisit() {
         setIsSubmitting(true);
         try {
             await createVisit(buildPayload(values, false));
+            await queryClient.invalidateQueries({ queryKey: ["visits"] });
 
             const notificationChannels = [
                 values.notifyEmail ? "email" : null,
