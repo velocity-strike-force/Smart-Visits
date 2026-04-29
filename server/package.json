@@ -24,7 +24,7 @@
   },
   "scripts": {
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
-    "start:local": "sam local start-api --warm-containers EAGER",
+    "start:local": "sam local start-api --warm-containers EAGER --env-vars sam-local-env.json",
     "seed:test": "ts-node --project tsconfig.seed.json --transpile-only scripts/seed-test-records.ts"
   }
 }

@@ -10,9 +10,36 @@ export default function VisitDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
-  const { getVisit, addAttendee, removeAttendee } = useVisits();
+  const { getVisit, addAttendee, removeAttendee, visitsLoading, visitsError } =
+    useVisits();
 
   const visit = getVisit(id || '');
+
+  if (visitsLoading) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Loading visit…</p>
+      </div>
+    );
+  }
+
+  if (visitsError) {
+    return (
+      <div className="flex-1 bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md px-4">
+          <h2 className="text-xl mb-2 text-red-700">Could not load visits</h2>
+          <p className="text-gray-600 mb-4">{visitsError}</p>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Back to Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!visit) {
     return (

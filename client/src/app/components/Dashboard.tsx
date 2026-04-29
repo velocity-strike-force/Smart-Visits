@@ -9,7 +9,7 @@ import { useVisits } from './VisitsContext';
 export default function Dashboard() {
   const navigate = useNavigate();
   const { user } = useUser();
-  const { visits } = useVisits();
+  const { visits, visitsLoading, visitsError } = useVisits();
   const [viewMode, setViewMode] = useState<'calendar' | 'list'>('calendar');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [showFilters, setShowFilters] = useState(false);
@@ -38,6 +38,14 @@ export default function Dashboard() {
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
       <div className="bg-white border-b px-8 py-6">
+        {visitsError && (
+          <div className="mb-4 rounded-lg bg-red-50 text-red-800 px-4 py-2 text-sm border border-red-100">
+            {visitsError}
+          </div>
+        )}
+        {visitsLoading && (
+          <div className="mb-4 text-gray-600 text-sm">Loading visits…</div>
+        )}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="flex gap-2">
