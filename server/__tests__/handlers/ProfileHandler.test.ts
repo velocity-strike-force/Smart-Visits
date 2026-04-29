@@ -82,6 +82,18 @@ describe("ProfileHandler", () => {
         expect(JSON.parse(result.body).success).toBe(true);
     });
 
+    it("GET /api/profile returns 404 when user does not exist", async () => {
+        ddbMock.on(GetCommand).resolves({});
+
+        const handler = new ProfileHandler();
+        const result = await handler.handleProfileEndpoint(
+            makeEvent("GET", { userId: "user-missing" })
+        );
+
+        expect(result.statusCode).toBe(404);
+        expect(JSON.parse(result.body).success).toBe(false);
+    });
+
     it("POST /api/profile upserts profile data", async () => {
         ddbMock.on(GetCommand).resolves({});
         ddbMock.on(PutCommand).resolves({});
@@ -102,5 +114,22 @@ describe("ProfileHandler", () => {
 
         expect(result.statusCode).toBe(200);
         expect(JSON.parse(result.body).success).toBe(true);
+    });
+
+    it("POST /api/profile without userId returns 400", async () => {
+        const handler = new ProfileHandler();
+        const result = await handler.handleProfileEndpoint(
+            makeEvent(
+                "POST",
+                undefined,
+                JSON.stringify({
+                    name: "No User Id",
+                    email: "nouser@example.com",
+                })
+            )
+        );
+
+        expect(result.statusCode).toBe(400);
+        expect(JSON.parse(result.body).success).toBe(false);
     });
 });

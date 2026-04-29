@@ -120,6 +120,7 @@ Resources:
 
   RolesTable:
     Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-Roles"
       BillingMode: PAY_PER_REQUEST
@@ -132,6 +133,7 @@ Resources:
 
   ProductLinesTable:
     Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-ProductLines"
       BillingMode: PAY_PER_REQUEST
@@ -144,6 +146,7 @@ Resources:
 
   UserProductLinesTable:
     Type: AWS::DynamoDB::Table
+    Condition: IsLocalStage
     Properties:
       TableName: !Sub "${STAGE}-smart-visits-UserProductLines"
       BillingMode: PAY_PER_REQUEST
