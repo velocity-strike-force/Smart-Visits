@@ -7,7 +7,7 @@ import Typeahead from "./Typeahead";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
 import { createVisit } from "../lib/api";
-import mockCustomers from "../../mockapi/postVisitCustomers.json";
+import { useReferenceData } from "../referenceData/ReferenceDataContext";
 
 interface PostVisitFormValues {
     productLine: string;
@@ -30,6 +30,8 @@ interface PostVisitFormValues {
 export default function PostVisit() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
+    const { customerOptions, productLineOptions, domainOptions } =
+        useReferenceData();
     const initialDate = searchParams.get("date")
         ? new Date(searchParams.get("date")!)
         : new Date();
@@ -87,21 +89,6 @@ export default function PostVisit() {
         });
     }, [register]);
 
-    const productLineOptions = [
-        "Oracle Cloud",
-        "NetSuite",
-        "Shipping",
-        "TMS",
-        "Demand Planning",
-        "AX",
-    ];
-    const domainOptions = [
-        "Manufacturing",
-        "Technology",
-        "Logistics",
-        "Retail",
-        "Healthcare",
-    ];
     const purposeOptions = [
         "Quarterly Review",
         "Product Demo",
@@ -112,10 +99,16 @@ export default function PostVisit() {
     ];
 
     const handleCustomerSelect = (customerName: string) => {
-        const customer = mockCustomers.find((c) => c.name === customerName);
+        const customer = customerOptions.find(
+            (c) => c.customerName === customerName,
+        );
         setValue("customer", customerName, { shouldValidate: true });
         if (customer) {
-            setCustomerMetadata(customer);
+            setCustomerMetadata({
+                arr: customer.arr,
+                status: customer.implementationStatus,
+                isKeyAccount: customer.isKeyAccount,
+            });
         }
     };
 
@@ -196,8 +189,10 @@ export default function PostVisit() {
     };
 
     const filteredCustomers = customerSearch
-        ? mockCustomers.filter((c) =>
-              c.name.toLowerCase().includes(customerSearch.toLowerCase()),
+        ? customerOptions.filter((c) =>
+              c.customerName
+                  .toLowerCase()
+                  .includes(customerSearch.toLowerCase()),
           )
         : [];
 
@@ -324,15 +319,15 @@ export default function PostVisit() {
                                 <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto">
                                     {filteredCustomers.map((customer) => (
                                         <button
-                                            key={customer.name}
+                                            key={customer.customerId}
                                             onClick={() =>
                                                 handleCustomerSelect(
-                                                    customer.name,
+                                                    customer.customerName,
                                                 )
                                             }
                                             className="w-full px-4 py-2 text-left hover:bg-gray-50"
                                         >
-                                            {customer.name}
+                                            {customer.customerName}
                                         </button>
                                     ))}
                                 </div>
