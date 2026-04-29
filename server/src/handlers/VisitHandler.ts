@@ -1,8 +1,9 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResult } from "aws-lambda";
-import { randomUUID } from "crypto";
 import { ApiGatewayLambdaHandler } from "./ApiGatewayLambdaHandler";
 import { Dynamo } from "../database/Dynamo";
-import { Visit, type VisitData } from "../database/models/Visit";
+import { Visit, type VisitData } from "../database/schema/Visit";
+import auditLogger from "../services/AuditLoggerService";
+import { AuditLogData } from "../database/schema/AuditLog";
 
 export class VisitHandler extends ApiGatewayLambdaHandler {
     private readonly db: Dynamo;
@@ -251,10 +252,7 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
         if (!visitId || typeof visitId !== "string") {
             return this.createErrorResponse(400, {
                 success: false,
-                message:
-                    error instanceof Error
-                        ? error.message
-                        : "Internal server error",
+                message: "visitId is required in the request body",
             });
         }
 
@@ -320,20 +318,6 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
                     error instanceof Error
                         ? error.message
                         : "Internal server error",
-            });
-        }
-
-        try {
-            await this.db.deleteVisit(visitId);
-            return this.createSuccessResponse({
-                success: true,
-                message: "Visit deleted successfully",
-            });
-        } catch (err) {
-            return this.createErrorResponse(500, {
-                success: false,
-                message:
-                    err instanceof Error ? err.message : "Failed to delete visit",
             });
         }
     }

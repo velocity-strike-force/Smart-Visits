@@ -15,6 +15,9 @@ import { Signup, type SignupData } from "./schema/Signup";
 import { Feedback, type FeedbackData } from "./schema/Feedback";
 import { Customer, type CustomerData } from "./schema/Customer";
 import { AuditLog, type AuditLogData } from "./schema/AuditLog";
+import { Role, type RoleData } from "./schema/Role";
+import { ProductLine, type ProductLineData } from "./schema/ProductLine";
+import { UserProductLine, type UserProductLineData } from "./schema/UserProductLine";
 
 export class Dynamo {
     private readonly client: DynamoDBDocumentClient;

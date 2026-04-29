@@ -9,6 +9,7 @@ export interface Visit {
   salesRep: string;
   domain: string;
   isDraft?: boolean;
+  postVisitRecordCount?: number;
   capacity: number;
   attendees: string[];
   creatorEmail: string;
