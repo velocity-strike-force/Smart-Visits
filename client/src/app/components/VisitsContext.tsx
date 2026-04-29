@@ -40,6 +40,8 @@ const VisitsContext = createContext<VisitsContextType | undefined>(undefined);
 const EMPTY_RESPONSE_FALLBACK_ENABLED =
     import.meta.env.VITE_ENABLE_EMPTY_API_FALLBACK === "true";
 
+const DATA_SOURCE = import.meta.env.VITE_VISITS_DATA_SOURCE ?? "api";
+
 interface FallbackVisitRecord {
     id: string;
     title: string;
@@ -141,9 +143,16 @@ function mapApiVisitToVisit(visit: ApiVisit): Visit | null {
 
 export function VisitsProvider({ children }: { children: ReactNode }) {
     const { data: apiVisits } = useSuspenseQuery({
-        queryKey: ["visits"],
-        queryFn: getVisits,
+        queryKey: ["visits", DATA_SOURCE],
+        queryFn:
+            DATA_SOURCE === "mock"
+                ? (): Promise<ApiVisit[]> => Promise.resolve([])
+                : getVisits,
         select: (visits): Visit[] => {
+            if (DATA_SOURCE === "mock") {
+                return emptyStateFallbackVisits;
+            }
+
             const mapped = visits
                 .map(mapApiVisitToVisit)
                 .filter((visit): visit is Visit => Boolean(visit));
@@ -210,6 +219,9 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
     const getVisit = (visitId: string) => {
         return visits.find((visit) => visit.id === visitId);
     };
+
+    const visitsLoading = false;
+    const visitsError = null;
 
     return (
         <VisitsContext.Provider

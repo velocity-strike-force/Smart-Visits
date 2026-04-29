@@ -10,18 +10,18 @@ describe("getVisits", () => {
         vi.unstubAllGlobals();
     });
 
-    it("throws when VITE_API_URL is missing", async () => {
-        vi.stubEnv("VITE_API_URL", "");
+    it("throws when VITE_API_BASE_URL is missing", async () => {
+        vi.stubEnv("VITE_API_BASE_URL", "");
         const fetchMock = vi.fn();
         vi.stubGlobal("fetch", fetchMock);
 
         const { getVisits } = await import("./api");
-        await expect(getVisits()).rejects.toThrow("Missing VITE_API_URL");
+        await expect(getVisits()).rejects.toThrow("Missing VITE_API_BASE_URL");
         expect(fetchMock).not.toHaveBeenCalled();
     });
 
     it("returns visits from API payload", async () => {
-        vi.stubEnv("VITE_API_URL", "https://example.test");
+        vi.stubEnv("VITE_API_BASE_URL", "https://example.test");
         const fetchMock = vi.fn().mockResolvedValue({
             ok: true,
             json: async () => ({
@@ -40,7 +40,7 @@ describe("getVisits", () => {
     });
 
     it("throws on non-ok responses", async () => {
-        vi.stubEnv("VITE_API_URL", "https://example.test");
+        vi.stubEnv("VITE_API_BASE_URL", "https://example.test");
         vi.stubGlobal(
             "fetch",
             vi.fn().mockResolvedValue({ ok: false, status: 500 }),
