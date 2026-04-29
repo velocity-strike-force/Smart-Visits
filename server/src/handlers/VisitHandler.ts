@@ -226,6 +226,12 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
                     : `visit-${Date.now()}`;
             const data = this.buildVisitDataForCreate(body, visitId, now);
             await this.db.createVisit(data);
+            await this.logAudit({
+                entityId: visitId,
+                action: "VISIT_CREATED",
+                actorUserId: data.salesRepId,
+                metadata: { visitId },
+            });
             return this.createSuccessResponse({
                 success: true,
                 visitId,

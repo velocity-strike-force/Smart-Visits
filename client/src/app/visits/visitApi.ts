@@ -118,18 +118,8 @@ async function fetchVisitById(visitId: string): Promise<VisitFullApi | null> {
   return body.visit;
 }
 
-/** Loads visits from VisitHandler: list + optional per-id hydration for full fields. */
+/** Loads visits from VisitHandler list endpoint. */
 export async function loadVisitsFromApi(): Promise<Visit[]> {
   const rows = await fetchVisitsList();
-  return Promise.all(
-    rows.map(async (row) => {
-      try {
-        const full = await fetchVisitById(row.visitId);
-        if (full) return mapVisitFromApiFull(full);
-      } catch {
-        /* fallback below */
-      }
-      return mapListRowToVisit(row);
-    })
-  );
+  return rows.map(mapListRowToVisit);
 }

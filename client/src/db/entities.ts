@@ -110,16 +110,6 @@ export interface PostVisitFeedbackRecord {
   updatedDateTimeUTC?: string;
 }
 
-/** `{env}-smart-visits-Customers` — PK: customerId */
-export interface CustomerRecord {
-  customerId: string;
-  name: string;
-  arr?: number;
-  status?: string;
-  isKeyAccount?: boolean;
-  updatedAt?: string;
-  locationId: string
-}
 
 /** `{env}-smart-visits-AuditLog` — PK: entityId, SK: timestamp */
 export interface AuditLogRecord {
