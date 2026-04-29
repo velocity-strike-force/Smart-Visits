@@ -1,10 +1,138 @@
+import { Suspense } from "react";
 import { useState } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { BarChart3, Users, Briefcase, MessageSquare } from "lucide-react";
 import ProfileMenu from "./ProfileMenu";
 import AccountSettingsModal from "./AccountSettingsModal";
 import NotificationsModal from "./NotificationsModal";
+import { QueryErrorBoundary } from "./QueryErrorBoundary";
 import { useUser } from "./UserContext";
+import { VisitsProvider } from "./VisitsContext";
+
+export function RouteLoadingFallback({
+    pathname,
+    role,
+}: {
+    pathname: string;
+    role: "visitor" | "sales_rep";
+}) {
+    const isFormRoute =
+        pathname.startsWith("/post-visit") ||
+        pathname.startsWith("/request-visit");
+    const isListRoute =
+        pathname.startsWith("/feedback") ||
+        pathname.startsWith("/visit-requests") ||
+        pathname.startsWith("/analytics");
+
+    if (isFormRoute) {
+        return (
+            <div
+                data-testid="fallback-form"
+                className="flex-1 bg-gray-50 p-8 animate-pulse"
+            >
+                <div className="max-w-4xl mx-auto bg-white rounded-lg border p-6 space-y-5">
+                    <div className="h-8 w-48 rounded bg-gray-200" />
+                    <div className="flex justify-end">
+                        <div
+                            data-testid="fallback-role-action"
+                            className={`h-9 rounded-md bg-gray-100 ${role === "sales_rep" ? "w-28" : "w-32"}`}
+                        />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="h-10 rounded bg-gray-100" />
+                        <div className="h-10 rounded bg-gray-100" />
+                        <div className="h-10 rounded bg-gray-100" />
+                        <div className="h-10 rounded bg-gray-100" />
+                    </div>
+                    <div className="h-10 rounded bg-gray-100" />
+                    <div className="h-10 rounded bg-gray-100" />
+                    <div className="h-28 rounded bg-gray-100" />
+                    <div className="flex justify-end gap-3">
+                        <div className="h-10 w-24 rounded bg-gray-100" />
+                        <div className="h-10 w-28 rounded bg-gray-200" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (isListRoute) {
+        return (
+            <div
+                data-testid="fallback-list"
+                className="flex-1 bg-gray-50 p-8 animate-pulse"
+            >
+                <div className="bg-white rounded-lg border overflow-hidden">
+                    <div className="px-6 py-5 border-b">
+                        <div className="flex items-center justify-between gap-4">
+                            <div className="h-8 w-56 rounded bg-gray-200" />
+                            <div
+                                data-testid="fallback-role-action"
+                                className={`h-9 rounded-md bg-gray-100 ${role === "sales_rep" ? "w-40" : "w-28"}`}
+                            />
+                        </div>
+                    </div>
+                    <div className="p-6 space-y-3">
+                        {Array.from({ length: 8 }).map((_, idx) => (
+                            <div
+                                key={idx}
+                                className="h-12 rounded bg-gray-100"
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div
+            data-testid="fallback-calendar"
+            className="flex-1 bg-gray-50 p-8 animate-pulse"
+        >
+            <div className="bg-white border rounded-lg overflow-hidden">
+                <div className="px-6 py-5 border-b">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex gap-2">
+                            <div className="h-9 w-28 rounded-md bg-gray-200" />
+                            <div className="h-9 w-24 rounded-md bg-gray-100" />
+                        </div>
+                        <div
+                            data-testid="fallback-role-action"
+                            className={`h-9 rounded-md bg-gray-100 ${role === "sales_rep" ? "w-28" : "w-24"}`}
+                        />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <div className="h-7 w-40 rounded bg-gray-200" />
+                        <div className="flex gap-2">
+                            <div className="h-8 w-20 rounded-md bg-gray-100" />
+                            <div className="h-8 w-16 rounded-md bg-gray-100" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="p-6">
+                    <div className="grid grid-cols-7 gap-2 mb-3">
+                        {Array.from({ length: 7 }).map((_, idx) => (
+                            <div
+                                key={`header-${idx}`}
+                                className="h-5 rounded bg-gray-100"
+                            />
+                        ))}
+                    </div>
+                    <div className="grid grid-cols-7 gap-2">
+                        {Array.from({ length: 35 }).map((_, idx) => (
+                            <div
+                                key={`cell-${idx}`}
+                                className="h-24 rounded-md border bg-gray-50"
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function Layout() {
     const navigate = useNavigate();
@@ -155,7 +283,20 @@ export default function Layout() {
                     )}
                 </header>
 
-                <Outlet />
+                <QueryErrorBoundary>
+                    <Suspense
+                        fallback={
+                            <RouteLoadingFallback
+                                pathname={location.pathname}
+                                role={user.role}
+                            />
+                        }
+                    >
+                        <VisitsProvider>
+                            <Outlet />
+                        </VisitsProvider>
+                    </Suspense>
+                </QueryErrorBoundary>
             </div>
 
             <AccountSettingsModal

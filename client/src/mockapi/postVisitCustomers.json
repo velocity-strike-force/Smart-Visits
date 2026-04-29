@@ -1,0 +1,26 @@
+[
+    {
+        "name": "Acme Corp",
+        "arr": 250000,
+        "status": "Active",
+        "isKeyAccount": true
+    },
+    {
+        "name": "TechStart Inc",
+        "arr": 150000,
+        "status": "Implementation",
+        "isKeyAccount": false
+    },
+    {
+        "name": "Global Logistics",
+        "arr": 500000,
+        "status": "Active",
+        "isKeyAccount": true
+    },
+    {
+        "name": "RetailMax",
+        "arr": 180000,
+        "status": "Active",
+        "isKeyAccount": false
+    }
+]
