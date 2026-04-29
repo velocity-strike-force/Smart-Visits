@@ -72,6 +72,11 @@ export class ProfileHandler extends ApiGatewayLambdaHandler {
 
             const nowIso = new Date().toISOString();
             const existingProfile = await this.db.getUserById(userId);
+            const existingCreatedAt =
+                existingProfile?.createdAt instanceof Date &&
+                !Number.isNaN(existingProfile.createdAt.getTime())
+                    ? existingProfile.createdAt.toISOString()
+                    : undefined;
 
             const profileData: UserData = {
                 userId,
@@ -95,9 +100,7 @@ export class ProfileHandler extends ApiGatewayLambdaHandler {
                     body.proximityDistanceMiles ??
                     existingProfile?.proximityDistanceMiles ??
                     0,
-                createdAt: existingProfile
-                    ? existingProfile.createdAt.toISOString()
-                    : nowIso,
+                createdAt: existingCreatedAt ?? nowIso,
                 updatedAt: nowIso,
             };
 

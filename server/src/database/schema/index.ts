@@ -49,3 +49,6 @@ export type {
   ReferenceProductLineDto,
   ReferenceRoleDto,
 } from "./referenceData";
+export { Role, type RoleData } from "./Role";
+export { ProductLine, type ProductLineData } from "./ProductLine";
+export { UserProductLine, type UserProductLineData } from "./UserProductLine";

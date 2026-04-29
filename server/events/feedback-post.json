@@ -1,0 +1,26 @@
+{
+  "version": "2.0",
+  "routeKey": "POST /api/feedback",
+  "rawPath": "/api/feedback",
+  "rawQueryString": "",
+  "headers": {
+    "content-type": "application/json"
+  },
+  "queryStringParameters": null,
+  "requestContext": {
+    "http": {
+      "method": "POST",
+      "path": "/api/feedback",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "127.0.0.1",
+      "userAgent": "curl/7.68.0"
+    },
+    "requestId": "test-request-id",
+    "routeKey": "POST /api/feedback",
+    "stage": "$default",
+    "time": "27/Apr/2026:12:00:00 +0000",
+    "timeEpoch": 1777492800000
+  },
+  "body": "{\"visitId\":\"visit-001\",\"userId\":\"user-001\",\"userName\":\"Sam Developer\",\"role\":\"visitor\",\"feedbackNotes\":\"Great visit, learned a lot about roadmap.\",\"keyAreasOfFocus\":[\"Roadmap\",\"Support\",\"Expansion\"],\"detractors\":\"Timeline on one item\",\"delighters\":\"Team collaboration\"}",
+  "isBase64Encoded": false
+}

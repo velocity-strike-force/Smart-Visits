@@ -136,6 +136,89 @@ describe("SignupHandler", () => {
         expect(body.success).toBe(true);
     });
 
+    it("POST /api/signup returns 404 when visit does not exist", async () => {
+        ddbMock.on(GetCommand).resolves({});
+        ddbMock.on(QueryCommand).resolves({ Items: [] });
+        const handler = new SignupHandler();
+        const result = await handler.handleSignupEndpoint(
+            makeEvent(
+                "POST",
+                undefined,
+                JSON.stringify({
+                    visitId: "visit-missing",
+                    userId: "user-001",
+                    userName: "Sam",
+                    userEmail: "sam@example.com",
+                })
+            )
+        );
+
+        expect(result.statusCode).toBe(404);
+        expect(JSON.parse(result.body).success).toBe(false);
+    });
+
+    it("POST /api/signup returns 409 when user is already signed up", async () => {
+        ddbMock.on(GetCommand).resolves({ Item: makeVisit() });
+        ddbMock.on(QueryCommand).resolves({
+            Items: [
+                {
+                    visitId: "visit-001",
+                    userId: "user-001",
+                    userName: "Sam",
+                    userEmail: "sam@example.com",
+                    signedUpAt: new Date().toISOString(),
+                },
+            ],
+        });
+        const handler = new SignupHandler();
+        const result = await handler.handleSignupEndpoint(
+            makeEvent(
+                "POST",
+                undefined,
+                JSON.stringify({
+                    visitId: "visit-001",
+                    userId: "user-001",
+                    userName: "Sam",
+                    userEmail: "sam@example.com",
+                })
+            )
+        );
+
+        expect(result.statusCode).toBe(409);
+        expect(JSON.parse(result.body).success).toBe(false);
+    });
+
+    it("POST /api/signup returns 409 when visit is at capacity", async () => {
+        ddbMock.on(GetCommand).resolves({ Item: { ...makeVisit(), capacity: 1 } });
+        ddbMock.on(QueryCommand).resolves({
+            Items: [
+                {
+                    visitId: "visit-001",
+                    userId: "other-user",
+                    userName: "Other",
+                    userEmail: "other@example.com",
+                    signedUpAt: new Date().toISOString(),
+                },
+            ],
+        });
+        const handler = new SignupHandler();
+        const result = await handler.handleSignupEndpoint(
+            makeEvent(
+                "POST",
+                undefined,
+                JSON.stringify({
+                    visitId: "visit-001",
+                    userId: "user-001",
+                    userName: "Sam",
+                    userEmail: "sam@example.com",
+                })
+            )
+        );
+
+        expect(result.statusCode).toBe(409);
+        expect(JSON.parse(result.body).success).toBe(false);
+    });
+
     it("DELETE /api/signup cancels an existing signup", async () => {
         ddbMock.on(QueryCommand).resolves({
             Items: [

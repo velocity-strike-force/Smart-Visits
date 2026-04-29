@@ -68,6 +68,18 @@ describe("CustomerHandler", () => {
         expect(JSON.parse(result.body).success).toBe(true);
     });
 
+    it("GET /api/customer?customerId=... returns 404 when missing", async () => {
+        ddbMock.on(GetCommand).resolves({});
+
+        const handler = new CustomerHandler();
+        const result = await handler.handleCustomerEndpoint(
+            makeEvent("GET", { customerId: "cust-missing" })
+        );
+
+        expect(result.statusCode).toBe(404);
+        expect(JSON.parse(result.body).success).toBe(false);
+    });
+
     it("GET /api/customer?q=acme returns customer list", async () => {
         ddbMock.on(ScanCommand).resolves({
             Items: [
@@ -88,5 +100,19 @@ describe("CustomerHandler", () => {
         expect(result.statusCode).toBe(200);
         expect(body.success).toBe(true);
         expect(body.customers).toHaveLength(1);
+    });
+
+    it("GET /api/customer?q=missing returns empty list", async () => {
+        ddbMock.on(ScanCommand).resolves({ Items: [] });
+
+        const handler = new CustomerHandler();
+        const result = await handler.handleCustomerEndpoint(
+            makeEvent("GET", { q: "missing" })
+        );
+        const body = JSON.parse(result.body);
+
+        expect(result.statusCode).toBe(200);
+        expect(body.success).toBe(true);
+        expect(body.customers).toHaveLength(0);
     });
 });
