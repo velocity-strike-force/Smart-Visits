@@ -97,8 +97,11 @@ export default function PostVisit() {
         "Contract Renewal",
         "Other",
     ];
+    const customerNameOptions = [
+        ...new Set(customerOptions.map((customer) => customer.customerName)),
+    ];
 
-    const handleCustomerSelect = (customerName: string) => {
+    const handleCustomerChange = (customerName: string) => {
         const customer = customerOptions.find(
             (c) => c.customerName === customerName,
         );
@@ -109,6 +112,8 @@ export default function PostVisit() {
                 status: customer.implementationStatus,
                 isKeyAccount: customer.isKeyAccount,
             });
+        } else {
+            setCustomerMetadata(null);
         }
     };
 
@@ -187,14 +192,6 @@ export default function PostVisit() {
             setIsSubmitting(false);
         }
     };
-
-    const filteredCustomers = customerSearch
-        ? customerOptions.filter((c) =>
-              c.customerName
-                  .toLowerCase()
-                  .includes(customerSearch.toLowerCase()),
-          )
-        : [];
 
     return (
         <div className="flex-1 bg-gray-50 overflow-auto">
@@ -292,46 +289,20 @@ export default function PostVisit() {
                         )}
                     </div>
 
-                    <div className="relative">
-                        <RequiredLabel className="block mb-2 text-sm" required>
-                            Customer
-                        </RequiredLabel>
-                        <input
-                            type="text"
-                            placeholder="Search for customer"
+                    <div>
+                        <Typeahead
+                            label="Customer"
+                            required
+                            placeholder="Search for customer…"
+                            options={customerNameOptions}
                             value={customerSearch}
-                            onChange={(e) => {
-                                setValue("customer", e.target.value, {
-                                    shouldValidate: true,
-                                });
-                                setCustomerMetadata(null);
-                            }}
-                            className="w-full px-3 py-2 border rounded-lg"
+                            onChange={handleCustomerChange}
                         />
                         {errors.customer && (
                             <p className="text-sm text-red-600 mt-1">
                                 {errors.customer.message}
                             </p>
                         )}
-                        {customerSearch &&
-                            filteredCustomers.length > 0 &&
-                            !customerMetadata && (
-                                <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-48 overflow-auto">
-                                    {filteredCustomers.map((customer) => (
-                                        <button
-                                            key={customer.customerId}
-                                            onClick={() =>
-                                                handleCustomerSelect(
-                                                    customer.customerName,
-                                                )
-                                            }
-                                            className="w-full px-4 py-2 text-left hover:bg-gray-50"
-                                        >
-                                            {customer.customerName}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
                         {customerMetadata && (
                             <div className="flex gap-2 mt-2">
                                 <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs">
