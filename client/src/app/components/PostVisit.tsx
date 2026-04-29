@@ -6,11 +6,25 @@ import { toast } from "sonner";
 import Typeahead from "./Typeahead";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
-import { getVisitApiBaseUrl } from "../visits/visitSourceConfig";
+import { createVisit } from "../lib/api";
+import mockCustomers from "../../mockapi/postVisitCustomers.json";
 
-function apiUrl(path: string): string {
-    const base = getVisitApiBaseUrl();
-    return base ? `${base}${path}` : path;
+interface PostVisitFormValues {
+    productLine: string;
+    location: string;
+    salesRep: string;
+    domain: string;
+    customer: string;
+    startDate: string;
+    endDate: string;
+    capacity: string;
+    invitees: string[];
+    customerContact: string;
+    purpose: string;
+    details: string;
+    isPrivate: boolean;
+    notifyEmail: boolean;
+    notifySlack: boolean;
 }
 
 export default function PostVisit() {
@@ -20,22 +34,31 @@ export default function PostVisit() {
         ? new Date(searchParams.get("date")!)
         : new Date();
 
-    const [formData, setFormData] = useState({
-        productLine: "",
-        location: "",
-        salesRep: "Kevin Reiter",
-        domain: "",
-        customer: "",
-        startDate: initialDate.toISOString().split("T")[0],
-        endDate: initialDate.toISOString().split("T")[0],
-        capacity: "",
-        invitees: [] as string[],
-        customerContact: "",
-        purpose: "",
-        details: "",
-        isPrivate: false,
-        notifyEmail: true,
-        notifySlack: true,
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm<PostVisitFormValues>({
+        defaultValues: {
+            productLine: "",
+            location: "",
+            salesRep: "Kevin Reiter",
+            domain: "",
+            customer: "",
+            startDate: initialDate.toISOString().split("T")[0],
+            endDate: initialDate.toISOString().split("T")[0],
+            capacity: "",
+            invitees: [],
+            customerContact: "",
+            purpose: "",
+            details: "",
+            isPrivate: false,
+            notifyEmail: true,
+            notifySlack: false,
+        },
     });
 
     const [inviteeInput, setInviteeInput] = useState("");
@@ -113,63 +136,63 @@ export default function PostVisit() {
         );
     };
 
-    const handleSubmit = async (isDraft: boolean) => {
-        if (isDraft) {
+    const buildPayload = (values: PostVisitFormValues, isDraft: boolean) => ({
+        productLine: values.productLine,
+        location: values.location,
+        salesRepName: values.salesRep,
+        domain: values.domain,
+        customerName: values.customer,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        capacity: Number(values.capacity),
+        invitees: values.invitees,
+        customerContactRep: values.customerContact,
+        purposeForVisit: values.purpose,
+        visitDetails: values.details,
+        isDraft,
+        isPrivate: values.isPrivate,
+    });
+
+    const submitDraft = async () => {
+        const values = getValues();
+        setIsSubmitting(true);
+        try {
+            await createVisit(buildPayload(values, true));
             toast.success("Visit saved as draft");
             navigate("/");
-            return;
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : "Failed to save draft",
+            );
+        } finally {
+            setIsSubmitting(false);
         }
+    };
 
-        const notificationChannels = [
-            formData.notifyEmail ? "email" : null,
-            formData.notifySlack ? "Slack" : null,
-        ].filter(Boolean);
+    const submitPost = async (values: PostVisitFormValues) => {
+        setIsSubmitting(true);
+        try {
+            await createVisit(buildPayload(values, false));
 
-        const notificationMessage =
-            notificationChannels.length > 0
-                ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
-                : "";
+            const notificationChannels = [
+                values.notifyEmail ? "email" : null,
+                values.notifySlack ? "Slack" : null,
+            ].filter(Boolean);
 
-        toast.success(`Visit posted successfully!${notificationMessage}`);
+            const notificationMessage =
+                notificationChannels.length > 0
+                    ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
+                    : "";
 
-        if (formData.notifySlack) {
-            try {
-                const res = await fetch(
-                    apiUrl("/api/notify/slack/post-visit"),
-                    {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            customer: formData.customer,
-                            productLine: formData.productLine,
-                            location: formData.location,
-                            startDate: formData.startDate,
-                            endDate: formData.endDate,
-                            salesRep: formData.salesRep,
-                            domain: formData.domain,
-                            purpose: formData.purpose,
-                            details: formData.details,
-                            capacity: formData.capacity,
-                            inviteeCount: formData.invitees.length,
-                            isPrivate: formData.isPrivate,
-                        }),
-                    },
-                );
-                if (!res.ok) {
-                    const data = (await res.json().catch(() => ({}))) as {
-                        message?: string;
-                    };
-                    console.warn(
-                        "Slack post-visit notification failed:",
-                        data.message ?? res.status,
-                    );
-                }
-            } catch (e) {
-                console.warn("Slack post-visit notification failed:", e);
-            }
+            toast.success(`Visit posted successfully!${notificationMessage}`);
+            navigate("/");
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : "Failed to post visit",
+            );
+        } finally {
+            setIsSubmitting(false);
         }
-
-        navigate("/");
     };
 
     const filteredCustomers = customerSearch
