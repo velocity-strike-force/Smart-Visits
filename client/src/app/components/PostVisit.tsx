@@ -118,10 +118,7 @@ export default function PostVisit() {
     };
 
     const addInvitee = () => {
-        if (
-            inviteeInput.trim() &&
-            !invitees.includes(inviteeInput.trim())
-        ) {
+        if (inviteeInput.trim() && !invitees.includes(inviteeInput.trim())) {
             setValue("invitees", [...invitees, inviteeInput.trim()], {
                 shouldDirty: true,
             });
@@ -351,7 +348,8 @@ export default function PostVisit() {
                                 {...register("endDate", {
                                     required: "End date is required",
                                     validate: (value) => {
-                                        const startDate = getValues("startDate");
+                                        const startDate =
+                                            getValues("startDate");
                                         return (
                                             !startDate ||
                                             value >= startDate ||

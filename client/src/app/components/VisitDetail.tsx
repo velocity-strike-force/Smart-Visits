@@ -392,12 +392,12 @@ export default function VisitDetail() {
                     {canManageVisit && (
                         <div className="border-t pt-6">
                             <h3 className="mb-3">Visitor Restrictions</h3>
-                                <RequiredLabel className="flex items-center justify-between gap-3">
+                            <RequiredLabel className="flex items-center justify-between gap-3">
                                 <span className="text-sm">
                                     Restrict by Product Line
                                 </span>
                                 <Switch />
-                                </RequiredLabel>
+                            </RequiredLabel>
                         </div>
                     )}
                 </div>

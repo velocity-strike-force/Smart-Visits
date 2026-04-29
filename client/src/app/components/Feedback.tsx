@@ -236,7 +236,10 @@ export default function Feedback() {
                 {selectedPastVisit && (
                     <div className="bg-white rounded-lg border p-6 space-y-6">
                         <div>
-                            <RequiredLabel className="block mb-2 text-sm" required>
+                            <RequiredLabel
+                                className="block mb-2 text-sm"
+                                required
+                            >
                                 Feedback Notes
                             </RequiredLabel>
                             <p className="text-sm text-gray-600 mb-2">

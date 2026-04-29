@@ -62,18 +62,12 @@ describe("PostVisit", () => {
             screen.getByPlaceholderText("Search for customer"),
             "Acme Corp",
         );
-        await user.type(
-            screen.getByPlaceholderText("e.g., 10"),
-            "5",
-        );
+        await user.type(screen.getByPlaceholderText("e.g., 10"), "5");
         await user.type(
             screen.getByPlaceholderText("Contact person at customer site"),
             "Alex Smith",
         );
-        await user.type(
-            screen.getByPlaceholderText(/Search purpose/i),
-            "QBR",
-        );
+        await user.type(screen.getByPlaceholderText(/Search purpose/i), "QBR");
         await user.type(
             screen.getByPlaceholderText(
                 "e.g., Closed-toed shoes required, parking information, etc.",
