@@ -15,20 +15,26 @@ AWS SAM + Lambda backend for the Customer Visit Sign-Up App.
 # 1. Start DynamoDB Local (from repo root)
 docker-compose up -d
 
-# 2. Seed local tables (PowerShell)
-.\scripts\seed-dynamodb-local.ps1
-
-# 3. Install dependencies
+# 2. Install dependencies
 cd server
 npm install
 
+# 3. Create and seed local tables
+npm run db:setup:local
+npm run seed:test:local
+
 # 4. Start SAM local API
-sam local start-api --warm-containers EAGER
+npm run start:local
 
 # 5. Test an endpoint
 curl http://localhost:3000/api/visit
 curl http://localhost:3000/api/customer?q=acme
 ```
+
+The client `npm run dev:api` mode sends `/api/*` requests through the Vite
+proxy to `http://127.0.0.1:3000`, so keep `npm run start:local` running while
+using API mode. Local SAM is configured with `STAGE=dev` to match the seeded
+`dev-smart-visits-*` DynamoDB Local tables.
 
 ## Testing
 

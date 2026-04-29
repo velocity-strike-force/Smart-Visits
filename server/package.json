@@ -10,11 +10,12 @@
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.x",
+    "@types/jest": "^29.x",
     "@types/node": "^22.x",
     "aws-sdk-client-mock": "^4.x",
+    "cross-env": "^10.1.0",
     "esbuild": "^0.25.x",
     "jest": "^29.x",
-    "@types/jest": "^29.x",
     "ts-jest": "^29.x",
     "ts-node": "^10.x",
     "typescript": "^5.x"
@@ -24,7 +25,9 @@
     "build:prod": "npm run build && npm prune --production",
     "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
     "db:setup": "ts-node scripts/create-local-tables.ts",
+    "db:setup:local": "cross-env STAGE=dev DYNAMODB_ENDPOINT=http://localhost:8000 SEED_SAMPLE_DATA=true ts-node scripts/create-local-tables.ts",
     "start:local": "sam local start-api --warm-containers EAGER --env-vars env.local.json",
-    "seed:test": "ts-node --project tsconfig.seed.json --transpile-only scripts/seed-test-records.ts"
+    "seed:test": "ts-node --project tsconfig.seed.json --transpile-only scripts/seed-test-records.ts",
+    "seed:test:local": "cross-env STAGE=dev DYNAMODB_ENDPOINT=http://localhost:8000 ts-node --project tsconfig.seed.json --transpile-only scripts/seed-test-records.ts"
   }
 }
