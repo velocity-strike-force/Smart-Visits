@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { format, startOfDay } from "date-fns";
@@ -6,6 +6,16 @@ import { toast } from "sonner";
 import { useUser } from "./UserContext";
 import { useVisits } from "./VisitsContext";
 import Typeahead from "./Typeahead";
+import RequiredLabel from "./RequiredLabel";
+
+interface FeedbackFormValues {
+    notes: string;
+    keyAreas: string[];
+    keyAreaInput: string;
+    detractors: string;
+    delighters: string;
+    visitSearch: string;
+}
 
 export default function Feedback() {
     const navigate = useNavigate();
@@ -14,15 +24,26 @@ export default function Feedback() {
     const { visits, getVisit } = useVisits();
     const isSalesRep = user.role === "sales_rep";
 
-    const [feedbackData, setFeedbackData] = useState({
-        notes: "",
-        keyAreas: [] as string[],
-        detractors: "",
-        delighters: "",
+    const {
+        register,
+        handleSubmit,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm<FeedbackFormValues>({
+        defaultValues: {
+            notes: "",
+            keyAreas: [],
+            keyAreaInput: "",
+            detractors: "",
+            delighters: "",
+            visitSearch: "",
+        },
     });
 
-    const [keyAreaInput, setKeyAreaInput] = useState("");
-    const [visitSearch, setVisitSearch] = useState("");
+    const keyAreaInput = watch("keyAreaInput");
+    const visitSearch = watch("visitSearch");
+    const keyAreas = watch("keyAreas");
 
     const visit = id ? getVisit(id) : undefined;
     const today = startOfDay(new Date());
@@ -55,38 +76,34 @@ export default function Feedback() {
         : selectableVisits;
 
     const addKeyArea = () => {
-        if (
-            keyAreaInput.trim() &&
-            !feedbackData.keyAreas.includes(keyAreaInput.trim())
-        ) {
-            setFeedbackData({
-                ...feedbackData,
-                keyAreas: [...feedbackData.keyAreas, keyAreaInput.trim()],
-            });
-            setKeyAreaInput("");
+        const trimmed = keyAreaInput.trim();
+        if (trimmed && !keyAreas.includes(trimmed)) {
+            setValue("keyAreas", [...keyAreas, trimmed]);
+            setValue("keyAreaInput", "");
         }
     };
 
     const removeKeyArea = (area: string) => {
-        setFeedbackData({
-            ...feedbackData,
-            keyAreas: feedbackData.keyAreas.filter((a) => a !== area),
-        });
+        setValue(
+            "keyAreas",
+            keyAreas.filter((a) => a !== area),
+        );
     };
 
-    const handleSubmit = () => {
+    const onSubmit = () => {
         if (!selectedPastVisit) {
             toast.error("Please select a past visit first");
             return;
         }
 
-        if (!feedbackData.notes) {
-            toast.error("Please provide feedback notes");
-            return;
-        }
-
         toast.success("Feedback submitted successfully!");
         navigate("/");
+    };
+
+    const onInvalid = (formErrors: { notes?: unknown }) => {
+        if (formErrors.notes) {
+            toast.error("Please provide feedback notes");
+        }
     };
 
     return (
@@ -113,11 +130,12 @@ export default function Feedback() {
 
                         <Typeahead
                             label="Find Visit"
+                            required
                             placeholder="Search by title, customer, product line, or location"
                             options={selectableVisitOptions.map((o) => o.label)}
                             value={visitSearch}
                             onChange={(value) => {
-                                setVisitSearch(value);
+                                setValue("visitSearch", value);
                                 const selectedOption =
                                     selectableVisitOptions.find(
                                         (o) => o.label === value,
@@ -218,41 +236,44 @@ export default function Feedback() {
                 {selectedPastVisit && (
                     <div className="bg-white rounded-lg border p-6 space-y-6">
                         <div>
-                            <label className="block mb-2 text-sm">
-                                Feedback Notes{" "}
-                                <span className="text-red-500">*</span>
-                            </label>
+                            <RequiredLabel className="block mb-2 text-sm" required>
+                                Feedback Notes
+                            </RequiredLabel>
                             <p className="text-sm text-gray-600 mb-2">
                                 {isSalesRep
                                     ? "Share key takeaways from the visit"
                                     : "Required to receive visit credit"}
                             </p>
                             <textarea
-                                value={feedbackData.notes}
-                                onChange={(e) =>
-                                    setFeedbackData({
-                                        ...feedbackData,
-                                        notes: e.target.value,
-                                    })
-                                }
+                                {...register("notes", {
+                                    required: "Feedback notes are required",
+                                })}
                                 rows={6}
                                 className="w-full px-3 py-2 border rounded-lg"
                                 placeholder="Enter your feedback notes..."
                             />
+                            {errors.notes && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.notes.message}
+                                </p>
+                            )}
                         </div>
 
                         <>
                             <div>
-                                <label className="block mb-2 text-sm">
+                                <RequiredLabel className="block mb-2 text-sm">
                                     Key Areas of Focus
-                                </label>
+                                </RequiredLabel>
                                 <div className="flex gap-2 mb-2">
                                     <input
                                         type="text"
                                         placeholder="Enter key area"
                                         value={keyAreaInput}
                                         onChange={(e) =>
-                                            setKeyAreaInput(e.target.value)
+                                            setValue(
+                                                "keyAreaInput",
+                                                e.target.value,
+                                            )
                                         }
                                         onKeyPress={(e) =>
                                             e.key === "Enter" && addKeyArea()
@@ -267,7 +288,7 @@ export default function Feedback() {
                                     </button>
                                 </div>
                                 <div className="flex flex-wrap gap-2">
-                                    {feedbackData.keyAreas.map((area) => (
+                                    {keyAreas.map((area) => (
                                         <span
                                             key={area}
                                             className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm flex items-center gap-2"
@@ -287,21 +308,15 @@ export default function Feedback() {
                             </div>
 
                             <div>
-                                <label className="block mb-2 text-sm">
+                                <RequiredLabel className="block mb-2 text-sm">
                                     Detractors
-                                </label>
+                                </RequiredLabel>
                                 <p className="text-sm text-gray-600 mb-2">
                                     What challenges or concerns did the customer
                                     express?
                                 </p>
                                 <textarea
-                                    value={feedbackData.detractors}
-                                    onChange={(e) =>
-                                        setFeedbackData({
-                                            ...feedbackData,
-                                            detractors: e.target.value,
-                                        })
-                                    }
+                                    {...register("detractors")}
                                     rows={4}
                                     className="w-full px-3 py-2 border rounded-lg"
                                     placeholder="Enter detractors..."
@@ -309,21 +324,15 @@ export default function Feedback() {
                             </div>
 
                             <div>
-                                <label className="block mb-2 text-sm">
+                                <RequiredLabel className="block mb-2 text-sm">
                                     Delighters
-                                </label>
+                                </RequiredLabel>
                                 <p className="text-sm text-gray-600 mb-2">
                                     What aspects of the visit or product
                                     exceeded expectations?
                                 </p>
                                 <textarea
-                                    value={feedbackData.delighters}
-                                    onChange={(e) =>
-                                        setFeedbackData({
-                                            ...feedbackData,
-                                            delighters: e.target.value,
-                                        })
-                                    }
+                                    {...register("delighters")}
                                     rows={4}
                                     className="w-full px-3 py-2 border rounded-lg"
                                     placeholder="Enter delighters..."
@@ -339,7 +348,7 @@ export default function Feedback() {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleSubmit}
+                                onClick={handleSubmit(onSubmit, onInvalid)}
                                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                             >
                                 Submit Feedback

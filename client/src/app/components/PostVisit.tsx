@@ -1,9 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Mail, Slack } from "lucide-react";
 import { toast } from "sonner";
 import Typeahead from "./Typeahead";
+import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
+import mockCustomers from "../../mockapi/postVisitCustomers.json";
+
+interface PostVisitFormValues {
+    productLine: string;
+    location: string;
+    salesRep: string;
+    domain: string;
+    customer: string;
+    startDate: string;
+    endDate: string;
+    capacity: string;
+    invitees: string[];
+    customerContact: string;
+    purpose: string;
+    details: string;
+    isPrivate: boolean;
+    notifyEmail: boolean;
+    notifySlack: boolean;
+}
 
 export default function PostVisit() {
     const navigate = useNavigate();
@@ -12,31 +33,57 @@ export default function PostVisit() {
         ? new Date(searchParams.get("date")!)
         : new Date();
 
-    const [formData, setFormData] = useState({
-        productLine: "",
-        location: "",
-        salesRep: "Kevin Reiter",
-        domain: "",
-        customer: "",
-        startDate: initialDate.toISOString().split("T")[0],
-        endDate: initialDate.toISOString().split("T")[0],
-        capacity: "",
-        invitees: [] as string[],
-        customerContact: "",
-        purpose: "",
-        details: "",
-        isPrivate: false,
-        notifyEmail: true,
-        notifySlack: false,
+    const {
+        register,
+        handleSubmit,
+        getValues,
+        setValue,
+        watch,
+        formState: { errors },
+    } = useForm<PostVisitFormValues>({
+        defaultValues: {
+            productLine: "",
+            location: "",
+            salesRep: "Kevin Reiter",
+            domain: "",
+            customer: "",
+            startDate: initialDate.toISOString().split("T")[0],
+            endDate: initialDate.toISOString().split("T")[0],
+            capacity: "",
+            invitees: [],
+            customerContact: "",
+            purpose: "",
+            details: "",
+            isPrivate: false,
+            notifyEmail: true,
+            notifySlack: false,
+        },
     });
 
     const [inviteeInput, setInviteeInput] = useState("");
-    const [customerSearch, setCustomerSearch] = useState("");
     const [customerMetadata, setCustomerMetadata] = useState<{
         arr?: number;
         status?: string;
         isKeyAccount?: boolean;
     } | null>(null);
+
+    const customerSearch = watch("customer");
+    const invitees = watch("invitees");
+
+    useEffect(() => {
+        register("productLine", {
+            required: "Product line is required",
+        });
+        register("domain", {
+            required: "Domain is required",
+        });
+        register("purpose", {
+            required: "Purpose is required",
+        });
+        register("customer", {
+            required: "Customer is required",
+        });
+    }, [register]);
 
     const productLineOptions = [
         "Oracle Cloud",
@@ -62,37 +109,9 @@ export default function PostVisit() {
         "Other",
     ];
 
-    const mockCustomers = [
-        {
-            name: "Acme Corp",
-            arr: 250000,
-            status: "Active",
-            isKeyAccount: true,
-        },
-        {
-            name: "TechStart Inc",
-            arr: 150000,
-            status: "Implementation",
-            isKeyAccount: false,
-        },
-        {
-            name: "Global Logistics",
-            arr: 500000,
-            status: "Active",
-            isKeyAccount: true,
-        },
-        {
-            name: "RetailMax",
-            arr: 180000,
-            status: "Active",
-            isKeyAccount: false,
-        },
-    ];
-
     const handleCustomerSelect = (customerName: string) => {
         const customer = mockCustomers.find((c) => c.name === customerName);
-        setFormData({ ...formData, customer: customerName });
-        setCustomerSearch(customerName);
+        setValue("customer", customerName, { shouldValidate: true });
         if (customer) {
             setCustomerMetadata(customer);
         }
@@ -101,39 +120,40 @@ export default function PostVisit() {
     const addInvitee = () => {
         if (
             inviteeInput.trim() &&
-            !formData.invitees.includes(inviteeInput.trim())
+            !invitees.includes(inviteeInput.trim())
         ) {
-            setFormData({
-                ...formData,
-                invitees: [...formData.invitees, inviteeInput.trim()],
+            setValue("invitees", [...invitees, inviteeInput.trim()], {
+                shouldDirty: true,
             });
             setInviteeInput("");
         }
     };
 
     const removeInvitee = (invitee: string) => {
-        setFormData({
-            ...formData,
-            invitees: formData.invitees.filter((i) => i !== invitee),
-        });
+        setValue(
+            "invitees",
+            invitees.filter((i) => i !== invitee),
+            { shouldDirty: true },
+        );
     };
 
-    const handleSubmit = (isDraft: boolean) => {
-        if (isDraft) {
-            toast.success("Visit saved as draft");
-        } else {
-            const notificationChannels = [
-                formData.notifyEmail ? "email" : null,
-                formData.notifySlack ? "Slack" : null,
-            ].filter(Boolean);
+    const submitDraft = () => {
+        toast.success("Visit saved as draft");
+        navigate("/");
+    };
 
-            const notificationMessage =
-                notificationChannels.length > 0
-                    ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
-                    : "";
+    const submitPost = (values: PostVisitFormValues) => {
+        const notificationChannels = [
+            values.notifyEmail ? "email" : null,
+            values.notifySlack ? "Slack" : null,
+        ].filter(Boolean);
 
-            toast.success(`Visit posted successfully!${notificationMessage}`);
-        }
+        const notificationMessage =
+            notificationChannels.length > 0
+                ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
+                : "";
+
+        toast.success(`Visit posted successfully!${notificationMessage}`);
         navigate("/");
     };
 
@@ -161,72 +181,105 @@ export default function PostVisit() {
                     <div className="grid grid-cols-2 gap-4">
                         <Typeahead
                             label="Product Line"
+                            required
                             placeholder="Search product line…"
                             options={productLineOptions}
-                            value={formData.productLine}
+                            value={watch("productLine")}
                             onChange={(v) =>
-                                setFormData({ ...formData, productLine: v })
+                                setValue("productLine", v, {
+                                    shouldValidate: true,
+                                })
                             }
                         />
+                        {errors.productLine && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.productLine.message}
+                            </p>
+                        )}
 
                         <div>
-                            <label className="block mb-2 text-sm">
+                            <RequiredLabel
+                                className="block mb-2 text-sm"
+                                required
+                            >
                                 Location
-                            </label>
+                            </RequiredLabel>
                             <input
                                 type="text"
                                 placeholder="e.g., Jacksonville, FL"
-                                value={formData.location}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        location: e.target.value,
-                                    })
-                                }
+                                {...register("location", {
+                                    required: "Location is required",
+                                })}
                                 className="w-full px-3 py-2 border rounded-lg"
                             />
+                            {errors.location && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.location.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block mb-2 text-sm">
+                            <RequiredLabel
+                                className="block mb-2 text-sm"
+                                required
+                            >
                                 Sales Rep Name
-                            </label>
+                            </RequiredLabel>
                             <input
                                 type="text"
-                                value={formData.salesRep}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        salesRep: e.target.value,
-                                    })
-                                }
+                                {...register("salesRep", {
+                                    required: "Sales rep name is required",
+                                })}
                                 className="w-full px-3 py-2 border rounded-lg bg-gray-50"
                             />
+                            {errors.salesRep && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.salesRep.message}
+                                </p>
+                            )}
                         </div>
 
                         <Typeahead
                             label="Domain"
+                            required
                             placeholder="Search domain…"
                             options={domainOptions}
-                            value={formData.domain}
+                            value={watch("domain")}
                             onChange={(v) =>
-                                setFormData({ ...formData, domain: v })
+                                setValue("domain", v, {
+                                    shouldValidate: true,
+                                })
                             }
                         />
+                        {errors.domain && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.domain.message}
+                            </p>
+                        )}
                     </div>
 
                     <div className="relative">
-                        <label className="block mb-2 text-sm">Customer</label>
+                        <RequiredLabel className="block mb-2 text-sm" required>
+                            Customer
+                        </RequiredLabel>
                         <input
                             type="text"
                             placeholder="Search for customer"
                             value={customerSearch}
                             onChange={(e) => {
-                                setCustomerSearch(e.target.value);
+                                setValue("customer", e.target.value, {
+                                    shouldValidate: true,
+                                });
                                 setCustomerMetadata(null);
                             }}
                             className="w-full px-3 py-2 border rounded-lg"
                         />
+                        {errors.customer && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.customer.message}
+                            </p>
+                        )}
                         {customerSearch &&
                             filteredCustomers.length > 0 &&
                             !customerMetadata && (
@@ -266,60 +319,82 @@ export default function PostVisit() {
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block mb-2 text-sm">
+                            <RequiredLabel
+                                className="block mb-2 text-sm"
+                                required
+                            >
                                 Start Date
-                            </label>
+                            </RequiredLabel>
                             <input
                                 type="date"
-                                value={formData.startDate}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        startDate: e.target.value,
-                                    })
-                                }
+                                {...register("startDate", {
+                                    required: "Start date is required",
+                                })}
                                 className="w-full px-3 py-2 border rounded-lg"
                             />
+                            {errors.startDate && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.startDate.message}
+                                </p>
+                            )}
                         </div>
 
                         <div>
-                            <label className="block mb-2 text-sm">
+                            <RequiredLabel
+                                className="block mb-2 text-sm"
+                                required
+                            >
                                 End Date
-                            </label>
+                            </RequiredLabel>
                             <input
                                 type="date"
-                                value={formData.endDate}
-                                onChange={(e) =>
-                                    setFormData({
-                                        ...formData,
-                                        endDate: e.target.value,
-                                    })
-                                }
+                                {...register("endDate", {
+                                    required: "End date is required",
+                                    validate: (value) => {
+                                        const startDate = getValues("startDate");
+                                        return (
+                                            !startDate ||
+                                            value >= startDate ||
+                                            "End date must be on or after start date"
+                                        );
+                                    },
+                                })}
                                 className="w-full px-3 py-2 border rounded-lg"
                             />
+                            {errors.endDate && (
+                                <p className="text-sm text-red-600 mt-1">
+                                    {errors.endDate.message}
+                                </p>
+                            )}
                         </div>
                     </div>
 
                     <div>
-                        <label className="block mb-2 text-sm">
+                        <RequiredLabel className="block mb-2 text-sm" required>
                             Capacity (Max Attendees)
-                        </label>
+                        </RequiredLabel>
                         <input
                             type="number"
                             placeholder="e.g., 10"
-                            value={formData.capacity}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    capacity: e.target.value,
-                                })
-                            }
+                            {...register("capacity", {
+                                required: "Capacity is required",
+                                validate: (value) =>
+                                    Number(value) > 0 ||
+                                    "Capacity must be greater than 0",
+                            })}
                             className="w-full px-3 py-2 border rounded-lg"
                         />
+                        {errors.capacity && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.capacity.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label className="block mb-2 text-sm">Invitees</label>
+                        <RequiredLabel className="block mb-2 text-sm">
+                            Invitees
+                        </RequiredLabel>
                         <div className="flex gap-2 mb-2">
                             <input
                                 type="text"
@@ -341,7 +416,7 @@ export default function PostVisit() {
                             </button>
                         </div>
                         <div className="flex flex-wrap gap-2">
-                            {formData.invitees.map((invitee) => (
+                            {invitees.map((invitee) => (
                                 <span
                                     key={invitee}
                                     className="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm flex items-center gap-2"
@@ -359,70 +434,82 @@ export default function PostVisit() {
                     </div>
 
                     <div>
-                        <label className="block mb-2 text-sm">
+                        <RequiredLabel className="block mb-2 text-sm" required>
                             Customer Contact Rep
-                        </label>
+                        </RequiredLabel>
                         <input
                             type="text"
                             placeholder="Contact person at customer site"
-                            value={formData.customerContact}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    customerContact: e.target.value,
-                                })
-                            }
+                            {...register("customerContact", {
+                                required: "Customer contact is required",
+                            })}
                             className="w-full px-3 py-2 border rounded-lg"
                         />
+                        {errors.customerContact && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.customerContact.message}
+                            </p>
+                        )}
                     </div>
 
                     <Typeahead
                         label="Purpose for Visit"
+                        required
                         placeholder="Search purpose…"
                         options={purposeOptions}
-                        value={formData.purpose}
+                        value={watch("purpose")}
                         onChange={(v) =>
-                            setFormData({ ...formData, purpose: v })
+                            setValue("purpose", v, {
+                                shouldValidate: true,
+                            })
                         }
                     />
+                    {errors.purpose && (
+                        <p className="text-sm text-red-600 -mt-4">
+                            {errors.purpose.message}
+                        </p>
+                    )}
 
                     <div>
-                        <label className="block mb-2 text-sm">
+                        <RequiredLabel className="block mb-2 text-sm" required>
                             Visit Details / Requirements
-                        </label>
+                        </RequiredLabel>
                         <textarea
                             placeholder="e.g., Closed-toed shoes required, parking information, etc."
-                            value={formData.details}
-                            onChange={(e) =>
-                                setFormData({
-                                    ...formData,
-                                    details: e.target.value,
-                                })
-                            }
+                            {...register("details", {
+                                required: "Visit details are required",
+                                minLength: {
+                                    value: 10,
+                                    message:
+                                        "Visit details should be at least 10 characters",
+                                },
+                            })}
                             rows={4}
                             className="w-full px-3 py-2 border rounded-lg"
                         />
+                        {errors.details && (
+                            <p className="text-sm text-red-600 mt-1">
+                                {errors.details.message}
+                            </p>
+                        )}
                     </div>
 
                     <div>
-                        <label className="flex items-center justify-between gap-3">
+                        <RequiredLabel className="flex items-center justify-between gap-3">
                             <span className="text-sm">Private Event</span>
                             <Switch
-                                checked={formData.isPrivate}
+                                checked={watch("isPrivate")}
                                 onCheckedChange={(checked) =>
-                                    setFormData({
-                                        ...formData,
-                                        isPrivate: checked,
-                                    })
+                                    setValue("isPrivate", checked)
                                 }
                             />
-                        </label>
+                        </RequiredLabel>
                     </div>
 
                     <div className="border rounded-lg p-4 space-y-3">
                         <h3 className="text-sm font-medium">Notifications</h3>
 
-                        <label className="flex items-center justify-between rounded-lg border p-3 gap-3">
+                        <RequiredLabel className="flex items-center justify-between rounded-lg border p-3 gap-3">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-lg bg-red-100 text-red-700 flex items-center justify-center">
                                     <Mail className="w-4 h-4" />
@@ -434,17 +521,14 @@ export default function PostVisit() {
                             </div>
 
                             <Switch
-                                checked={formData.notifyEmail}
+                                checked={watch("notifyEmail")}
                                 onCheckedChange={(checked) =>
-                                    setFormData({
-                                        ...formData,
-                                        notifyEmail: checked,
-                                    })
+                                    setValue("notifyEmail", checked)
                                 }
                             />
-                        </label>
+                        </RequiredLabel>
 
-                        <label className="flex items-center justify-between rounded-lg border p-3 gap-3">
+                        <RequiredLabel className="flex items-center justify-between rounded-lg border p-3 gap-3">
                             <div className="flex items-center gap-3">
                                 <div className="w-9 h-9 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
                                     <Slack className="w-4 h-4" />
@@ -456,15 +540,12 @@ export default function PostVisit() {
                             </div>
 
                             <Switch
-                                checked={formData.notifySlack}
+                                checked={watch("notifySlack")}
                                 onCheckedChange={(checked) =>
-                                    setFormData({
-                                        ...formData,
-                                        notifySlack: checked,
-                                    })
+                                    setValue("notifySlack", checked)
                                 }
                             />
-                        </label>
+                        </RequiredLabel>
                     </div>
 
                     <div className="flex gap-3 pt-4">
@@ -475,13 +556,13 @@ export default function PostVisit() {
                             Cancel
                         </button>
                         <button
-                            onClick={() => handleSubmit(true)}
+                            onClick={submitDraft}
                             className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
                         >
                             Save as Draft
                         </button>
                         <button
-                            onClick={() => handleSubmit(false)}
+                            onClick={handleSubmit(submitPost)}
                             className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                         >
                             Post Visit

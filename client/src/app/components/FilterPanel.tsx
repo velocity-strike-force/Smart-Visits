@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Slider } from './ui/slider';
+import RequiredLabel from './RequiredLabel';
 
 interface Visit {
   id: string;
@@ -115,7 +116,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
     <div className="space-y-4">
       <div className="grid grid-cols-4 gap-4">
         <div>
-          <label className="block mb-2">Product Line</label>
+          <RequiredLabel className="block mb-2">Product Line</RequiredLabel>
           <div className="space-y-2 max-h-48 overflow-auto">
             {productLineOptions.length > 0 ? (
               productLineOptions.map(line => (
@@ -136,7 +137,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
         </div>
 
         <div>
-          <label className="block mb-2">Location</label>
+          <RequiredLabel className="block mb-2">Location</RequiredLabel>
           <select
             value={filters.location}
             onChange={(e) => setFilters({ ...filters, location: e.target.value })}
@@ -148,7 +149,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
             ))}
           </select>
 
-          <label className="block mb-2 mt-4">Domain</label>
+          <RequiredLabel className="block mb-2 mt-4">Domain</RequiredLabel>
           <select
             value={filters.domain}
             onChange={(e) => setFilters({ ...filters, domain: e.target.value })}
@@ -162,7 +163,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
         </div>
 
         <div>
-          <label className="block mb-2">ARR Range</label>
+          <RequiredLabel className="block mb-2">ARR Range</RequiredLabel>
           <div className="space-y-3 rounded-lg border px-3 py-4">
             <Slider
               min={arrBounds.min}
@@ -186,7 +187,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
         </div>
 
         <div>
-          <label className="block mb-2">Sales Rep</label>
+          <RequiredLabel className="block mb-2">Sales Rep</RequiredLabel>
           <select
             value={filters.salesRep}
             onChange={(e) => setFilters({ ...filters, salesRep: e.target.value })}
@@ -198,7 +199,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
             ))}
           </select>
 
-          <label className="block mb-2 mt-4">Customer</label>
+          <RequiredLabel className="block mb-2 mt-4">Customer</RequiredLabel>
           <input
             type="text"
             placeholder="Search customer"
@@ -207,7 +208,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
             className="w-full px-3 py-2 border rounded-lg"
           />
 
-          <label className="flex items-center gap-2 mt-4 text-sm">
+          <RequiredLabel className="flex items-center gap-2 mt-4 text-sm">
             <input
               type="checkbox"
               checked={filters.keyAccounts}
@@ -215,7 +216,7 @@ export default function FilterPanel({ visits, filters: controlledFilters, onChan
               className="rounded"
             />
             Key Accounts Only
-          </label>
+          </RequiredLabel>
         </div>
       </div>
 
