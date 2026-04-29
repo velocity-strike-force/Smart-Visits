@@ -1,5 +1,60 @@
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { VisitHandler } from "../../src/handlers/VisitHandler";
+import { Dynamo } from "../../src/database/Dynamo";
+import { Visit, type VisitData } from "../../src/database/models/Visit";
+
+function sampleVisitData(overrides: Partial<VisitData> = {}): VisitData {
+    return {
+        visitId: "visit-001",
+        productLine: "NetSuite",
+        location: "Jacksonville, FL",
+        city: "Jacksonville",
+        state: "FL",
+        salesRepId: "rep-001",
+        salesRepName: "Jane Smith",
+        domain: "ERP",
+        customerId: "cust-001",
+        customerName: "Acme Corp",
+        customerARR: 250000,
+        customerImplementationStatus: "Live",
+        isKeyAccount: true,
+        startDate: "2026-05-15",
+        endDate: "2026-05-16",
+        capacity: 5,
+        invitees: ["user-002"],
+        customerContactRep: "John Doe",
+        purposeForVisit: "Quarterly Business Review",
+        visitDetails: "Meet in lobby.",
+        isDraft: false,
+        isPrivate: false,
+        createdAt: "2026-04-01T10:00:00Z",
+        updatedAt: "2026-04-01T10:00:00Z",
+        ...overrides,
+    };
+}
+
+function createMockDynamo(): Dynamo {
+    const v1 = new Visit(sampleVisitData());
+    const v2 = new Visit(
+        sampleVisitData({
+            visitId: "visit-002",
+            isDraft: true,
+            customerName: "Globex Industries",
+        })
+    );
+
+    return {
+        getAllVisits: jest.fn().mockResolvedValue([v1, v2]),
+        getVisitById: jest
+            .fn()
+            .mockImplementation(async (id: string) =>
+                id === "visit-001" ? v1 : undefined
+            ),
+        createVisit: jest.fn().mockResolvedValue(undefined),
+        updateVisit: jest.fn().mockResolvedValue(undefined),
+        deleteVisit: jest.fn().mockResolvedValue(undefined),
+    } as unknown as Dynamo;
+}
 
 function makeEvent(
     method: string,
@@ -37,10 +92,12 @@ function makeEvent(
 }
 
 describe("VisitHandler", () => {
+    let mockDb: Dynamo;
     let handler: VisitHandler;
 
     beforeEach(() => {
-        handler = new VisitHandler();
+        mockDb = createMockDynamo();
+        handler = new VisitHandler({ db: mockDb });
     });
 
     it("GET /api/visit returns a list of visits", async () => {
@@ -53,7 +110,8 @@ describe("VisitHandler", () => {
         expect(body.success).toBe(true);
         expect(body.visits).toBeDefined();
         expect(Array.isArray(body.visits)).toBe(true);
-        expect(body.visits.length).toBeGreaterThan(0);
+        expect(body.visits.length).toBe(2);
+        expect(mockDb.getAllVisits).toHaveBeenCalled();
     });
 
     it("GET /api/visit?visitId=visit-001 returns a single visit", async () => {
@@ -66,6 +124,7 @@ describe("VisitHandler", () => {
         expect(body.success).toBe(true);
         expect(body.visit).toBeDefined();
         expect(body.visit.visitId).toBe("visit-001");
+        expect(mockDb.getVisitById).toHaveBeenCalledWith("visit-001");
     });
 
     it("POST /api/visit creates a visit and returns an id", async () => {
@@ -85,6 +144,7 @@ describe("VisitHandler", () => {
         const body = JSON.parse(result.body);
         expect(body.success).toBe(true);
         expect(body.visitId).toBeDefined();
+        expect(mockDb.createVisit).toHaveBeenCalled();
     });
 
     it("DELETE /api/visit without visitId returns 400", async () => {

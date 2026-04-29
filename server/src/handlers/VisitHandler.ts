@@ -3,17 +3,13 @@ import { ApiGatewayLambdaHandler } from "./ApiGatewayLambdaHandler";
 import { Dynamo } from "../database/Dynamo";
 import { Visit, type VisitData } from "../database/models/Visit";
 
-/** `VISITS_DATA_SOURCE=dynamo` uses DynamoDB; otherwise handler mocks (tests/local default). */
-function useVisitMocks(): boolean {
-    return process.env.VISITS_DATA_SOURCE?.toLowerCase() !== "dynamo";
-}
-
 export class VisitHandler extends ApiGatewayLambdaHandler {
     private readonly db: Dynamo;
 
-    constructor() {
+    /** Pass `{ db }` in tests; Lambda uses `new Dynamo()` via default `visit.js`. */
+    constructor(options?: { db?: Dynamo }) {
         super();
-        this.db = new Dynamo({});
+        this.db = options?.db ?? new Dynamo({});
     }
 
     async handleVisitEndpoint(
@@ -32,10 +28,6 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
     ): Promise<APIGatewayProxyResult> {
         const params = event.queryStringParameters;
         const visitId = params?.visitId;
-
-        if (useVisitMocks()) {
-            return this.getVisitsMock(visitId);
-        }
 
         try {
             if (visitId) {
@@ -64,73 +56,6 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
                     err instanceof Error ? err.message : "Failed to load visits",
             });
         }
-    }
-
-    private getVisitsMock(
-        visitId: string | undefined
-    ): APIGatewayProxyResult {
-        if (visitId) {
-            return this.createSuccessResponse({
-                success: true,
-                visit: {
-                    visitId,
-                    productLine: "NetSuite",
-                    location: "Jacksonville, FL",
-                    city: "Jacksonville",
-                    state: "FL",
-                    salesRepId: "rep-001",
-                    salesRepName: "Jane Smith",
-                    domain: "ERP",
-                    customerId: "cust-001",
-                    customerName: "Acme Corp",
-                    customerARR: 250000,
-                    customerImplementationStatus: "Live",
-                    isKeyAccount: true,
-                    startDate: "2026-05-15",
-                    endDate: "2026-05-16",
-                    capacity: 5,
-                    invitees: ["user-002", "user-003"],
-                    customerContactRep: "John Doe",
-                    purposeForVisit: "Quarterly Business Review",
-                    visitDetails:
-                        "Closed-toed shoes required. Meet in lobby at 9 AM.",
-                    isDraft: false,
-                    isPrivate: false,
-                    createdAt: "2026-04-01T10:00:00Z",
-                    updatedAt: "2026-04-01T10:00:00Z",
-                },
-            });
-        }
-
-        return this.createSuccessResponse({
-            success: true,
-            visits: [
-                {
-                    visitId: "visit-001",
-                    productLine: "NetSuite",
-                    location: "Jacksonville, FL",
-                    salesRepName: "Jane Smith",
-                    customerName: "Acme Corp",
-                    startDate: "2026-05-15",
-                    endDate: "2026-05-16",
-                    capacity: 5,
-                    isDraft: false,
-                    isKeyAccount: true,
-                },
-                {
-                    visitId: "visit-002",
-                    productLine: "Oracle Cloud",
-                    location: "Atlanta, GA",
-                    salesRepName: "Bob Johnson",
-                    customerName: "Globex Industries",
-                    startDate: "2026-05-20",
-                    endDate: "2026-05-21",
-                    capacity: 3,
-                    isDraft: true,
-                    isKeyAccount: false,
-                },
-            ],
-        });
     }
 
     private visitToFullResponse(v: Visit) {
@@ -280,15 +205,6 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
             unknown
         >;
 
-        if (useVisitMocks()) {
-            const newVisitId = `visit-${Date.now()}`;
-            return this.createSuccessResponse({
-                success: true,
-                visitId: newVisitId,
-                message: "Visit created successfully",
-            });
-        }
-
         try {
             const now = new Date().toISOString();
             const visitId =
@@ -327,14 +243,6 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
             });
         }
 
-        if (useVisitMocks()) {
-            return this.createSuccessResponse({
-                success: true,
-                visitId,
-                message: "Visit updated successfully",
-            });
-        }
-
         try {
             const { visitId: _id, ...rest } = body;
             const updates = this.pickVisitUpdates(
@@ -366,13 +274,6 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
             return this.createErrorResponse(400, {
                 success: false,
                 message: "visitId is required",
-            });
-        }
-
-        if (useVisitMocks()) {
-            return this.createSuccessResponse({
-                success: true,
-                message: "Visit deleted successfully",
             });
         }
 

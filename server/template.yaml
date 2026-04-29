@@ -37,9 +37,6 @@ Resources:
       FunctionName: !Sub smart-visits-${STAGE}-handle-visit
       CodeUri: ./
       Handler: src/handlers/visit.handleVisitEndpoint
-      Environment:
-        Variables:
-          VISITS_DATA_SOURCE: dynamo
       Events:
         GetApi:
           Type: HttpApi

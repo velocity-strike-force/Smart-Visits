@@ -5,7 +5,7 @@ export function getMockVisits(): Visit[] {
     {
       id: '1',
       title: 'Quarterly Review',
-      customer: 'Acme Corp',
+      customer: 'Acmes Corp',
       date: new Date(2026, 3, 10),
       endDate: new Date(2026, 3, 10),
       productLine: 'NetSuite',
