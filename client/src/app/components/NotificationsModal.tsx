@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Slack, Mail, MapPin } from "lucide-react";
+import { X, MessagesSquare, Mail, MapPin } from "lucide-react";
 
 interface NotificationsModalProps {
     isOpen: boolean;
@@ -39,7 +39,7 @@ export default function NotificationsModal({
                     <div className="flex items-center justify-between rounded-lg border p-4">
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
-                                <Slack className="w-5 h-5" />
+                                <MessagesSquare className="w-5 h-5" />
                             </div>
 
                             <div>
