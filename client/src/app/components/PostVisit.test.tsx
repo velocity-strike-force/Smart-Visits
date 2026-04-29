@@ -13,6 +13,10 @@ vi.mock("sonner", () => ({
     },
 }));
 
+vi.mock("../lib/api", () => ({
+    createVisit: vi.fn().mockResolvedValue({ success: true, visitId: "v-test" }),
+}));
+
 describe("PostVisit", () => {
     beforeEach(() => {
         toastSuccess.mockReset();

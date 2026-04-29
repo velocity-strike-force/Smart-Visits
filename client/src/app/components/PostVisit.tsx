@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import Typeahead from "./Typeahead";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
+import { createVisit } from "../lib/api";
 import mockCustomers from "../../mockapi/postVisitCustomers.json";
 
 interface PostVisitFormValues {
@@ -61,6 +62,7 @@ export default function PostVisit() {
     });
 
     const [inviteeInput, setInviteeInput] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const [customerMetadata, setCustomerMetadata] = useState<{
         arr?: number;
         status?: string;
@@ -134,24 +136,63 @@ export default function PostVisit() {
         );
     };
 
-    const submitDraft = () => {
-        toast.success("Visit saved as draft");
-        navigate("/");
+    const buildPayload = (values: PostVisitFormValues, isDraft: boolean) => ({
+        productLine: values.productLine,
+        location: values.location,
+        salesRepName: values.salesRep,
+        domain: values.domain,
+        customerName: values.customer,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        capacity: Number(values.capacity),
+        invitees: values.invitees,
+        customerContactRep: values.customerContact,
+        purposeForVisit: values.purpose,
+        visitDetails: values.details,
+        isDraft,
+        isPrivate: values.isPrivate,
+    });
+
+    const submitDraft = async () => {
+        const values = getValues();
+        setIsSubmitting(true);
+        try {
+            await createVisit(buildPayload(values, true));
+            toast.success("Visit saved as draft");
+            navigate("/");
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : "Failed to save draft",
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const submitPost = (values: PostVisitFormValues) => {
-        const notificationChannels = [
-            values.notifyEmail ? "email" : null,
-            values.notifySlack ? "Slack" : null,
-        ].filter(Boolean);
+    const submitPost = async (values: PostVisitFormValues) => {
+        setIsSubmitting(true);
+        try {
+            await createVisit(buildPayload(values, false));
 
-        const notificationMessage =
-            notificationChannels.length > 0
-                ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
-                : "";
+            const notificationChannels = [
+                values.notifyEmail ? "email" : null,
+                values.notifySlack ? "Slack" : null,
+            ].filter(Boolean);
 
-        toast.success(`Visit posted successfully!${notificationMessage}`);
-        navigate("/");
+            const notificationMessage =
+                notificationChannels.length > 0
+                    ? ` Notifications sent via ${notificationChannels.join(" and ")}.`
+                    : "";
+
+            toast.success(`Visit posted successfully!${notificationMessage}`);
+            navigate("/");
+        } catch (err) {
+            toast.error(
+                err instanceof Error ? err.message : "Failed to post visit",
+            );
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const filteredCustomers = customerSearch
@@ -549,21 +590,24 @@ export default function PostVisit() {
                     <div className="flex gap-3 pt-4">
                         <button
                             onClick={() => navigate("/")}
-                            className="px-6 py-2 border rounded-lg hover:bg-gray-50"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             Cancel
                         </button>
                         <button
                             onClick={submitDraft}
-                            className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Save as Draft
+                            {isSubmitting ? "Saving…" : "Save as Draft"}
                         </button>
                         <button
                             onClick={handleSubmit(submitPost)}
-                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                            disabled={isSubmitting}
+                            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Post Visit
+                            {isSubmitting ? "Posting…" : "Post Visit"}
                         </button>
                     </div>
                 </div>

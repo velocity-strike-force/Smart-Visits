@@ -47,3 +47,42 @@ export async function getVisits(): Promise<ApiVisit[]> {
     const data = (await response.json()) as VisitListResponse;
     return data.visits ?? [];
 }
+
+export interface CreateVisitPayload {
+    productLine: string;
+    location: string;
+    salesRepName: string;
+    domain: string;
+    customerName: string;
+    startDate: string;
+    endDate: string;
+    capacity: number;
+    invitees: string[];
+    customerContactRep: string;
+    purposeForVisit: string;
+    visitDetails: string;
+    isDraft: boolean;
+    isPrivate: boolean;
+}
+
+export interface CreateVisitResponse {
+    success: boolean;
+    visitId?: string;
+    message?: string;
+}
+
+export async function createVisit(
+    payload: CreateVisitPayload,
+): Promise<CreateVisitResponse> {
+    const response = await fetch(getApiUrl("/dev/visit"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to create visit (${response.status})`);
+    }
+
+    return (await response.json()) as CreateVisitResponse;
+}
