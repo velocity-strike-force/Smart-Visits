@@ -105,4 +105,21 @@ describe("FeedbackHandler", () => {
         expect(result.statusCode).toBe(200);
         expect(JSON.parse(result.body).success).toBe(true);
     });
+
+    it("POST /api/feedback without visitId and userId returns 400", async () => {
+        const handler = new FeedbackHandler();
+        const result = await handler.handleFeedbackEndpoint(
+            makeEvent(
+                "POST",
+                undefined,
+                JSON.stringify({
+                    userName: "Sam",
+                    feedbackNotes: "Missing required ids",
+                })
+            )
+        );
+
+        expect(result.statusCode).toBe(400);
+        expect(JSON.parse(result.body).success).toBe(false);
+    });
 });

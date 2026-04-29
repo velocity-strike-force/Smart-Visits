@@ -28,6 +28,8 @@ export interface Visit {
 
 interface VisitsContextType {
     visits: Visit[];
+    visitsLoading: boolean;
+    visitsError: string | null;
     addAttendee: (visitId: string, attendeeName: string) => void;
     removeAttendee: (visitId: string, attendeeName: string) => void;
     getVisit: (visitId: string) => Visit | undefined;
@@ -211,7 +213,14 @@ export function VisitsProvider({ children }: { children: ReactNode }) {
 
     return (
         <VisitsContext.Provider
-            value={{ visits, addAttendee, removeAttendee, getVisit }}
+            value={{
+                visits,
+                visitsLoading,
+                visitsError,
+                addAttendee,
+                removeAttendee,
+                getVisit,
+            }}
         >
             {children}
         </VisitsContext.Provider>
