@@ -12,6 +12,7 @@ export interface Visit {
   postVisitRecordCount?: number;
   capacity: number;
   attendees: string[];
+  attendeeUserIds?: string[];
   creatorEmail: string;
   endDate?: Date;
   customerContact?: string;

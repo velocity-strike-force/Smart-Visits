@@ -41,6 +41,14 @@ export interface VisitFullApi {
   updatedAt: string;
 }
 
+export interface SignupApi {
+  visitId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  signedUpAt: string;
+}
+
 function apiUrl(path: string): string {
   const base = getVisitApiBaseUrl();
   const p = path.startsWith('/') ? path : `/${path}`;
@@ -70,6 +78,7 @@ export function mapVisitFromApiFull(api: VisitFullApi): Visit {
     isDraft: api.isDraft,
     capacity: api.capacity,
     attendees: [...(api.invitees ?? [])],
+    attendeeUserIds: [],
     creatorEmail: '',
     customerContact: api.customerContactRep,
     purpose: api.purposeForVisit,
@@ -93,6 +102,7 @@ export function mapListRowToVisit(row: VisitListRow): Visit {
     isDraft: row.isDraft,
     capacity: row.capacity,
     attendees: [],
+    attendeeUserIds: [],
     creatorEmail: '',
   };
 }
@@ -116,6 +126,84 @@ async function fetchVisitById(visitId: string): Promise<VisitFullApi | null> {
   const body = (await res.json()) as { success?: boolean; visit?: VisitFullApi };
   if (!body.success || !body.visit) return null;
   return body.visit;
+}
+
+export async function fetchVisitDetail(visitId: string): Promise<VisitFullApi | null> {
+  return fetchVisitById(visitId);
+}
+
+export async function fetchVisitSignups(visitId: string): Promise<SignupApi[]> {
+  const res = await fetch(
+    apiUrl(`/api/signup?visitId=${encodeURIComponent(visitId)}`)
+  );
+  if (res.status === 404) {
+    return [];
+  }
+  if (!res.ok) {
+    throw new Error(`Signup request failed (${res.status})`);
+  }
+  const body = (await res.json()) as {
+    success?: boolean;
+    signups?: SignupApi[];
+  };
+  if (!body.success || !Array.isArray(body.signups)) {
+    throw new Error('Invalid signup response');
+  }
+  return body.signups;
+}
+
+export async function createVisitSignup(payload: {
+  visitId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+}): Promise<void> {
+  const res = await fetch(apiUrl('/api/signup'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { message?: string };
+    throw new Error(body.message || `Signup failed (${res.status})`);
+  }
+  const body = (await res.json()) as { success?: boolean; message?: string };
+  if (!body.success) {
+    throw new Error(body.message || 'Signup failed');
+  }
+}
+
+export async function cancelVisitSignup(visitId: string, userId: string): Promise<void> {
+  const res = await fetch(
+    apiUrl(
+      `/api/signup?visitId=${encodeURIComponent(visitId)}&userId=${encodeURIComponent(userId)}`
+    ),
+    { method: 'DELETE' }
+  );
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { message?: string };
+    throw new Error(body.message || `Cancel signup failed (${res.status})`);
+  }
+  const body = (await res.json()) as { success?: boolean; message?: string };
+  if (!body.success) {
+    throw new Error(body.message || 'Cancel signup failed');
+  }
+}
+
+export async function loadVisitDetailWithSignups(visitId: string): Promise<Visit | null> {
+  const [visitFull, signups] = await Promise.all([
+    fetchVisitById(visitId),
+    fetchVisitSignups(visitId),
+  ]);
+  if (!visitFull) {
+    return null;
+  }
+  const mapped = mapVisitFromApiFull(visitFull);
+  mapped.attendees = signups.map((signup) => signup.userName);
+  mapped.attendeeUserIds = signups.map((signup) => signup.userId);
+  return mapped;
 }
 
 /** Loads visits from VisitHandler list endpoint. */

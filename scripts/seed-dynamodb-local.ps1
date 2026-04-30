@@ -1,6 +1,16 @@
-# Creates all Smart-Visits DynamoDB tables in DynamoDB Local and seeds deterministic data.
+# Creates all Smart-Visits DynamoDB tables in DynamoDB Local and seeds data via the server
+# script (all tables: Visits, Users, Signups, Feedback, Customers, AuditLog, Roles,
+# ProductLines, UserProductLines, ReferenceData — see server/src/database/schema/tableNames.ts).
+#
 # Usage: .\scripts\seed-dynamodb-local.ps1
-# Requires: AWS CLI (this script provides default local credentials/region if missing).
+# Requires: AWS CLI, Node/npm with server dependencies (`npm install` in server/).
+#
+# Parameters:
+#   -SkipFullSeed  Only create tables; do not run npm run seed:test
+
+param(
+    [switch]$SkipFullSeed
+)
 
 $ErrorActionPreference = "Stop"
 
@@ -83,6 +93,11 @@ $tables = @(
             @{ AttributeName = "userId"; KeyType = "HASH" },
             @{ AttributeName = "productLineId"; KeyType = "RANGE" }
         )
+    },
+    @{
+        Name       = "$Stage-smart-visits-ReferenceData"
+        Attributes = @( @{ AttributeName = "domainId"; AttributeType = "S" } )
+        KeySchema  = @( @{ AttributeName = "domainId"; KeyType = "HASH" } )
     }
 )
 
@@ -126,88 +141,51 @@ foreach ($table in $tables) {
     }
 }
 
-Write-Host ""
-Write-Host "Seeding deterministic baseline records..." -ForegroundColor Cyan
-
-function Put-LocalItem {
-    param(
-        [Parameter(Mandatory=$true)][string]$TableName,
-        [Parameter(Mandatory=$true)][string]$ItemJson
-    )
-
-    $tempJson = New-TemporaryFile
-    try {
-        Set-Content -LiteralPath $tempJson.FullName -Value $ItemJson -Encoding ASCII -NoNewline
-        aws dynamodb put-item `
-            --endpoint-url $Endpoint `
-            --table-name $TableName `
-            --item "file://$($tempJson.FullName)" `
-            --no-cli-pager 1>$null
-    } finally {
-        Remove-Item -LiteralPath $tempJson.FullName -ErrorAction SilentlyContinue
+if (-not $SkipFullSeed) {
+    Write-Host ""
+    Write-Host "Running full seed (npm run seed:test from server/)..." -ForegroundColor Cyan
+    $serverDir = Join-Path $PSScriptRoot "..\server"
+    if (-not (Test-Path (Join-Path $serverDir "package.json"))) {
+        throw "server/package.json not found at $serverDir — run from repo root."
     }
+    $savedStage = $env:STAGE
+    $savedDynamo = $env:DYNAMODB_ENDPOINT
+    try {
+        $env:STAGE = $Stage
+        $env:DYNAMODB_ENDPOINT = $Endpoint
+        Push-Location $serverDir
+        npm run seed:test
+        if ($LASTEXITCODE -ne 0) {
+            throw "npm run seed:test failed (exit $LASTEXITCODE). Install deps: cd server; npm install"
+        }
+    } finally {
+        Pop-Location
+        if ($null -ne $savedStage) { $env:STAGE = $savedStage } else { Remove-Item Env:\STAGE -ErrorAction SilentlyContinue }
+        if ($null -ne $savedDynamo) { $env:DYNAMODB_ENDPOINT = $savedDynamo } else { Remove-Item Env:\DYNAMODB_ENDPOINT -ErrorAction SilentlyContinue }
+    }
+    Write-Host "  Full seed completed." -ForegroundColor Green
+} else {
+    Write-Host ""
+    Write-Host "Skipped full seed (-SkipFullSeed). Tables exist but may be empty." -ForegroundColor Yellow
 }
 
-$now = (Get-Date).ToUniversalTime().ToString("o")
-$visitId = "visit-live-001"
-$salesRepId = "rep-live-001"
-$attendeeId = "user-live-002"
-$customerId = "cust-live-marker-001"
-$markerName = "LIVE_TEST_MARKER_CORP"
-
-# Customers
-Put-LocalItem -TableName "$Stage-smart-visits-Customers" -ItemJson @"
-{"customerId":{"S":"$customerId"},"customerName":{"S":"$markerName"},"arr":{"N":"325000"},"implementationStatus":{"S":"Live"},"isKeyAccount":{"BOOL":true},"domain":{"S":"Manufacturing"},"primaryContactName":{"S":"Casey Marker"},"primaryContactEmail":{"S":"casey.marker@example.com"}}
-"@
-Put-LocalItem -TableName "$Stage-smart-visits-Customers" -ItemJson @"
-{"customerId":{"S":"cust-live-002"},"customerName":{"S":"Acme Distribution"},"arr":{"N":"150000"},"implementationStatus":{"S":"Implementing"},"isKeyAccount":{"BOOL":false},"domain":{"S":"Distribution"},"primaryContactName":{"S":"Jordan Miles"},"primaryContactEmail":{"S":"jordan.miles@example.com"}}
-"@
-
-# Users
-Put-LocalItem -TableName "$Stage-smart-visits-Users" -ItemJson @"
-{"userId":{"S":"$salesRepId"},"name":{"S":"Taylor Rep"},"email":{"S":"taylor.rep@rfsmart.com"},"productLines":{"L":[{"S":"NetSuite"},{"S":"Shipping"}]},"city":{"S":"Jacksonville"},"state":{"S":"FL"},"emailNotifications":{"BOOL":true},"slackNotifications":{"BOOL":false},"proximityAlerts":{"BOOL":true},"proximityDistanceMiles":{"N":"50"},"createdAt":{"S":"$now"},"updatedAt":{"S":"$now"}}
-"@
-Put-LocalItem -TableName "$Stage-smart-visits-Users" -ItemJson @"
-{"userId":{"S":"$attendeeId"},"name":{"S":"Morgan Visitor"},"email":{"S":"morgan.visitor@rfsmart.com"},"productLines":{"L":[{"S":"NetSuite"}]},"city":{"S":"Orlando"},"state":{"S":"FL"},"emailNotifications":{"BOOL":true},"slackNotifications":{"BOOL":true},"proximityAlerts":{"BOOL":false},"proximityDistanceMiles":{"N":"0"},"createdAt":{"S":"$now"},"updatedAt":{"S":"$now"}}
-"@
-
-# Visits
-Put-LocalItem -TableName "$Stage-smart-visits-Visits" -ItemJson @"
-{"visitId":{"S":"$visitId"},"productLine":{"S":"NetSuite"},"location":{"S":"Jacksonville, FL"},"city":{"S":"Jacksonville"},"state":{"S":"FL"},"salesRepId":{"S":"$salesRepId"},"salesRepName":{"S":"Taylor Rep"},"domain":{"S":"Manufacturing"},"customerId":{"S":"$customerId"},"customerName":{"S":"$markerName"},"customerARR":{"N":"325000"},"customerImplementationStatus":{"S":"Live"},"isKeyAccount":{"BOOL":true},"startDate":{"S":"2026-05-15"},"endDate":{"S":"2026-05-16"},"capacity":{"N":"5"},"invitees":{"L":[{"S":"$attendeeId"}]},"customerContactRep":{"S":"Casey Marker"},"purposeForVisit":{"S":"Quarterly Business Review"},"visitDetails":{"S":"Closed-toed shoes required."},"isDraft":{"BOOL":false},"isPrivate":{"BOOL":false},"createdAt":{"S":"$now"},"updatedAt":{"S":"$now"}}
-"@
-
-# Signups
-Put-LocalItem -TableName "$Stage-smart-visits-Signups" -ItemJson @"
-{"visitId":{"S":"$visitId"},"userId":{"S":"$attendeeId"},"userName":{"S":"Morgan Visitor"},"userEmail":{"S":"morgan.visitor@rfsmart.com"},"signedUpAt":{"S":"$now"}}
-"@
-
-# Feedback
-Put-LocalItem -TableName "$Stage-smart-visits-Feedback" -ItemJson @"
-{"visitId":{"S":"$visitId"},"userId":{"S":"$attendeeId"},"userName":{"S":"Morgan Visitor"},"role":{"S":"visitor"},"feedbackNotes":{"S":"Great visit and actionable outcomes."},"keyAreasOfFocus":{"L":[{"S":"Inventory accuracy"},{"S":"Receiving flow"}]},"detractors":{"S":"None"},"delighters":{"S":"Clear process improvements."},"submittedAt":{"S":"$now"}}
-"@
-
-# Audit log
-Put-LocalItem -TableName "$Stage-smart-visits-AuditLog" -ItemJson @"
-{"entityId":{"S":"$visitId"},"timestamp":{"S":"$now"},"action":{"S":"CREATE"},"entityType":{"S":"Visit"},"userId":{"S":"$salesRepId"},"userName":{"S":"Taylor Rep"},"before":{"NULL":true},"after":{"M":{"visitId":{"S":"$visitId"},"customerName":{"S":"$markerName"}}}}
-"@
-
-Write-Host "  Baseline records upserted." -ForegroundColor Green
-
 Write-Host ""
-Write-Host "All tables seeded. Listing tables:" -ForegroundColor Cyan
+Write-Host "Listing tables:" -ForegroundColor Cyan
 aws dynamodb list-tables --endpoint-url $Endpoint --no-cli-pager
 
-Write-Host ""
-Write-Host "Live data marker check (Customers table):" -ForegroundColor Cyan
-$tempKeyFile = New-TemporaryFile
-try {
-    Set-Content -LiteralPath $tempKeyFile.FullName -Value "{`"customerId`":{`"S`":`"$customerId`"}}" -Encoding ASCII -NoNewline
-    aws dynamodb get-item `
-        --endpoint-url $Endpoint `
-        --table-name "$Stage-smart-visits-Customers" `
-        --key "file://$($tempKeyFile.FullName)" `
-        --projection-expression "customerName, arr" `
-        --no-cli-pager
-} finally {
-    Remove-Item -LiteralPath $tempKeyFile.FullName -ErrorAction SilentlyContinue
+if (-not $SkipFullSeed) {
+    Write-Host ""
+    Write-Host "Sample check (seed customer cust-seed-00):" -ForegroundColor Cyan
+    $tempKeyFile = New-TemporaryFile
+    try {
+        Set-Content -LiteralPath $tempKeyFile.FullName -Value "{`"customerId`":{`"S`":`"cust-seed-00`"}}" -Encoding ASCII -NoNewline
+        aws dynamodb get-item `
+            --endpoint-url $Endpoint `
+            --table-name "$Stage-smart-visits-Customers" `
+            --key "file://$($tempKeyFile.FullName)" `
+            --projection-expression "customerName, arr" `
+            --no-cli-pager
+    } finally {
+        Remove-Item -LiteralPath $tempKeyFile.FullName -ErrorAction SilentlyContinue
+    }
 }

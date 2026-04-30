@@ -52,3 +52,11 @@ export type {
 export { Role, type RoleData } from "./Role";
 export { ProductLine, type ProductLineData } from "./ProductLine";
 export { UserProductLine, type UserProductLineData } from "./UserProductLine";
+export {
+  OutlookIntegration,
+  type OutlookIntegrationData,
+} from "./OutlookIntegration";
+export {
+  CalendarEventLink,
+  type CalendarEventLinkData,
+} from "./CalendarEventLink";

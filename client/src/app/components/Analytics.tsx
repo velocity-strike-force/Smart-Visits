@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { useVisits } from "./VisitsContext";
 import { Switch } from "./ui/switch";
+import { useReferenceData } from "../referenceData/ReferenceDataContext";
 
 interface CustomerVisitStat {
     name: string;
@@ -58,14 +59,22 @@ const getCustomerVisitStats = (
 export default function Analytics() {
     const navigate = useNavigate();
     const { visits } = useVisits();
+    const { productLineOptions: referenceProductLineOptions } =
+        useReferenceData();
     const [dateRange, setDateRange] = useState("ytd");
     const [selectedProductLines, setSelectedProductLines] = useState<string[]>(
         [],
     );
 
     const availableProductLines = useMemo(
-        () => [...new Set(visits.map((visit) => visit.productLine))].sort(),
-        [visits],
+        () =>
+            [
+                ...new Set([
+                    ...referenceProductLineOptions,
+                    ...visits.map((visit) => visit.productLine).filter(Boolean),
+                ]),
+            ].sort(),
+        [referenceProductLineOptions, visits],
     );
 
     const filteredVisits = useMemo(() => {

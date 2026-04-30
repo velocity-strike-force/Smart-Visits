@@ -4,13 +4,19 @@ import { Dynamo } from "../database/Dynamo";
 import { SignupData } from "../database/schema/Signup";
 import auditLogger from "../services/AuditLoggerService";
 import { AuditLogData } from "../database/schema/AuditLog";
+import defaultCalendarService, {
+    OutlookCalendarService,
+} from "../services/OutlookCalendarService";
+import { Visit } from "../database/schema/Visit";
 
 export class SignupHandler extends ApiGatewayLambdaHandler {
     private readonly db: Dynamo;
+    private readonly calendarService: OutlookCalendarService;
 
-    constructor() {
+    constructor(options?: { db?: Dynamo; calendarService?: OutlookCalendarService }) {
         super();
-        this.db = new Dynamo({});
+        this.db = options?.db ?? new Dynamo({});
+        this.calendarService = options?.calendarService ?? defaultCalendarService;
     }
 
     private async logAudit(
@@ -22,6 +28,42 @@ export class SignupHandler extends ApiGatewayLambdaHandler {
         } catch (error) {
             console.error("Failed to flush audit log entry", error);
         }
+    }
+
+    private dispatchSignupCalendarCreate(userId: string, visit: Visit): void {
+        if (!process.env.OUTLOOK_OAUTH_REDIRECT_URI) {
+            return;
+        }
+        this.calendarService
+            .createOrUpdateVisitEventForUser(userId, {
+                visitId: visit.visitId,
+                customerName: visit.customerName,
+                productLine: visit.productLine,
+                location: visit.location,
+                visitDetails: visit.visitDetails,
+                startDate: visit.startDate,
+                endDate: visit.endDate,
+            })
+            .catch((error) => {
+                console.error("Failed to create calendar event for signup", {
+                    visitId: visit.visitId,
+                    userId,
+                    error,
+                });
+            });
+    }
+
+    private dispatchSignupCalendarDelete(visitId: string, userId: string): void {
+        if (!process.env.OUTLOOK_OAUTH_REDIRECT_URI) {
+            return;
+        }
+        this.calendarService.deleteVisitEventForUser(visitId, userId).catch((error) => {
+            console.error("Failed to delete calendar event for signup cancel", {
+                visitId,
+                userId,
+                error,
+            });
+        });
     }
 
     async handleSignupEndpoint(
@@ -127,6 +169,7 @@ export class SignupHandler extends ApiGatewayLambdaHandler {
                 actorUserId: userId,
                 metadata: { visitId, userId },
             });
+            this.dispatchSignupCalendarCreate(userId, visit);
 
             return this.createSuccessResponse({
                 success: true,
@@ -173,6 +216,7 @@ export class SignupHandler extends ApiGatewayLambdaHandler {
                 actorUserId: userId,
                 metadata: { visitId, userId },
             });
+            this.dispatchSignupCalendarDelete(visitId, userId);
 
             return this.createSuccessResponse({
                 success: true,
