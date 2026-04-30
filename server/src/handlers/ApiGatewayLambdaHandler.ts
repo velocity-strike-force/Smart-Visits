@@ -1,5 +1,28 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResult } from "aws-lambda";
 
+/** Resolve HTTP method from REST (v1), HTTP API (v2), or minimal/test payloads. */
+function resolveHttpMethod(event: APIGatewayProxyEventV2): string | undefined {
+    const e = event as APIGatewayProxyEventV2 & {
+        httpMethod?: string;
+        routeKey?: string;
+    };
+    const fromV1 = e.httpMethod?.trim();
+    const fromV2 = e.requestContext?.http?.method?.trim();
+    if (fromV1) return fromV1.toUpperCase();
+    if (fromV2) return fromV2.toUpperCase();
+
+    if (typeof e.routeKey === "string" && e.routeKey.length > 0) {
+        const token = e.routeKey.split(/\s+/)[0]?.toUpperCase();
+        if (
+            token &&
+            /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)$/i.test(token)
+        ) {
+            return token;
+        }
+    }
+    return undefined;
+}
+
 export class ApiGatewayLambdaHandler {
     createSuccessResponse(body: any): APIGatewayProxyResult {
         return {
@@ -26,14 +49,12 @@ export class ApiGatewayLambdaHandler {
         }
     ): Promise<APIGatewayProxyResult> {
         try {
-            const httpMethod = (
-                (event as any).httpMethod || event?.requestContext?.http?.method
-            )?.toUpperCase();
-            const handler = handlers[httpMethod];
+            const httpMethod = resolveHttpMethod(event);
+            const handler = httpMethod ? handlers[httpMethod] : undefined;
             if (!handler) {
                 return this.createErrorResponse(405, {
                     success: false,
-                    message: `Method not allowed: ${httpMethod}`,
+                    message: `Method not allowed: ${httpMethod ?? "unknown"}`,
                 });
             }
             return await handler(event);

@@ -8,7 +8,12 @@ import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
 import { createVisit } from "../lib/api";
 import { useReferenceData } from "../referenceData/ReferenceDataContext";
+import { getVisitApiBaseUrl } from "../visits/visitSourceConfig";
 
+function apiUrl(path: string): string {
+    const base = getVisitApiBaseUrl();
+    return base ? `${base}${path}` : path;
+}
 interface PostVisitFormValues {
     productLine: string;
     location: string;
@@ -183,6 +188,43 @@ export default function PostVisit() {
                     : "";
 
             toast.success(`Visit posted successfully!${notificationMessage}`);
+
+            if (values.notifySlack) {
+                    try {
+                        const res = await fetch(
+                            apiUrl("/api/notify/slack/post-visit"),
+                            {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    customer: values.customer,
+                                    productLine: values.productLine,
+                                    location: values.location,
+                                    startDate: values.startDate,
+                                    endDate: values.endDate,
+                                    salesRep: values.salesRep,
+                                    domain: values.domain,
+                                    purpose: values.purpose,
+                                    details: values.details,
+                                    capacity: values.capacity,
+                                    inviteeCount: values.invitees.length,
+                                    isPrivate: values.isPrivate,
+                                }),
+                            },
+                        );
+                        if (!res.ok) {
+                            const data = (await res.json().catch(() => ({}))) as {
+                                message?: string;
+                            };
+                            console.warn(
+                                "Slack post-visit notification failed:",
+                                data.message ?? res.status,
+                            );
+                        }
+                    } catch (e) {
+                        console.warn("Slack post-visit notification failed:", e);
+                    }
+                }
             navigate("/");
         } catch (err) {
             toast.error(
