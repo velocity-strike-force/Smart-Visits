@@ -46,6 +46,10 @@ export default function App() {
                                     path="visit-requests"
                                     element={<VisitRequests />}
                                 />
+                                <Route
+                                    path="outlook/callback"
+                                    element={<OutlookCallback />}
+                                />
                             </Route>
                         </Routes>
                         <Toaster
