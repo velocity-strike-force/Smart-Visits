@@ -10,6 +10,7 @@ import Feedback from "./components/Feedback";
 import Analytics from "./components/Analytics";
 import RequestVisit from "./components/RequestVisit";
 import VisitRequests from "./components/VisitRequests";
+import OutlookCallback from "./components/OutlookCallback";
 
 export default function App() {
     return (

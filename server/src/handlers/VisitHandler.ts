@@ -4,14 +4,29 @@ import { Dynamo } from "../database/Dynamo";
 import { Visit, type VisitData } from "../database/schema/Visit";
 import auditLogger from "../services/AuditLoggerService";
 import { AuditLogData } from "../database/schema/AuditLog";
+import defaultNotificationService, {
+    NotificationService,
+} from "../services/NotificationService";
+import defaultCalendarService, {
+    OutlookCalendarService,
+} from "../services/OutlookCalendarService";
 
 export class VisitHandler extends ApiGatewayLambdaHandler {
     private readonly db: Dynamo;
+    private readonly notificationService: NotificationService;
+    private readonly calendarService: OutlookCalendarService;
 
     /** Pass `{ db }` in tests; Lambda uses `new Dynamo()` via default `visit.js`. */
-    constructor(options?: { db?: Dynamo }) {
+    constructor(options?: {
+        db?: Dynamo;
+        notificationService?: NotificationService;
+        calendarService?: OutlookCalendarService;
+    }) {
         super();
         this.db = options?.db ?? new Dynamo({});
+        this.notificationService =
+            options?.notificationService ?? defaultNotificationService;
+        this.calendarService = options?.calendarService ?? defaultCalendarService;
     }
 
     private async logAudit(
@@ -23,6 +38,90 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
         } catch (error) {
             console.error("Failed to flush audit log entry", error);
         }
+    }
+
+    private dispatchVisitCreatedNotification(visit: VisitData): void {
+        if (visit.isDraft) {
+            return;
+        }
+
+        this.notificationService.notifyVisitCreated(visit).catch((error) => {
+            console.error("Failed to dispatch visit created notifications", {
+                visitId: visit.visitId,
+                error,
+            });
+        });
+    }
+
+    private dispatchVisitCalendarCreate(visit: VisitData): void {
+        if (
+            visit.isDraft ||
+            !visit.salesRepId ||
+            !process.env.OUTLOOK_OAUTH_REDIRECT_URI
+        ) {
+            return;
+        }
+
+        this.calendarService
+            .createOrUpdateVisitEventForUser(visit.salesRepId, {
+                visitId: visit.visitId,
+                customerName: visit.customerName,
+                productLine: visit.productLine,
+                location: visit.location,
+                visitDetails: visit.visitDetails,
+                startDate: visit.startDate,
+                endDate: visit.endDate,
+            })
+            .catch((error) => {
+                console.error("Failed to create Outlook calendar event for visit", {
+                    visitId: visit.visitId,
+                    userId: visit.salesRepId,
+                    error,
+                });
+            });
+    }
+
+    private dispatchVisitCalendarCleanup(visitId: string): void {
+        if (!process.env.OUTLOOK_OAUTH_REDIRECT_URI) {
+            return;
+        }
+        this.calendarService.deleteAllVisitEvents(visitId).catch((error) => {
+            console.error("Failed cleaning calendar links for deleted visit", {
+                visitId,
+                error,
+            });
+        });
+    }
+
+    private dispatchVisitCalendarUpdate(visit: Visit): void {
+        if (!process.env.OUTLOOK_OAUTH_REDIRECT_URI) {
+            return;
+        }
+
+        if (visit.isDraft) {
+            this.dispatchVisitCalendarCleanup(visit.visitId);
+            return;
+        }
+
+        this.calendarService
+            .syncVisitEventsForVisit(
+                {
+                    visitId: visit.visitId,
+                    customerName: visit.customerName,
+                    productLine: visit.productLine,
+                    location: visit.location,
+                    visitDetails: visit.visitDetails,
+                    startDate: visit.startDate,
+                    endDate: visit.endDate,
+                },
+                visit.salesRepId
+            )
+            .catch((error) => {
+                console.error("Failed to sync Outlook calendar after visit update", {
+                    visitId: visit.visitId,
+                    error,
+                });
+            });
     }
 
     async handleVisitEndpoint(
@@ -232,6 +331,8 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
                 actorUserId: data.salesRepId,
                 metadata: { visitId },
             });
+            this.dispatchVisitCreatedNotification(data);
+            this.dispatchVisitCalendarCreate(data);
             return this.createSuccessResponse({
                 success: true,
                 visitId,
@@ -269,6 +370,10 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
             );
             updates.updatedAt = new Date().toISOString();
             await this.db.updateVisit(visitId, updates);
+            const updatedVisit = await this.db.getVisitById(visitId);
+            if (updatedVisit) {
+                this.dispatchVisitCalendarUpdate(updatedVisit);
+            }
             return this.createSuccessResponse({
                 success: true,
                 visitId,
@@ -312,6 +417,7 @@ export class VisitHandler extends ApiGatewayLambdaHandler {
                 actorUserId: existingVisit.salesRepId,
                 metadata: { visitId },
             });
+            this.dispatchVisitCalendarCleanup(visitId);
 
             return this.createSuccessResponse({
                 success: true,

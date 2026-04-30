@@ -15,6 +15,18 @@ Parameters:
     Default: ""
     NoEcho: true
     Description: "Slack Incoming Webhook URL for signup notifications (optional)."
+  FrontendBaseUrl:
+    Type: String
+    Default: "https://smart-visits.example.com"
+    Description: "Base URL for Smart Visits frontend links used in email notifications."
+  OutlookOAuthRedirectUri:
+    Type: String
+    Default: "https://api.smart-visits.example.com/api/outlook-integration"
+    Description: "Redirect URI registered in Microsoft Entra for delegated OAuth."
+  OutlookCalendarTimeZone:
+    Type: String
+    Default: "UTC"
+    Description: "IANA time zone used for generated Outlook calendar events."
 
 Globals:
   Function:
@@ -31,6 +43,9 @@ Globals:
       Variables:
         STAGE: !Ref STAGE
         DYNAMODB_ENDPOINT: !Ref DynamodbEndpoint
+        FRONTEND_BASE_URL: !Ref FrontendBaseUrl
+        OUTLOOK_OAUTH_REDIRECT_URI: !Ref OutlookOAuthRedirectUri
+        OUTLOOK_CALENDAR_TIMEZONE: !Ref OutlookCalendarTimeZone
   Api:
     Cors:
       AllowHeaders: "'*'"
@@ -175,6 +190,34 @@ Resources:
         - AttributeName: domainId
           KeyType: HASH
 
+  OutlookIntegrationsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-OutlookIntegrations"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: userId
+          KeyType: HASH
+
+  CalendarEventLinksTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "${STAGE}-smart-visits-CalendarEventLinks"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: visitId
+          AttributeType: S
+        - AttributeName: userId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: visitId
+          KeyType: HASH
+        - AttributeName: userId
+          KeyType: RANGE
+
   # ── Visit ────────────────────────────────────────────────
   HandleVisitFunction:
     Type: AWS::Serverless::Function
@@ -201,6 +244,15 @@ Resources:
             TableName: !Ref ProductLinesTable
         - DynamoDBCrudPolicy:
             TableName: !Ref UserProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OutlookIntegrationsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CalendarEventLinksTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParametersByPath
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/smart-visits/${STAGE}/outlook/*
       Events:
         GetApi:
           Type: HttpApi
@@ -259,6 +311,15 @@ Resources:
             TableName: !Ref ProductLinesTable
         - DynamoDBCrudPolicy:
             TableName: !Ref UserProductLinesTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OutlookIntegrationsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CalendarEventLinksTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParametersByPath
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/smart-visits/${STAGE}/outlook/*
       Events:
         GetApi:
           Type: HttpApi
@@ -283,6 +344,52 @@ Resources:
         Sourcemap: true
         EntryPoints:
           - src/handlers/signup.ts
+        External:
+          - "@aws-sdk/*"
+
+  # ── Outlook Integration (OAuth + Calendar) ───────────────
+  HandleOutlookIntegrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub smart-visits-${STAGE}-handle-outlook-integration
+      CodeUri: ./
+      Handler: outlookIntegration.handleOutlookIntegrationEndpoint
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref UsersTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OutlookIntegrationsTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref CalendarEventLinksTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParametersByPath
+              Resource: !Sub arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/smart-visits/${STAGE}/outlook/*
+      Events:
+        GetApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/outlook-integration
+            Method: GET
+        PostApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/outlook-integration
+            Method: POST
+        DeleteApi:
+          Type: HttpApi
+          Properties:
+            Path: /api/outlook-integration
+            Method: DELETE
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: false
+        Target: "es2020"
+        Sourcemap: true
+        EntryPoints:
+          - src/handlers/outlookIntegration.ts
         External:
           - "@aws-sdk/*"
 
