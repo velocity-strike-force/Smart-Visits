@@ -145,7 +145,8 @@ export default function AccountSettingsModal({
                     emailNotifications: Boolean(profile.emailNotifications),
                     slackNotifications: Boolean(profile.slackNotifications),
                     distanceAlerts: Boolean(profile.proximityAlerts),
-                    proximityDistanceMiles: profile.proximityDistanceMiles ?? 25,
+                    proximityDistanceMiles:
+                        profile.proximityDistanceMiles ?? 25,
                 });
                 setOutlookConnected(Boolean(outlookStatus.connected));
                 setOutlookEmail(outlookStatus.outlookUserEmail || "");
@@ -199,7 +200,7 @@ export default function AccountSettingsModal({
             toast.error(
                 error instanceof Error
                     ? error.message
-                    : "Failed to save preferences"
+                    : "Failed to save preferences",
             );
         } finally {
             setSaving(false);
@@ -215,7 +216,9 @@ export default function AccountSettingsModal({
             window.location.assign(authUrl);
         } catch (error) {
             const message =
-                error instanceof Error ? error.message : "Failed to start Outlook OAuth";
+                error instanceof Error
+                    ? error.message
+                    : "Failed to start Outlook OAuth";
             setOutlookError(message);
             toast.error(message);
             setOutlookLoading(false);
@@ -233,7 +236,9 @@ export default function AccountSettingsModal({
             toast.success("Outlook calendar disconnected");
         } catch (error) {
             const message =
-                error instanceof Error ? error.message : "Failed to disconnect Outlook";
+                error instanceof Error
+                    ? error.message
+                    : "Failed to disconnect Outlook";
             setOutlookError(message);
             toast.error(message);
         } finally {
@@ -392,10 +397,13 @@ export default function AccountSettingsModal({
                                         onChange={(e) =>
                                             setSettings({
                                                 ...settings,
-                                                proximityDistanceMiles: Math.max(
-                                                    1,
-                                                    Number(e.target.value) || 1
-                                                ),
+                                                proximityDistanceMiles:
+                                                    Math.max(
+                                                        1,
+                                                        Number(
+                                                            e.target.value,
+                                                        ) || 1,
+                                                    ),
                                             })
                                         }
                                         className="w-full px-3 py-2 border rounded-lg"
@@ -414,7 +422,9 @@ export default function AccountSettingsModal({
                                     : "Not connected. Connect to auto-create calendar events for visits."}
                             </p>
                             {outlookError && (
-                                <p className="text-sm text-red-600">{outlookError}</p>
+                                <p className="text-sm text-red-600">
+                                    {outlookError}
+                                </p>
                             )}
                             <div className="flex gap-3">
                                 {!outlookConnected ? (
