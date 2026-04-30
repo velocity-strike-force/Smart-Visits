@@ -4,7 +4,17 @@ import { toast } from "sonner";
 import Typeahead from "./Typeahead";
 import RequiredLabel from "./RequiredLabel";
 import { Switch } from "./ui/switch";
+import { useUser } from "./UserContext";
 import { useReferenceData } from "../referenceData/ReferenceDataContext";
+import { getVisitsDataSourceMode } from "../visits/visitSourceConfig";
+import {
+    disconnectOutlookIntegration,
+    getOutlookIntegrationStatus,
+    loadProfileFromApi,
+    profileUserId,
+    startOutlookIntegration,
+    updateProfileFromApi,
+} from "../user/userApi";
 
 interface AccountSettingsModalProps {
     isOpen: boolean;
@@ -15,6 +25,8 @@ export default function AccountSettingsModal({
     isOpen,
     onClose,
 }: AccountSettingsModalProps) {
+    const { user } = useUser();
+    const isApi = getVisitsDataSourceMode() === "api";
     const { productLineOptions } = useReferenceData();
     const [settings, setSettings] = useState({
         productLines: ["NetSuite", "Oracle Cloud"] as string[],
